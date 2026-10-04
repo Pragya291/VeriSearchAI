@@ -19,7 +19,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: #020817;
+  background: #f8fafc;
 }
 
 #root {
@@ -57,4 +57,16 @@ textarea {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }

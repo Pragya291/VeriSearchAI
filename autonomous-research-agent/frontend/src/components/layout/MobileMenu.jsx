@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 
 const navItems = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-  { label: 'New Research', to: '/research', icon: Search },
+  { label: 'New Research', to: '/new-research', icon: Search },
   { label: 'Research History', to: '/history', icon: History },
   { label: 'Saved Reports', to: '/saved', icon: FileText },
   { label: 'Settings', to: '/settings', icon: Settings },

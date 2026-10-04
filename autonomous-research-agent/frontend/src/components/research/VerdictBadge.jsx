@@ -23,14 +23,22 @@ const verdictMeta = {
   },
 }
 
-export default function VerdictBadge({ verdict = 'supported' }) {
+export default function VerdictBadge({ verdict = 'supported', theme = 'light' }) {
+  const isDark = theme === 'dark'
   const normalizedVerdict = verdict.toLowerCase().replaceAll(' ', '-')
   const verdictKey = normalizedVerdict === 'insufficient-evidence' ? 'unverified' : normalizedVerdict
   const meta = verdictMeta[verdictKey] || verdictMeta.unverified
   const Icon = meta.icon
 
+  const darkTone = {
+    supported: 'bg-emerald-400/10 text-emerald-300',
+    'partially-supported': 'bg-amber-400/10 text-amber-300',
+    contradicted: 'bg-rose-400/10 text-rose-300',
+    unverified: 'bg-slate-700 text-slate-300',
+  }
+
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${meta.bg}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${isDark ? darkTone[verdictKey] : meta.bg}`}>
       <Icon className="h-3.5 w-3.5" />
       {meta.label}
     </span>
