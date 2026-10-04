@@ -99,26 +99,13 @@ export function Sidebar({ className = '', onNavClick }) {
         </Link>
 
         <div className="flex items-center justify-between rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
-          <div className="flex items-center gap-2.5 min-w-0">
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.full_name || 'User avatar'}
-                className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200"
-              />
-            ) : (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">
-                {(user?.full_name || user?.email || 'U')[0].toUpperCase()}
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-slate-900">
-                {user?.full_name || 'Dr. Alex Bennett'}
-              </p>
-              <p className="truncate text-[11px] text-slate-400">
-                {user?.email || 'alex.bennett@verisearch.ai'}
-              </p>
-            </div>
+          <div className="min-w-0 pr-2">
+            <p className="truncate text-xs font-semibold text-slate-900">
+              {user?.full_name || 'Dr. Alex Bennett'}
+            </p>
+            <p className="truncate text-[11px] text-slate-400">
+              {user?.email || 'alex.bennett@verisearch.ai'}
+            </p>
           </div>
 
           <button

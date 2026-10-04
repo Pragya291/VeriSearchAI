@@ -57,29 +57,6 @@ export function Settings() {
             <h3 className="text-base font-bold text-slate-900">Researcher Profile</h3>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-6">
-            <div className="relative">
-              {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={fullName}
-                  className="h-16 w-16 rounded-2xl object-cover ring-2 ring-blue-100"
-                />
-              ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-blue-700 font-bold text-xl">
-                  {fullName[0]}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Profile Picture</p>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Avatar is synced with your verified institution credentials.
-              </p>
-            </div>
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Full Name"

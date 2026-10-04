@@ -64,7 +64,6 @@ export async function login(payload) {
       full_name: payload.email ? payload.email.split('@')[0].replace('.', ' ') : 'Dr. Alex Bennett',
       email: payload.email || 'alex.bennett@verisearch.ai',
       role: 'Research Analyst',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
     }
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(demoUser))
     return demoUser
@@ -86,7 +85,6 @@ export async function signup(payload) {
       full_name: payload.full_name || payload.fullName || 'Research Member',
       email: payload.email,
       role: 'Researcher',
-      avatar: null,
     }
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(newUser))
     return newUser
