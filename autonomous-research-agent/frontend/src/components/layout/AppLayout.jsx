@@ -26,7 +26,7 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row text-slate-900">
+    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#F8FAFC] flex flex-col md:flex-row text-slate-900">
       {/* Desktop Sticky Sidebar */}
       <Sidebar className="hidden md:flex" />
 
@@ -69,8 +69,8 @@ export function AppLayout() {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        <div className="p-4 sm:p-6 md:p-8 max-w-7xl w-full mx-auto">
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto h-full">
+        <div className="p-3.5 sm:p-5 lg:px-6 lg:py-4 max-w-7xl w-full mx-auto">
           <Outlet />
         </div>
       </main>
