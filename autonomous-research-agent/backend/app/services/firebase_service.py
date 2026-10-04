@@ -19,7 +19,7 @@ class FirebaseService:
     def _get_db(self):
         return get_firestore_client()
 
-    def create_research(self, question: str) -> str:
+    def create_research(self, question: str, owner_id: Optional[str] = None) -> str:
         """
         Creates a new research session record with status 'created'.
         Returns generated research_id.
@@ -29,6 +29,7 @@ class FirebaseService:
 
         doc_data = {
             "research_id": research_id,
+            "owner_id": owner_id,
             "question": question,
             "status": "created",
             "summary": "",
@@ -40,6 +41,8 @@ class FirebaseService:
                 "source_count": 0,
                 "processing_time": 0.0
             },
+            "confidence": 0,
+            "contradictions": [],
             "created_at": now_iso,
             "completed_at": None,
             "error": None
@@ -99,6 +102,8 @@ class FirebaseService:
             "claims": research_data.get("claims", []),
             "sources": research_data.get("sources", []),
             "metadata": research_data.get("metadata", {}),
+            "confidence": research_data.get("confidence", 0),
+            "contradictions": research_data.get("contradictions", []),
             "completed_at": now_iso
         }
 
@@ -118,7 +123,7 @@ class FirebaseService:
 
         return False
 
-    def get_research(self, research_id: str) -> Optional[Dict[str, Any]]:
+    def get_research(self, research_id: str, owner_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """Retrieves a research session by ID."""
         db = self._get_db()
         if db is not None:
@@ -126,13 +131,22 @@ class FirebaseService:
                 doc = db.collection(self.COLLECTION_NAME).document(research_id).get()
                 if doc.exists:
                     data = doc.to_dict()
-                    return data
+                    if owner_id is None or data.get("owner_id") == owner_id:
+                        return data
             except Exception as e:
                 logger.error(f"Firestore error in get_research: {e}")
 
-        return self._in_memory_store.get(research_id)
+        data = self._in_memory_store.get(research_id)
+        if data and (owner_id is None or data.get("owner_id") == owner_id):
+            return data
+        return None
 
-    def get_research_history(self, page: int = 1, limit: int = 10) -> Dict[str, Any]:
+    def get_research_history(
+        self,
+        page: int = 1,
+        limit: int = 10,
+        owner_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
         Returns paginated history of research sessions sorted by creation time descending.
         """
@@ -157,6 +171,8 @@ class FirebaseService:
             all_items = list(self._in_memory_store.values())
 
         # Sort descending by created_at
+        if owner_id is not None:
+            all_items = [item for item in all_items if item.get("owner_id") == owner_id]
         all_items.sort(key=lambda x: x.get("created_at") or "", reverse=True)
 
         total = len(all_items)
@@ -174,7 +190,8 @@ class FirebaseService:
                 "created_at": d.get("created_at"),
                 "completed_at": d.get("completed_at"),
                 "source_count": len(d.get("sources", [])),
-                "claim_count": len(d.get("claims", []))
+                "claim_count": len(d.get("claims", [])),
+                "confidence": d.get("confidence", 0),
             })
 
         return {

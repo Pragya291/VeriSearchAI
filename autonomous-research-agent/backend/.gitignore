@@ -12,6 +12,11 @@ ENV/
 # Environment variables
 .env
 
+# Local authentication data
+data/
+*.sqlite3
+*.sqlite3-*
+
 # Testing & Coverage
 .pytest_cache/
 .coverage

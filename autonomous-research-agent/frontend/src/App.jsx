@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ArrowRight, Search, ShieldCheck, SlidersHorizontal } from 'lucide-react'
 
@@ -15,31 +15,66 @@ import SourceCard from './components/research/SourceCard'
 import ConflictCard from './components/research/ConflictCard'
 import EmptyState from './components/common/EmptyState'
 import Button from './components/common/Button'
-import { exampleQuestions, historyEntries, recentResearch, savedReports, stats } from './data/mockData'
+import { exampleQuestions } from './data/exampleQuestions'
+import { AuthPage, LandingPage } from './pages/PublicPages'
+import { AuthProvider } from './auth/AuthProvider'
+import { useAuth } from './auth/useAuth'
+import { getResearchById, getResearchHistory, submitResearch } from './services/api'
 
 function App() {
   const [query, setQuery] = useState(exampleQuestions[0])
+  const [recentReports, setRecentReports] = useState([])
   const [theme, setTheme] = useState('dark')
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <BrowserRouter>
-      <AppShell
-        query={query}
-        setQuery={setQuery}
-        theme={theme}
-        setTheme={setTheme}
-        menuOpen={menuOpen}
-        setMenuOpen={setMenuOpen}
-      />
+      <AuthProvider>
+        <PageMetadata />
+        <AppShell
+          query={query}
+          setQuery={setQuery}
+          recentReports={recentReports}
+          setRecentReports={setRecentReports}
+          theme={theme}
+          setTheme={setTheme}
+          menuOpen={menuOpen}
+          setMenuOpen={setMenuOpen}
+        />
+      </AuthProvider>
     </BrowserRouter>
   )
 }
 
-function AppShell({ query, setQuery, theme, setTheme, menuOpen, setMenuOpen }) {
+function PageMetadata() {
+  const location = useLocation()
+  const pageTitles = {
+    '/': 'AI Research & Source Verification',
+    '/login': 'Log In',
+    '/signup': 'Create Account',
+    '/dashboard': 'Research Dashboard',
+    '/research': 'Research in Progress',
+    '/history': 'Research History',
+    '/saved': 'Saved Reports',
+    '/settings': 'Settings',
+  }
+  const title = location.pathname.startsWith('/report/')
+    ? 'Research Report'
+    : pageTitles[location.pathname] || 'AI Research'
+
+  useEffect(() => {
+    document.title = `${title} | VeriSearchAI`
+  }, [title])
+
+  return null
+}
+
+function AppShell({ query, setQuery, recentReports, setRecentReports, theme, setTheme, menuOpen, setMenuOpen }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const { user, isLoading, logout } = useAuth()
   const isDark = theme === 'dark'
+  const isPublicPage = ['/', '/login', '/signup'].includes(location.pathname)
 
   const pageMeta = useMemo(() => {
     if (location.pathname === '/history') {
@@ -62,11 +97,68 @@ function AppShell({ query, setQuery, theme, setTheme, menuOpen, setMenuOpen }) {
       return { title: 'Research Report', subtitle: 'Evidence-backed conclusions and source verification.' }
     }
 
-    return { title: 'Autonomous Research', subtitle: 'Investigate questions, verify claims, and discover reliable evidence.' }
+    if (location.pathname === '/dashboard') {
+      return { title: 'Research Dashboard', subtitle: 'Investigate questions, verify claims, and discover reliable evidence.' }
+    }
+
+    return { title: 'VeriSearchAI', subtitle: 'Research with evidence you can trust.' }
   }, [location.pathname])
 
+  useEffect(() => {
+    if (!user) return undefined
+
+    let isActive = true
+    getResearchHistory()
+      .then(({ data }) => {
+        if (!isActive) return
+        setRecentReports((current) => {
+          const currentById = new Map(current.map((report) => [report.research_id, report]))
+          return data.items.map((item) => currentById.get(item.research_id) || ({
+            research_id: item.research_id,
+            question: item.question,
+            status: item.status,
+            confidence: item.confidence || 0,
+            source_count: item.source_count,
+            claim_count: item.claim_count,
+            completed_at: item.completed_at,
+            sources: [],
+            claims: [],
+          }))
+        })
+      })
+      .catch(() => {})
+
+    return () => { isActive = false }
+  }, [setRecentReports, user])
+
+  if (isPublicPage) {
+    return (
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<AuthPage key="login" mode="login" />} />
+        <Route path="/signup" element={<AuthPage key="signup" mode="signup" />} />
+      </Routes>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-200" aria-live="polite">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900 px-5 py-4 text-sm">
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-300 border-t-transparent" />
+          Checking your VeriSearchAI session...
+        </div>
+      </main>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />
+  }
+
   const handleSubmit = () => {
-    const nextQuestion = query.trim() || exampleQuestions[0]
+    const nextQuestion = query.trim()
+    if (!nextQuestion) return
     setQuery(nextQuestion)
     navigate('/research', { state: { question: nextQuestion } })
   }
@@ -74,11 +166,27 @@ function AppShell({ query, setQuery, theme, setTheme, menuOpen, setMenuOpen }) {
   return (
     <div className={isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}>
       <div className="mx-auto flex min-h-screen max-w-[1800px]">
-        <Sidebar theme={theme} onToggleTheme={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))} />
+        <Sidebar
+          theme={theme}
+          user={user}
+          onLogout={async () => {
+            setRecentReports([])
+            await logout()
+            navigate('/login', { replace: true })
+          }}
+          onToggleTheme={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
+        />
         <MobileMenu
           open={menuOpen}
           onClose={() => setMenuOpen(false)}
           theme={theme}
+          user={user}
+          onLogout={async () => {
+            setMenuOpen(false)
+            setRecentReports([])
+            await logout()
+            navigate('/login', { replace: true })
+          }}
           onToggleTheme={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
         />
 
@@ -91,13 +199,13 @@ function AppShell({ query, setQuery, theme, setTheme, menuOpen, setMenuOpen }) {
           />
           <div className="px-4 py-6 md:px-8 md:py-8">
             <Routes>
-              <Route path="/" element={<DashboardPage query={query} setQuery={setQuery} onSubmit={handleSubmit} theme={theme} />} />
-              <Route path="/research" element={<ResearchPage theme={theme} />} />
+              <Route path="/dashboard" element={<DashboardPage query={query} setQuery={setQuery} onSubmit={handleSubmit} theme={theme} user={user} recentReports={recentReports} />} />
+              <Route path="/research" element={<ResearchPage theme={theme} setRecentReports={setRecentReports} />} />
               <Route path="/report/:id" element={<ResearchReportPage theme={theme} />} />
               <Route path="/history" element={<HistoryPage theme={theme} />} />
               <Route path="/saved" element={<SavedReportsPage theme={theme} />} />
-              <Route path="/settings" element={<SettingsPage theme={theme} />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="/settings" element={<SettingsPage theme={theme} user={user} />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </div>
         </main>
@@ -106,15 +214,36 @@ function AppShell({ query, setQuery, theme, setTheme, menuOpen, setMenuOpen }) {
   )
 }
 
-function DashboardPage({ query, setQuery, onSubmit, theme }) {
+function DashboardPage({ query, setQuery, onSubmit, theme, user, recentReports }) {
   const isDark = theme === 'dark'
+  const stats = [
+    { label: 'Research Sessions', value: recentReports.length, icon: 'search' },
+    { label: 'Sources Analyzed', value: recentReports.reduce((total, report) => total + (report.sources?.length || report.source_count || report.metadata?.source_count || 0), 0), icon: 'link' },
+    { label: 'Claims Verified', value: recentReports.reduce((total, report) => total + (report.claims?.length || report.claim_count || 0), 0), icon: 'check' },
+    {
+      label: 'Average Confidence',
+      value: recentReports.length
+        ? `${Math.round(recentReports.reduce((total, report) => total + (report.confidence || 0), 0) / recentReports.length)}%`
+        : '—',
+      icon: 'gauge',
+    },
+  ]
+  const recentItems = recentReports.map((report) => ({
+    id: report.research_id,
+    question: report.question,
+    sources: report.sources?.length || report.source_count || report.metadata?.source_count || 0,
+    claimCount: report.claims?.length || report.claim_count || 0,
+    date: report.completed_at ? new Date(report.completed_at).toLocaleDateString() : 'Just now',
+    confidence: report.confidence || 0,
+    status: report.status === 'completed' ? 'Completed' : 'Insufficient Evidence',
+  }))
 
   return (
     <div className="space-y-8">
       <section className={isDark ? 'rounded-[28px] border border-slate-800 bg-slate-900/80 p-5 shadow-sm md:p-7' : 'rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm md:p-7'}>
         <div className="mb-6 flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-indigo-400">Autonomous Research</p>
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-indigo-400">Welcome, {user.full_name.split(' ')[0]}</p>
             <h2 className={isDark ? 'mt-2 text-3xl font-semibold tracking-tight text-slate-100 md:text-4xl' : 'mt-2 text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl'}>
               Investigate questions, verify claims, and discover reliable evidence.
             </h2>
@@ -138,7 +267,7 @@ function DashboardPage({ query, setQuery, onSubmit, theme }) {
           </div>
         </div>
 
-        <RecentResearch items={recentResearch} onSelect={(id) => window.location.assign(`/report/${id}`)} theme={theme} />
+        <RecentResearch items={recentItems} onSelect={(id) => window.location.assign(`/report/${id}`)} theme={theme} />
       </section>
     </div>
   )
@@ -153,51 +282,104 @@ const researchPipeline = [
   { name: 'Generating Report', status: 'pending' },
 ]
 
-function ResearchPage({ theme }) {
+function ResearchPage({ theme, setRecentReports }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const question = location.state?.question || 'Is electric vehicle adoption increasing worldwide?'
+  const question = location.state?.question?.trim() || ''
   const isDark = theme === 'dark'
-  const [progressIndex, setProgressIndex] = useState(2)
-  const [isComplete, setIsComplete] = useState(false)
+  const [researchState, setResearchState] = useState(() => ({
+    key: location.key,
+    progressIndex: 0,
+    statusMessage: 'Finding relevant sources...',
+    sourceCount: null,
+    error: '',
+  }))
+  const currentResearchState = researchState.key === location.key
+    ? researchState
+    : { key: location.key, progressIndex: 0, statusMessage: 'Finding relevant sources...', sourceCount: null, error: '' }
+  const requestRef = useRef(null)
 
   useEffect(() => {
-    if (isComplete) return undefined
+    if (!question) {
+      navigate('/dashboard', { replace: true })
+      return undefined
+    }
+    if (requestRef.current?.key !== location.key) {
+      requestRef.current = {
+        key: location.key,
+        promise: submitResearch({ question }),
+      }
+    }
 
-    const timer = setTimeout(() => {
-      setProgressIndex((current) => {
-        if (current >= researchPipeline.length - 1) {
-          setIsComplete(true)
-          return current
-        }
-
-        return current + 1
+    let isActive = true
+    let phaseIndex = 0
+    let completionTimer
+    const phases = [
+      'Finding relevant sources...',
+      'Analyzing evidence...',
+      'Verifying claims...',
+      'Generating research report...',
+    ]
+    const phaseTimer = setInterval(() => {
+      phaseIndex = Math.min(phaseIndex + 1, phases.length - 1)
+      setResearchState({
+        key: location.key,
+        progressIndex: [0, 2, 4, 5][phaseIndex],
+        statusMessage: phases[phaseIndex],
+        sourceCount: null,
+        error: '',
       })
-    }, 1200)
-
-    return () => clearTimeout(timer)
-  }, [isComplete, progressIndex])
-
-  useEffect(() => {
-    if (!isComplete) return undefined
-
-    const timer = setTimeout(() => {
-      navigate('/report/ev-1')
     }, 1800)
 
-    return () => clearTimeout(timer)
-  }, [isComplete, navigate])
+    requestRef.current.promise
+      .then(({ data }) => {
+        if (!isActive) return
+        clearInterval(phaseTimer)
+        setResearchState({
+          key: location.key,
+          progressIndex: researchPipeline.length,
+          statusMessage: 'Research complete',
+          sourceCount: data.sources?.length || 0,
+          error: '',
+        })
+        setRecentReports((current) => [data, ...current.filter((report) => report.research_id !== data.research_id)])
+        completionTimer = setTimeout(() => {
+          if (isActive) navigate(`/report/${data.research_id}`, { replace: true, state: { report: data } })
+        }, 450)
+      })
+      .catch((error) => {
+        if (!isActive) return
+        clearInterval(phaseTimer)
+        setResearchState({
+          key: location.key,
+          progressIndex: phaseIndex === 0 ? 0 : [0, 2, 4, 5][phaseIndex],
+          statusMessage: 'Research could not be completed',
+          sourceCount: null,
+          error: error.response?.data?.detail || 'Unable to retrieve sources. Please try again.',
+        })
+      })
 
+    return () => {
+      isActive = false
+      clearInterval(phaseTimer)
+      clearTimeout(completionTimer)
+    }
+  }, [location.key, navigate, question, setRecentReports])
+
+  const { progressIndex, statusMessage, sourceCount, error: requestError } = currentResearchState
   const steps = researchPipeline.map((step, index) => {
     if (index < progressIndex) return { ...step, status: 'completed' }
-    if (index === progressIndex) return { ...step, status: 'in-progress' }
+    if (index === progressIndex && progressIndex < researchPipeline.length) return { ...step, status: 'in-progress' }
     return { ...step, status: 'pending' }
   })
 
-  const statusLabel = isComplete ? 'Complete' : 'Researching'
-  const statusBadge = isComplete
-    ? 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/30'
-    : 'bg-indigo-500/15 text-indigo-300 ring-1 ring-indigo-400/30'
+  const isComplete = statusMessage === 'Research complete'
+  const statusLabel = requestError ? 'Failed' : isComplete ? 'Complete' : 'Researching'
+  const statusBadge = requestError
+    ? 'bg-rose-500/15 text-rose-300 ring-1 ring-rose-400/30'
+    : isComplete
+      ? 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/30'
+      : 'bg-indigo-500/15 text-indigo-300 ring-1 ring-indigo-400/30'
 
   return (
     <div className="space-y-8">
@@ -207,7 +389,7 @@ function ResearchPage({ theme }) {
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-indigo-400">Research</p>
             <h2 className={isDark ? 'mt-2 text-2xl font-semibold text-slate-100 md:text-3xl' : 'mt-2 text-2xl font-semibold text-slate-900 md:text-3xl'}>Researching your question</h2>
           </div>
-          <Button variant="secondary" onClick={() => navigate('/')} className="hidden sm:inline-flex">
+          <Button variant="secondary" onClick={() => navigate('/dashboard')} className="hidden sm:inline-flex">
             Back to Dashboard
           </Button>
         </div>
@@ -233,16 +415,20 @@ function ResearchPage({ theme }) {
             <div className={isDark ? 'rounded-2xl border border-slate-700 bg-slate-800/80 p-4' : 'rounded-2xl border border-slate-200 bg-slate-50 p-4'}>
               <div className="flex items-center gap-3">
                 <div className="h-3 w-3 animate-pulse rounded-full bg-indigo-500" />
-                <p className={isDark ? 'text-sm text-slate-300' : 'text-sm text-slate-600'}>{isComplete ? 'Finalizing findings...' : 'Searching sources...'}</p>
+                <p className={isDark ? 'text-sm text-slate-300' : 'text-sm text-slate-600'}>{requestError || statusMessage}</p>
               </div>
-              <p className={isDark ? 'mt-3 text-2xl font-semibold text-slate-100' : 'mt-3 text-2xl font-semibold text-slate-900'}>{isComplete ? 'Report ready' : '12 sources found'}</p>
+              <p className={isDark ? 'mt-3 text-2xl font-semibold text-slate-100' : 'mt-3 text-2xl font-semibold text-slate-900'}>
+                {sourceCount === null ? 'Collecting evidence' : `${sourceCount} sources found`}
+              </p>
             </div>
             <div className={isDark ? 'rounded-2xl border border-slate-700 bg-slate-800/80 p-4' : 'rounded-2xl border border-slate-200 bg-slate-50 p-4'}>
               <div className="flex items-center gap-3">
                 <ShieldCheck className={isDark ? 'h-4 w-4 text-emerald-400' : 'h-4 w-4 text-emerald-600'} />
-                <p className={isDark ? 'text-sm text-slate-300' : 'text-sm text-slate-600'}>{isComplete ? 'Evidence verified' : 'Analyzing evidence...'}</p>
+                <p className={isDark ? 'text-sm text-slate-300' : 'text-sm text-slate-600'}>{requestError ? 'Analysis stopped' : isComplete ? 'Evidence verified' : 'Gemini analyzes retrieved source evidence.'}</p>
               </div>
-              <p className={isDark ? 'mt-3 text-sm text-slate-400' : 'mt-3 text-sm text-slate-500'}>{isComplete ? 'Our findings have been cross-checked across the strongest evidence sources.' : 'Comparing source reliability and contradiction patterns.'}</p>
+              <p className={isDark ? 'mt-3 text-sm text-slate-400' : 'mt-3 text-sm text-slate-500'}>
+                {requestError ? 'No placeholder report will be shown.' : isComplete ? 'Findings have been cross-checked against retrieved sources.' : 'Comparing source reliability and potential contradictions.'}
+              </p>
             </div>
           </div>
         </div>
@@ -253,19 +439,53 @@ function ResearchPage({ theme }) {
 
 function ResearchReportPage({ theme }) {
   const { id } = useParams()
+  const location = useLocation()
   const isDark = theme === 'dark'
-  const report = recentResearch.find((item) => item.id === id) || recentResearch[0]
+  const routeReport = location.state?.report?.research_id === id ? location.state.report : null
+  const [fetchedResult, setFetchedResult] = useState(null)
+  const report = routeReport || (fetchedResult?.id === id ? fetchedResult.report : null)
+  const error = fetchedResult?.id === id ? fetchedResult.error : ''
+  const isLoading = !report && !error
 
-  if (!report) {
+  useEffect(() => {
+    if (routeReport) return undefined
+
+    let isActive = true
+    getResearchById(id)
+      .then(({ data }) => {
+        if (isActive) setFetchedResult({ id, report: data, error: '' })
+      })
+      .catch((requestError) => {
+        if (isActive) setFetchedResult({
+          id,
+          report: null,
+          error: requestError.response?.data?.detail || 'Unable to load this research report.',
+        })
+      })
+
+    return () => { isActive = false }
+  }, [id, routeReport])
+
+  if (isLoading) {
+    return <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 text-sm text-slate-300" role="status">Loading research report...</div>
+  }
+
+  if (error || !report) {
     return (
       <EmptyState
         title="Research Not Found"
-        description="The requested report is not available right now. Try returning to the dashboard and selecting another analysis."
-        actionLabel="Return Home"
-        onAction={() => window.location.assign('/')}
+        description={error || 'No report data was returned for this research request.'}
+        actionLabel="Return to Dashboard"
+        onAction={() => window.location.assign('/dashboard')}
       />
     )
   }
+
+  const claims = report.claims || []
+  const sources = report.sources || []
+  const contradictions = report.contradictions || []
+  const confidence = report.confidence || 0
+  const reportDate = report.completed_at ? new Date(report.completed_at).toLocaleString() : 'Just completed'
 
   return (
     <div className="space-y-8">
@@ -277,31 +497,33 @@ function ResearchReportPage({ theme }) {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">
-              Completed
+              {report.status === 'insufficient_evidence' ? 'Insufficient Evidence' : 'Completed'}
             </span>
-            <span className={isDark ? 'text-sm text-slate-400' : 'text-sm text-slate-500'}>{report.processingTime}</span>
+            <span className={isDark ? 'text-sm text-slate-400' : 'text-sm text-slate-500'}>
+              {report.metadata?.processing_time ? `${report.metadata.processing_time}s` : ''}
+            </span>
           </div>
         </div>
 
         <div className={isDark ? 'mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-400' : 'mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-500'}>
-          <span>{report.sources} Sources</span>
+          <span>{sources.length} Sources</span>
           <span>•</span>
-          <span>{report.claimCount ?? report.claims?.length ?? 0} Claims</span>
+          <span>{claims.length} Claims</span>
           <span>•</span>
-          <span>{report.confidence}% Confidence</span>
+          <span>{confidence}% Confidence</span>
           <span>•</span>
-          <span>{report.date}</span>
+          <span>{reportDate}</span>
         </div>
       </section>
 
-      <ResearchSummary summary={report.summary} confidence={report.confidence} theme={theme} />
+      <ResearchSummary summary={report.summary} confidence={confidence} theme={theme} />
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className={isDark ? 'text-2xl font-semibold text-slate-100' : 'text-2xl font-semibold text-slate-900'}>Claim Verification</h3>
         </div>
-        {report.claims?.length ? (
-          report.claims.map((item) => <ClaimCard key={item.id} claim={item} theme={theme} />)
+        {claims.length ? (
+          claims.map((item, index) => <ClaimCard key={`${report.research_id}-claim-${index}`} claim={item} theme={theme} />)
         ) : (
           <EmptyState title="No Verified Claims" description="No claim-level findings were captured for this inquiry yet." />
         )}
@@ -339,24 +561,26 @@ function ResearchReportPage({ theme }) {
         </div>
 
         <div className="grid gap-4 xl:grid-cols-2">
-          {report.sourcesData?.length ? (
-            report.sourcesData.map((source) => <SourceCard key={source.id} source={source} theme={theme} />)
+          {sources.length ? (
+            sources.map((source, index) => <SourceCard key={`${report.research_id}-source-${index}`} source={source} theme={theme} />)
           ) : (
             <div className={isDark ? 'rounded-2xl border border-dashed border-slate-700 bg-slate-950/70 p-8 text-sm text-slate-400' : 'rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-sm text-slate-500'}>
-              No source cards available yet for this research item.
+              No reliable sources were found for this query.
             </div>
           )}
         </div>
       </section>
 
-      {report.contradictions?.length ? (
-        <section className="space-y-4">
-          <h3 className={isDark ? 'text-2xl font-semibold text-slate-100' : 'text-2xl font-semibold text-slate-900'}>Conflicting Evidence</h3>
-          {report.contradictions.map((conflict) => (
-            <ConflictCard key={conflict.id} conflict={conflict} theme={theme} />
-          ))}
-        </section>
-      ) : null}
+      <section className="space-y-4">
+        <h3 className={isDark ? 'text-2xl font-semibold text-slate-100' : 'text-2xl font-semibold text-slate-900'}>Conflicting Evidence</h3>
+        {contradictions.length ? contradictions.map((conflict, index) => (
+          <ConflictCard key={`${report.research_id}-conflict-${index}`} conflict={conflict} theme={theme} />
+        )) : (
+          <div className={isDark ? 'rounded-2xl border border-slate-800 bg-slate-900/80 p-5 text-sm text-slate-300' : 'rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600'}>
+            No significant conflicting evidence found.
+          </div>
+        )}
+      </section>
     </div>
   )
 }
@@ -364,9 +588,38 @@ function ResearchReportPage({ theme }) {
 function HistoryPage({ theme }) {
   const [sortBy, setSortBy] = useState('Newest')
   const [query, setQuery] = useState('')
+  const [items, setItems] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
   const isDark = theme === 'dark'
 
-  const filteredItems = [...historyEntries]
+  useEffect(() => {
+    let isActive = true
+    getResearchHistory()
+      .then(({ data }) => {
+        if (isActive) {
+          setItems(data.items.map((item) => ({
+            id: item.research_id,
+            question: item.question,
+            date: item.completed_at || item.created_at || '',
+            status: item.status === 'completed' ? 'Completed' : 'Insufficient Evidence',
+            sources: item.source_count,
+            claims: item.claim_count,
+            confidence: item.confidence || 0,
+          })))
+        }
+      })
+      .catch((requestError) => {
+        if (isActive) setError(requestError.response?.data?.detail || 'Unable to load research history.')
+      })
+      .finally(() => {
+        if (isActive) setIsLoading(false)
+      })
+
+    return () => { isActive = false }
+  }, [])
+
+  const filteredItems = [...items]
     .filter((item) => item.question.toLowerCase().includes(query.toLowerCase()))
     .sort((a, b) => {
       if (sortBy === 'Oldest') return a.date.localeCompare(b.date)
@@ -403,7 +656,9 @@ function HistoryPage({ theme }) {
         </div>
       </div>
 
+      {error ? <p className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-200" role="alert">{error}</p> : null}
       <div className="space-y-3">
+        {isLoading ? <p className="text-sm text-slate-400" role="status">Loading research history...</p> : null}
         {filteredItems.length ? (
           filteredItems.map((item) => (
             <div key={item.id} className={isDark ? 'rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-sm md:p-5' : 'rounded-2xl border border-slate-200 bg-white p-4 shadow-sm md:p-5'}>
@@ -440,40 +695,13 @@ function HistoryPage({ theme }) {
   )
 }
 
-function SavedReportsPage({ theme }) {
-  const isDark = theme === 'dark'
-
+function SavedReportsPage() {
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
-      {savedReports.map((report) => (
-        <div key={report.id} className={isDark ? 'rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-sm' : 'rounded-3xl border border-slate-200 bg-white p-5 shadow-sm'}>
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-[0.18em] text-indigo-400">Saved Report</p>
-              <h3 className={isDark ? 'mt-2 text-xl font-semibold text-slate-100' : 'mt-2 text-xl font-semibold text-slate-900'}>{report.question}</h3>
-            </div>
-            <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">{report.confidence}%</span>
-          </div>
-
-          <p className={isDark ? 'mt-4 text-sm text-slate-400' : 'mt-4 text-sm text-slate-500'}>{report.date}</p>
-          <p className={isDark ? 'mt-3 text-sm leading-6 text-slate-300' : 'mt-3 text-sm leading-6 text-slate-700'}>{report.summary}</p>
-
-          <div className={isDark ? 'mt-5 flex items-center justify-between gap-3 text-sm text-slate-400' : 'mt-5 flex items-center justify-between gap-3 text-sm text-slate-500'}>
-            <span>{report.sources} Sources</span>
-            <div className="flex gap-2">
-              <Button variant="secondary" onClick={() => window.location.assign(`/report/${report.id}`)}>
-                View
-              </Button>
-              <Button variant="danger">Delete</Button>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
+    <EmptyState title="No Saved Reports" description="Reports you save will appear here." />
   )
 }
 
-function SettingsPage({ theme }) {
+function SettingsPage({ theme, user }) {
   const isDark = theme === 'dark'
 
   return (
@@ -529,8 +757,8 @@ function SettingsPage({ theme }) {
         <div className={isDark ? 'mt-4 space-y-3 text-sm text-slate-300' : 'mt-4 space-y-3 text-sm text-slate-600'}>
           <div className={isDark ? 'rounded-2xl border border-slate-700 bg-slate-950 p-4' : 'rounded-2xl border border-slate-200 bg-slate-50 p-4'}>
             <p className={isDark ? 'text-slate-400' : 'text-slate-500'}>Profile</p>
-            <p className={isDark ? 'mt-1 font-medium text-slate-100' : 'mt-1 font-medium text-slate-900'}>Janahvi Loke</p>
-            <p className={isDark ? 'text-slate-400' : 'text-slate-500'}>Research Lead</p>
+            <p className={isDark ? 'mt-1 font-medium text-slate-100' : 'mt-1 font-medium text-slate-900'}>{user.full_name}</p>
+            <p className={isDark ? 'text-slate-400' : 'text-slate-500'}>{user.email}</p>
           </div>
         </div>
       </div>

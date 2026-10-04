@@ -9,6 +9,10 @@ from app.models.research import Source, Claim
 logger = logging.getLogger("gemini_service")
 
 
+class GeminiServiceError(RuntimeError):
+    """Raised when Gemini cannot complete evidence analysis."""
+
+
 class GeminiService:
     """Service to interact with Google Gemini API for fact-checking and report generation."""
 
@@ -47,14 +51,15 @@ class GeminiService:
     def _call_gemini(self, prompt: str, system_instruction: Optional[str] = None) -> str:
         """Calls Gemini API and returns the text response."""
         if not self.api_key:
-            raise ValueError("GEMINI_API_KEY environment variable is not configured.")
+            raise GeminiServiceError("GEMINI_API_KEY is not configured.")
 
         if not self._client:
             try:
                 from google import genai
                 self._client = genai.Client(api_key=self.api_key)
             except Exception as e:
-                raise RuntimeError(f"Gemini client is not initialized: {e}")
+                logger.error("Gemini client initialization failed.", exc_info=True)
+                raise GeminiServiceError("Gemini analysis is unavailable.") from e
 
         try:
             logger.info(f"Calling Gemini model '{self.model_name}'...")
@@ -71,8 +76,8 @@ class GeminiService:
             )
             return response.text or ""
         except Exception as e:
-            logger.error(f"Gemini API call failed: {e}", exc_info=True)
-            raise RuntimeError(f"Gemini API execution error: {e}")
+            logger.error("Gemini API call failed.", exc_info=True)
+            raise GeminiServiceError("Gemini analysis is temporarily unavailable.") from e
 
     def extract_claims(self, question: str, sources: List[Source]) -> List[str]:
         """
@@ -109,9 +114,8 @@ Format your output strictly as a JSON array of strings:
                 return [str(c).strip() for c in extracted if str(c).strip()]
             return []
         except Exception as e:
-            logger.error(f"Failed to extract claims with Gemini: {e}")
-            # Fallback claim generation from sources
-            return [f"Evidence regarding: {question}"]
+            logger.error("Failed to extract claims with Gemini.", exc_info=True)
+            raise GeminiServiceError("Gemini could not extract claims from the retrieved evidence.") from e
 
     def verify_claim(self, claim: str, question: str, sources: List[Source]) -> Dict[str, Any]:
         """
@@ -168,23 +172,26 @@ Evaluate this claim. Output strictly a JSON object formatted as:
 
             confidence = float(data.get("confidence", 0.5))
             confidence = min(max(confidence, 0.0), 1.0)
+            allowed_sources = {source.url for source in sources}
+            candidate_sources = data.get("supporting_sources", [])
+            if not isinstance(candidate_sources, list):
+                candidate_sources = []
+            supporting_sources = [
+                source_url
+                for source_url in candidate_sources
+                if isinstance(source_url, str) and source_url in allowed_sources
+            ]
 
             return {
                 "claim": claim,
                 "verdict": verdict,
                 "confidence": round(confidence, 2),
                 "explanation": data.get("explanation", "Evaluated based on provided web sources."),
-                "supporting_sources": data.get("supporting_sources", [])
+                "supporting_sources": supporting_sources
             }
         except Exception as e:
-            logger.error(f"Error fact-checking claim '{claim}' with Gemini: {e}")
-            return {
-                "claim": claim,
-                "verdict": "Unverified",
-                "confidence": 0.0,
-                "explanation": f"Evaluation error: {str(e)}. Insufficient evidence to verify this claim.",
-                "supporting_sources": []
-            }
+            logger.error("Gemini claim verification failed.", exc_info=True)
+            raise GeminiServiceError("Gemini could not verify a claim against the retrieved evidence.") from e
 
     def detect_contradictions(self, claims: List[Claim], sources: List[Source]) -> List[str]:
         """Detect any conflicting claims or evidence between sources."""
@@ -220,8 +227,8 @@ Return strictly JSON array:
                 return [str(item) for item in res if str(item).strip()]
             return []
         except Exception as e:
-            logger.warning(f"Could not analyze contradictions: {e}")
-            return []
+            logger.error("Gemini contradiction analysis failed.", exc_info=True)
+            raise GeminiServiceError("Gemini could not compare the retrieved evidence.") from e
 
     def generate_summary_and_report(
         self,
@@ -277,18 +284,14 @@ Provide your response in JSON format containing two fields:
         try:
             raw_response = self._call_gemini(prompt, system_instruction=system_instruction)
             data = self._extract_json_from_text(raw_response)
-            summary = data.get("summary", f"Research analysis for: '{question}' based on {len(sources)} sources.")
-            report = data.get("report", f"# Research Report: {question}\n\n" + prompt)
+            summary = data.get("summary")
+            report = data.get("report")
+            if not isinstance(summary, str) or not summary.strip() or not isinstance(report, str) or not report.strip():
+                raise ValueError("Gemini returned an incomplete research report.")
             return {"summary": summary, "report": report}
         except Exception as e:
-            logger.error(f"Failed to generate final report with Gemini: {e}")
-            # Fallback report builder
-            fallback_summary = f"Research completed for '{question}' with {len(claims)} evaluated claims across {len(sources)} sources."
-            fallback_report = f"# Research Report: {question}\n\n"
-            fallback_report += f"## Summary\n{fallback_summary}\n\n"
-            fallback_report += "## Fact-Checking Findings\n" + claims_text + "\n\n"
-            fallback_report += "## Sources\n" + sources_text
-            return {"summary": fallback_summary, "report": fallback_report}
+            logger.error("Gemini report generation failed.", exc_info=True)
+            raise GeminiServiceError("Gemini could not generate the evidence-backed report.") from e
 
 
 # Singleton service instance

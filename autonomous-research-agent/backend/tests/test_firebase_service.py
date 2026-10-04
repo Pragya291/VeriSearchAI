@@ -28,7 +28,9 @@ def test_firebase_service_crud_flow():
         "report": "# Executive Summary\nEV adoption is growing.",
         "claims": [{"claim": "EV sales grew 35%", "verdict": "Supported"}],
         "sources": [{"title": "IEA", "url": "https://iea.org"}],
-        "metadata": {"search_count": 1, "source_count": 1, "processing_time": 1.25}
+        "metadata": {"search_count": 1, "source_count": 1, "processing_time": 1.25},
+        "confidence": 73,
+        "contradictions": ["Sources disagree on the reporting period."],
     }
     saved = service.save_research_result(research_id, research_data)
     assert saved is True
@@ -39,6 +41,8 @@ def test_firebase_service_crud_flow():
     assert completed_doc["summary"] == "EV sales are growing rapidly worldwide."
     assert len(completed_doc["claims"]) == 1
     assert len(completed_doc["sources"]) == 1
+    assert completed_doc["confidence"] == 73
+    assert completed_doc["contradictions"] == ["Sources disagree on the reporting period."]
 
     # 6. Test History Pagination
     history = service.get_research_history(page=1, limit=10)
@@ -46,3 +50,15 @@ def test_firebase_service_crud_flow():
     assert history["page"] == 1
     assert len(history["items"]) >= 1
     assert history["items"][0]["research_id"] == research_id
+    assert history["items"][0]["confidence"] == 73
+
+
+def test_research_records_are_scoped_to_their_owner():
+    service = FirebaseService()
+    research_id = service.create_research("A private research query", owner_id="user-a")
+    service.save_research_result(research_id, {"status": "completed", "confidence": 73})
+
+    assert service.get_research(research_id, owner_id="user-a") is not None
+    assert service.get_research(research_id, owner_id="user-b") is None
+    assert service.get_research_history(owner_id="user-a")["total"] == 1
+    assert service.get_research_history(owner_id="user-b")["total"] == 0

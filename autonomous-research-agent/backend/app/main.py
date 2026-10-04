@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.health import router as health_router
+from app.api.auth import router as auth_router
 from app.api.research import router as research_router
 
 # Configure logging format
@@ -33,6 +34,7 @@ app.add_middleware(
 
 # Register API Routers
 app.include_router(health_router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
 app.include_router(research_router, prefix="/api")
 
 

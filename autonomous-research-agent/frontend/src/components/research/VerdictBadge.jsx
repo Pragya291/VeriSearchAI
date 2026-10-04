@@ -24,7 +24,9 @@ const verdictMeta = {
 }
 
 export default function VerdictBadge({ verdict = 'supported' }) {
-  const meta = verdictMeta[verdict] || verdictMeta.supported
+  const normalizedVerdict = verdict.toLowerCase().replaceAll(' ', '-')
+  const verdictKey = normalizedVerdict === 'insufficient-evidence' ? 'unverified' : normalizedVerdict
+  const meta = verdictMeta[verdictKey] || verdictMeta.unverified
   const Icon = meta.icon
 
   return (

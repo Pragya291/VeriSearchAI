@@ -7,6 +7,10 @@ from app.models.research import Source
 logger = logging.getLogger("tavily_service")
 
 
+class TavilyServiceError(RuntimeError):
+    """Raised when source search is unavailable or fails."""
+
+
 class TavilyService:
     """Service to perform web research queries via the Tavily Search API."""
 
@@ -37,16 +41,15 @@ class TavilyService:
         Returns a list of structured Source objects.
         """
         if not self.api_key:
-            logger.warning("TAVILY_API_KEY is not configured. Returning empty search results.")
-            return []
+            raise TavilyServiceError("TAVILY_API_KEY is not configured.")
 
         if not self._client:
             try:
                 from tavily import TavilyClient
                 self._client = TavilyClient(api_key=self.api_key)
             except Exception as e:
-                logger.error(f"TavilyClient unavailable: {e}")
-                return []
+                logger.error("TavilyClient unavailable.", exc_info=True)
+                raise TavilyServiceError("Source search is unavailable.") from e
 
         try:
             logger.info(f"Initiating Tavily web search for query: '{query}'")
@@ -55,7 +58,7 @@ class TavilyService:
                 search_depth="advanced",
                 max_results=max_results,
                 include_answer=True,
-                include_raw_content=False
+                include_raw_content=True
             )
 
             raw_results = response.get("results", [])
@@ -67,7 +70,12 @@ class TavilyService:
             for item in raw_results:
                 url = item.get("url", "")
                 title = item.get("title", "Untitled Source").strip()
-                snippet = item.get("content", "").strip() or item.get("snippet", "").strip()
+                evidence = (
+                    item.get("raw_content", "").strip()
+                    or item.get("content", "").strip()
+                    or item.get("snippet", "").strip()
+                )
+                snippet = evidence[:6000]
                 score = float(item.get("score", 0.8))
 
                 # Normalize score to [0.0, 1.0]
@@ -81,7 +89,8 @@ class TavilyService:
                         snippet=snippet,
                         source_name=domain,
                         relevance_score=round(relevance_score, 2),
-                        credibility_score="Unknown"  # Will be assessed by SourceAnalyzer
+                        credibility_score="Unknown",  # Will be assessed by SourceAnalyzer
+                        published_date=item.get("published_date") or item.get("date")
                     )
                 )
 
@@ -89,8 +98,8 @@ class TavilyService:
             return sources
 
         except Exception as e:
-            logger.error(f"Error occurred during Tavily search execution: {e}", exc_info=True)
-            return []
+            logger.error("Error occurred during Tavily search execution.", exc_info=True)
+            raise TavilyServiceError("Unable to retrieve sources. Please try again.") from e
 
 
 # Singleton service instance

@@ -2,6 +2,9 @@ import { ExternalLink } from 'lucide-react'
 import VerdictBadge from './VerdictBadge'
 
 export default function ClaimCard({ claim }) {
+  const confidence = claim.confidence <= 1 ? Math.round(claim.confidence * 100) : claim.confidence
+  const supportingSources = claim.supporting_sources || claim.sources || []
+
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -16,12 +19,12 @@ export default function ClaimCard({ claim }) {
         <div>
           <div className="mb-3 flex items-center justify-between text-sm">
             <span className="text-slate-500">Confidence</span>
-            <span className="font-medium text-slate-700">{claim.confidence}%</span>
+            <span className="font-medium text-slate-700">{confidence}%</span>
           </div>
           <div className="h-2.5 overflow-hidden rounded-full bg-slate-200">
             <div
               className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500"
-              style={{ width: `${claim.confidence}%` }}
+              style={{ width: `${confidence}%` }}
             />
           </div>
         </div>
@@ -35,11 +38,17 @@ export default function ClaimCard({ claim }) {
       <div className="mt-5">
         <p className="text-sm font-medium text-slate-500">Supporting Sources</p>
         <div className="mt-2 flex flex-wrap gap-2">
-          {claim.sources.map((source) => (
-            <span key={source} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-600">
-              {source}
-              <ExternalLink className="h-3 w-3" />
-            </span>
+          {supportingSources.map((source, index) => (
+            /^https?:\/\//i.test(source) ? (
+              <a key={source} href={source} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-600 hover:border-indigo-200 hover:text-indigo-700">
+                {new URL(source).hostname}
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            ) : (
+              <span key={`${source}-${index}`} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-600">
+                {source}
+              </span>
+            )
           ))}
         </div>
       </div>

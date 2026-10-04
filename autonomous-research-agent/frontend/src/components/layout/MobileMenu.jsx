@@ -1,15 +1,15 @@
-import { X, FileText, History, LayoutDashboard, Search, Settings, User } from 'lucide-react'
+import { X, FileText, History, LayoutDashboard, LogOut, Search, Settings, User } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const navItems = [
-  { label: 'Dashboard', to: '/', icon: LayoutDashboard },
+  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
   { label: 'New Research', to: '/research', icon: Search },
   { label: 'Research History', to: '/history', icon: History },
   { label: 'Saved Reports', to: '/saved', icon: FileText },
   { label: 'Settings', to: '/settings', icon: Settings },
 ]
 
-export default function MobileMenu({ open, onClose, theme, onToggleTheme }) {
+export default function MobileMenu({ open, onClose, theme, user, onLogout, onToggleTheme }) {
   if (!open) return null
 
   const isDark = theme === 'dark'
@@ -19,10 +19,10 @@ export default function MobileMenu({ open, onClose, theme, onToggleTheme }) {
       <div className={isDark ? 'h-full w-4/5 max-w-sm border-r border-slate-800 bg-slate-950 p-4' : 'h-full w-4/5 max-w-sm border-r border-slate-200 bg-white p-4'}>
         <div className={isDark ? 'mb-6 flex items-center justify-between border-b border-slate-800 pb-4' : 'mb-6 flex items-center justify-between border-b border-slate-200 pb-4'}>
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white">FC</div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white">VS</div>
             <div>
-              <p className={isDark ? 'font-semibold text-slate-100' : 'font-semibold text-slate-900'}>FactCheck AI</p>
-              <p className={isDark ? 'text-xs text-slate-400' : 'text-xs text-slate-500'}>Autonomous Research Agent</p>
+              <p className={isDark ? 'font-semibold text-slate-100' : 'font-semibold text-slate-900'}>VeriSearchAI</p>
+              <p className={isDark ? 'text-xs text-slate-400' : 'text-xs text-slate-500'}>Research &amp; Verification</p>
             </div>
           </div>
           <button type="button" onClick={onClose} className={isDark ? 'rounded-lg border border-slate-700 p-2 text-slate-300' : 'rounded-lg border border-slate-200 p-2 text-slate-600'}>
@@ -35,7 +35,7 @@ export default function MobileMenu({ open, onClose, theme, onToggleTheme }) {
             <NavLink
               key={label}
               to={to}
-              end={to === '/'}
+              end={to === '/dashboard'}
               onClick={onClose}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium ${
@@ -57,9 +57,12 @@ export default function MobileMenu({ open, onClose, theme, onToggleTheme }) {
               <User className="h-4 w-4" />
             </div>
             <div>
-              <p className={isDark ? 'text-sm font-medium text-slate-100' : 'text-sm font-medium text-slate-800'}>Janahvi Loke</p>
-              <p className={isDark ? 'text-[11px] text-slate-400' : 'text-[11px] text-slate-500'}>Research Lead</p>
+              <p className={isDark ? 'text-sm font-medium text-slate-100' : 'text-sm font-medium text-slate-800'}>{user.full_name}</p>
+              <p className={isDark ? 'text-[11px] text-slate-400' : 'text-[11px] text-slate-500'}>{user.email}</p>
             </div>
+            <button type="button" onClick={onLogout} aria-label="Log out" title="Log out" className={isDark ? 'ml-auto rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white' : 'ml-auto rounded-lg p-2 text-slate-500 hover:bg-slate-200 hover:text-slate-900'}>
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </div>
 

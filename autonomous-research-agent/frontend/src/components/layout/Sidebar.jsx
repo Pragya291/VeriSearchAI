@@ -1,15 +1,15 @@
 import { NavLink } from 'react-router-dom'
-import { FileText, History, LayoutDashboard, Moon, Search, Settings, SunMedium, User } from 'lucide-react'
+import { FileText, History, LayoutDashboard, LogOut, Moon, Search, Settings, SunMedium, User } from 'lucide-react'
 
 const navItems = [
-  { label: 'Dashboard', to: '/', icon: LayoutDashboard },
+  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
   { label: 'New Research', to: '/research', icon: Search },
   { label: 'Research History', to: '/history', icon: History },
   { label: 'Saved Reports', to: '/saved', icon: FileText },
   { label: 'Settings', to: '/settings', icon: Settings },
 ]
 
-export default function Sidebar({ theme, onToggleTheme }) {
+export default function Sidebar({ theme, user, onLogout, onToggleTheme }) {
   const isDark = theme === 'dark'
 
   return (
@@ -17,11 +17,11 @@ export default function Sidebar({ theme, onToggleTheme }) {
       <div className={isDark ? 'border-b border-slate-800 px-6 py-6' : 'border-b border-slate-200 px-6 py-6'}>
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white shadow-sm">
-            FC
+            VS
           </div>
           <div>
-            <p className={isDark ? 'text-lg font-semibold text-slate-100' : 'text-lg font-semibold text-slate-900'}>FactCheck AI</p>
-            <p className={isDark ? 'text-xs text-slate-400' : 'text-xs text-slate-500'}>Autonomous Research Agent</p>
+            <p className={isDark ? 'text-lg font-semibold text-slate-100' : 'text-lg font-semibold text-slate-900'}>VeriSearchAI</p>
+            <p className={isDark ? 'text-xs text-slate-400' : 'text-xs text-slate-500'}>Research &amp; Verification</p>
           </div>
         </div>
       </div>
@@ -32,7 +32,7 @@ export default function Sidebar({ theme, onToggleTheme }) {
             <NavLink
               key={label}
               to={to}
-              end={to === '/'}
+              end={to === '/dashboard'}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                   isActive
@@ -55,10 +55,13 @@ export default function Sidebar({ theme, onToggleTheme }) {
               <User className="h-4 w-4" />
             </div>
             <div>
-              <p className={isDark ? 'text-sm font-medium text-slate-100' : 'text-sm font-medium text-slate-800'}>Janahvi Loke</p>
-              <p className={isDark ? 'text-[11px] text-slate-400' : 'text-[11px] text-slate-500'}>Research Lead</p>
+              <p className={isDark ? 'text-sm font-medium text-slate-100' : 'text-sm font-medium text-slate-800'}>{user.full_name}</p>
+              <p className={isDark ? 'text-[11px] text-slate-400' : 'text-[11px] text-slate-500'}>{user.email}</p>
             </div>
           </div>
+          <button type="button" onClick={onLogout} aria-label="Log out" title="Log out" className={isDark ? 'rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white' : 'rounded-lg p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-900'}>
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
 
         <button

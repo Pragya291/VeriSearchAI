@@ -27,6 +27,7 @@ class Source(BaseModel):
     title: str = Field(..., description="Title of the webpage/source.")
     url: str = Field(..., description="URL of the source.")
     snippet: str = Field(..., description="Excerpt or snippet of content from the source.")
+    published_date: Optional[str] = Field(default=None, description="Publication date returned by the search provider, when available.")
     source_name: str = Field(default="Unknown Domain", description="Domain or publisher name.")
     relevance_score: float = Field(default=0.0, ge=0.0, le=1.0, description="Score indicating relevance to question.")
     credibility_score: str = Field(default="Unknown", description="Credibility assessment (High, Medium, Low, Unknown).")

@@ -63,6 +63,26 @@ def test_verify_claim(mock_client_cls):
     assert "https://example.com/ev" in result["supporting_sources"]
 
 
+@patch("google.genai.Client")
+def test_verify_claim_discards_sources_not_in_retrieved_evidence(mock_client_cls):
+    mock_client = MagicMock()
+    mock_client_cls.return_value = mock_client
+    mock_response = MagicMock()
+    mock_response.text = json.dumps({
+        "verdict": "Supported",
+        "confidence": 0.9,
+        "explanation": "Verified by the provided evidence.",
+        "supporting_sources": ["https://example.com/evidence", "https://invented.example/fake"],
+    })
+    mock_client.models.generate_content.return_value = mock_response
+    service = GeminiService(api_key="mock_key")
+    sources = [Source(title="Evidence", url="https://example.com/evidence", snippet="Evidence text.")]
+
+    result = service.verify_claim("Evidence claim", "Evidence question", sources)
+
+    assert result["supporting_sources"] == ["https://example.com/evidence"]
+
+
 def test_verify_claim_no_sources():
     service = GeminiService(api_key="mock_key")
     result = service.verify_claim("Random unevidenced claim", "Question?", sources=[])

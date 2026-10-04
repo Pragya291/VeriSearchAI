@@ -4,6 +4,7 @@ const statusStyles = {
   Completed: 'bg-emerald-100 text-emerald-700',
   'Partially Supported': 'bg-amber-100 text-amber-700',
   Researching: 'bg-indigo-100 text-indigo-700',
+  'Insufficient Evidence': 'bg-amber-100 text-amber-700',
   Failed: 'bg-red-100 text-red-700',
 }
 
@@ -22,7 +23,7 @@ export default function RecentResearch({ items, onSelect }) {
       </div>
 
       <div className="space-y-3">
-        {items.map((item) => (
+        {items.length ? items.map((item) => (
           <button
             key={item.id}
             type="button"
@@ -48,7 +49,7 @@ export default function RecentResearch({ items, onSelect }) {
               </div>
             </div>
           </button>
-        ))}
+        )) : <p className="rounded-xl border border-dashed border-slate-300 p-5 text-sm text-slate-500">Your completed research reports will appear here.</p>}
       </div>
     </div>
   )

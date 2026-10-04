@@ -12,6 +12,8 @@ class ResearchResponse(BaseModel):
     claims: List[Claim] = Field(default_factory=list, description="Extracted claims and fact-check verdicts.")
     sources: List[Source] = Field(default_factory=list, description="Evaluated web sources.")
     report: str = Field(..., description="Full detailed research report in Markdown.")
+    confidence: int = Field(default=0, ge=0, le=100, description="Evidence-derived overall confidence percentage.")
+    contradictions: List[str] = Field(default_factory=list, description="Conflicting evidence detected from the retrieved sources.")
     created_at: Optional[str] = Field(default=None, description="ISO format creation timestamp.")
     completed_at: Optional[str] = Field(default=None, description="ISO format completion timestamp.")
     metadata: Optional[ResearchMetadata] = Field(default=None, description="Execution metadata.")
@@ -27,6 +29,7 @@ class ResearchListItem(BaseModel):
     completed_at: Optional[str] = None
     source_count: int = 0
     claim_count: int = 0
+    confidence: int = 0
 
 
 class ResearchHistoryResponse(BaseModel):

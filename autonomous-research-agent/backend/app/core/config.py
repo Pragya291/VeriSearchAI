@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import List, Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -14,6 +15,12 @@ class Settings(BaseSettings):
     # API Keys
     GEMINI_API_KEY: Optional[str] = None
     TAVILY_API_KEY: Optional[str] = None
+
+    # Authentication
+    AUTH_DATABASE_PATH: Optional[str] = None
+    AUTH_SESSION_DAYS: int = 14
+    AUTH_COOKIE_NAME: str = "verisearchai_session"
+    AUTH_COOKIE_SECURE: bool = False
     
     # Firebase Settings
     FIREBASE_PROJECT_ID: Optional[str] = None
@@ -26,7 +33,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: Optional[str] = None
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(Path(__file__).resolve().parents[2] / ".env"),
         env_file_encoding="utf-8",
         extra="ignore"
     )

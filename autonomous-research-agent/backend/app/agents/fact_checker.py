@@ -1,7 +1,7 @@
 import logging
 from typing import List
 from app.models.research import Source, Claim
-from app.services.gemini_service import gemini_service
+from app.services.gemini_service import GeminiServiceError, gemini_service
 
 logger = logging.getLogger("fact_checker")
 
@@ -36,14 +36,8 @@ class FactChecker:
                 supporting_sources=eval_result.get("supporting_sources", [])
             )
         except Exception as e:
-            logger.error(f"Error during fact check of claim '{claim_text}': {e}")
-            return Claim(
-                claim=claim_text,
-                verdict="Unverified",
-                confidence=0.0,
-                explanation=f"Error evaluating claim: {str(e)}. Insufficient evidence to verify this claim.",
-                supporting_sources=[]
-            )
+            logger.error("Error during fact check of a claim.", exc_info=True)
+            raise GeminiServiceError("Gemini could not verify a claim.") from e
 
     def fact_check_claims(self, claim_texts: List[str], question: str, sources: List[Source]) -> List[Claim]:
         """
