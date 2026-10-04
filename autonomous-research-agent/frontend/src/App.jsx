@@ -19,12 +19,36 @@ import { SavedResearch } from './pages/SavedResearch'
 import { Sources } from './pages/Sources'
 import { Settings } from './pages/Settings'
 
+import { useAuth } from './auth/useAuth'
+
+function RootGateway() {
+  const { user, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+          <span className="text-sm font-medium text-slate-700">Loading VeriSearchAI...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (user) {
+    return <Navigate to="/app/dashboard" replace />
+  }
+
+  return <Navigate to="/login" replace />
+}
+
 function PageMetadata() {
   const location = useLocation()
 
   useEffect(() => {
     const titles = {
-      '/': 'VeriSearchAI — AI Research & Fact Verification',
+      '/': 'Log In | VeriSearchAI',
+      '/home': 'VeriSearchAI — AI Research & Fact Verification',
       '/how-it-works': 'How It Works | VeriSearchAI',
       '/features': 'Features & Trust Tools | VeriSearchAI',
       '/login': 'Log In | VeriSearchAI',
@@ -54,12 +78,15 @@ function App() {
       <AuthProvider>
         <PageMetadata />
         <Routes>
-          {/* Public Marketing & Authentication Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/features" element={<Features />} />
+          {/* Initial Entry Route: Starts at Login/Signup page */}
+          <Route path="/" element={<RootGateway />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+
+          {/* Marketing & Informational Pages */}
+          <Route path="/home" element={<Home />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/features" element={<Features />} />
 
           {/* Protected Application Routes under /app */}
           <Route path="/app" element={<AppLayout />}>

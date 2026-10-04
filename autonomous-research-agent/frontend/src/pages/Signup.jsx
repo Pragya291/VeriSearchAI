@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, Navigate } from 'react-router-dom'
 import { BrandLogo } from '../components/layout/Navbar'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -8,7 +8,7 @@ import { User, Mail, Lock, ShieldCheck } from 'lucide-react'
 
 export function Signup() {
   const navigate = useNavigate()
-  const { signup } = useAuth()
+  const { user, signup } = useAuth()
 
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -17,6 +17,10 @@ export function Signup() {
   const [agreed, setAgreed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  if (user) {
+    return <Navigate to="/app/dashboard" replace />
+  }
 
   const handleSubmit = async (e) => {
     e?.preventDefault()
@@ -61,12 +65,27 @@ export function Signup() {
           Create your VeriSearchAI account
         </h1>
         <p className="mt-2 text-sm text-slate-500">
-          Join researchers and fact-checkers investigating truth.
+          Sign up to access your research dashboard and verify claims.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="rounded-2xl border border-slate-200/90 bg-white py-8 px-6 sm:px-10 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-6">
+          {/* Prominent Log In / Sign Up Switcher */}
+          <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200/80">
+            <Link
+              to="/login"
+              className="flex-1 text-center rounded-lg py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
+            >
+              Log In
+            </Link>
+            <button
+              type="button"
+              className="flex-1 rounded-lg py-2 text-xs font-bold transition-all bg-white text-blue-600 shadow-xs cursor-default"
+            >
+              Sign Up
+            </button>
+          </div>
           {error && (
             <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
               {error}

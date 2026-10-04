@@ -101,7 +101,7 @@ export async function getCurrentUser() {
       return res.data
     }
   } catch (backendError) {
-    // Return stored demo user or fallback user
+    // Return stored session user if present
     const local = localStorage.getItem(STORAGE_KEYS.USER)
     if (local) {
       try {
@@ -110,16 +110,7 @@ export async function getCurrentUser() {
         // ignore
       }
     }
-    // Return default demo user so user can immediately experience the product
-    const defaultUser = {
-      id: 'usr-demo-01',
-      full_name: 'Dr. Alex Bennett',
-      email: 'alex.bennett@verisearch.ai',
-      role: 'Research Fellow',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
-    }
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(defaultUser))
-    return defaultUser
+    return null
   }
   return null
 }

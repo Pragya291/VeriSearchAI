@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { BrandLogo } from '../components/layout/Navbar'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -9,7 +9,7 @@ import { Mail, Lock, Sparkles, CheckCircle2 } from 'lucide-react'
 export function Login() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { login } = useAuth()
+  const { user, login } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -18,6 +18,10 @@ export function Login() {
   const [error, setError] = useState('')
 
   const from = location.state?.from || '/app/dashboard'
+
+  if (user) {
+    return <Navigate to="/app/dashboard" replace />
+  }
 
   const handleSubmit = async (e) => {
     e?.preventDefault()
@@ -59,12 +63,27 @@ export function Login() {
           Welcome back
         </h1>
         <p className="mt-2 text-sm text-slate-500">
-          Continue your research with VeriSearchAI.
+          Log in to enter your research dashboard.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="rounded-2xl border border-slate-200/90 bg-white py-8 px-6 sm:px-10 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-6">
+          {/* Prominent Log In / Sign Up Switcher */}
+          <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200/80">
+            <button
+              type="button"
+              className="flex-1 rounded-lg py-2 text-xs font-bold transition-all bg-white text-blue-600 shadow-xs cursor-default"
+            >
+              Log In
+            </button>
+            <Link
+              to="/signup"
+              className="flex-1 text-center rounded-lg py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
+            >
+              Sign Up
+            </Link>
+          </div>
           {error && (
             <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
               {error}
