@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Select } from '../components/ui/Select'
 import { Card } from '../components/ui/Card'
-import { User, Sliders, CheckCircle2 } from 'lucide-react'
+import { User, Sliders, CheckCircle2, ArrowRight } from 'lucide-react'
 
 export function Settings() {
   const { user } = useAuth()
@@ -52,9 +53,18 @@ export function Settings() {
         {/* PROFILE                                             */}
         {/* =================================================== */}
         <Card>
-          <div className="flex items-center gap-2.5 border-b border-slate-100 pb-4 mb-5">
-            <User className="h-5 w-5 text-blue-600" />
-            <h3 className="text-base font-bold text-slate-900">Researcher Profile</h3>
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+            <div className="flex items-center gap-2.5">
+              <User className="h-5 w-5 text-blue-600" />
+              <h3 className="text-base font-bold text-slate-900">Researcher Profile</h3>
+            </div>
+            <Link
+              to="/app/profile"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700"
+            >
+              <span>Full Profile Page</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

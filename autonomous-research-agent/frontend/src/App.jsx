@@ -18,6 +18,7 @@ import { History } from './pages/History'
 import { SavedResearch } from './pages/SavedResearch'
 import { Sources } from './pages/Sources'
 import { Settings } from './pages/Settings'
+import { Profile } from './pages/Profile'
 
 import { useAuth } from './auth/useAuth'
 
@@ -60,6 +61,7 @@ function PageMetadata() {
       '/app/saved': 'Saved Research Reports | VeriSearchAI',
       '/app/sources': 'Evaluated Sources | VeriSearchAI',
       '/app/settings': 'Platform Settings | VeriSearchAI',
+      '/app/profile': 'Researcher Profile | VeriSearchAI',
     }
 
     if (location.pathname.startsWith('/app/results/') || location.pathname.startsWith('/app/report/')) {
@@ -92,6 +94,7 @@ function App() {
           <Route path="/app" element={<AppLayout />}>
             <Route index element={<Navigate to="/app/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="research" element={<Research />} />
             <Route path="results/:id" element={<Results />} />
             <Route path="report/:id" element={<Results />} />
@@ -103,6 +106,7 @@ function App() {
 
           {/* Fallback routes */}
           <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
+          <Route path="/profile" element={<Navigate to="/app/profile" replace />} />
           <Route path="/new-research" element={<Navigate to="/app/research" replace />} />
           <Route path="/history" element={<Navigate to="/app/history" replace />} />
           <Route path="/saved" element={<Navigate to="/app/saved" replace />} />

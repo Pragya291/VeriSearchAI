@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import {
   Sparkles,
   LayoutDashboard,
+  User,
   History,
   Bookmark,
   Database,
@@ -19,6 +20,7 @@ export function Sidebar({ className = '', onNavClick }) {
   const navItems = [
     { label: 'New Research', path: '/app/research', icon: Sparkles, highlight: true },
     { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
+    { label: 'Profile', path: '/app/profile', icon: User },
     { label: 'Research History', path: '/app/history', icon: History },
     { label: 'Saved Research', path: '/app/saved', icon: Bookmark },
     { label: 'Sources', path: '/app/sources', icon: Database },
@@ -98,15 +100,15 @@ export function Sidebar({ className = '', onNavClick }) {
           <ExternalLink className="h-3 w-3" />
         </Link>
 
-        <div className="flex items-center justify-between rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
-          <div className="min-w-0 pr-2">
-            <p className="truncate text-xs font-semibold text-slate-900">
+        <div className="flex items-center justify-between rounded-xl bg-slate-50/80 p-2.5 border border-slate-100 hover:border-slate-200 transition-colors">
+          <Link to="/app/profile" onClick={onNavClick} className="min-w-0 pr-2 flex-1 block group">
+            <p className="truncate text-xs font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
               {user?.full_name || 'Dr. Alex Bennett'}
             </p>
             <p className="truncate text-[11px] text-slate-400">
               {user?.email || 'alex.bennett@verisearch.ai'}
             </p>
-          </div>
+          </Link>
 
           <button
             type="button"
