@@ -95,12 +95,20 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between border-t border-slate-100 pt-8 sm:flex-row gap-4">
-          <p className="text-xs text-slate-400">
-            &copy; {new Date().getFullYear()} VeriSearchAI. All rights reserved. Built for evidence-backed research.
-          </p>
+          <div className="space-y-1 text-center sm:text-left">
+            <p className="text-xs text-slate-500 font-medium">
+              &copy; {new Date().getFullYear()} VeriSearchAI. All rights reserved. Built for evidence-backed research.
+            </p>
+            <p className="text-xs text-slate-600 flex items-center justify-center sm:justify-start gap-1">
+              <span>Developed by</span>
+              <span className="font-semibold text-slate-900">Pragya Mishra</span>
+              <span>&amp;</span>
+              <span className="font-semibold text-slate-900">Janahvi Loke</span>
+            </p>
+          </div>
           <div className="flex items-center gap-6 text-xs text-slate-500">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700 border border-emerald-200/80 font-medium">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
               FastAPI Integration Ready
             </span>
           </div>
@@ -111,3 +119,4 @@ export function Footer() {
 }
 
 export default Footer
+

@@ -1,10 +1,10 @@
-import { Search, CheckCircle2, Gauge, Link2, Sparkles, TrendingUp } from 'lucide-react'
+import { Search, Compass, Shield, Link2, Sparkles, TrendingUp } from 'lucide-react'
 
 export function StatCard({ label, value, icon, change, className = '' }) {
   const ICON_MAP = {
     search: Search,
-    check: CheckCircle2,
-    gauge: Gauge,
+    compass: Compass,
+    shield: Shield,
     link: Link2,
     sparkles: Sparkles,
   }
@@ -29,7 +29,7 @@ export function StatCard({ label, value, icon, change, className = '' }) {
           {value}
         </span>
         {change && (
-          <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600">
+          <span className="inline-flex items-center gap-0.5 rounded-full bg-[#22C55E] px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
             <TrendingUp className="h-3 w-3" />
             {change}
           </span>

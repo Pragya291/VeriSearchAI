@@ -1,14 +1,15 @@
 import { Link, useLocation } from 'react-router-dom'
 import {
-  Sparkles,
   LayoutDashboard,
   User,
   History,
   Bookmark,
-  Database,
+  Layers,
   Settings,
-  LogOut,
-  ExternalLink,
+  Sparkles,
+  Link as LinkIcon,
+  ArrowUpRight,
+  MoreHorizontal,
 } from 'lucide-react'
 import { BrandLogo } from './Navbar'
 import { useAuth } from '../../auth/useAuth'
@@ -18,69 +19,71 @@ export function Sidebar({ className = '', onNavClick }) {
   const { user, logout } = useAuth()
 
   const navItems = [
-    { label: 'New Research', path: '/app/research', icon: Sparkles, highlight: true },
     { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
     { label: 'Profile', path: '/app/profile', icon: User },
     { label: 'Research History', path: '/app/history', icon: History },
     { label: 'Saved Research', path: '/app/saved', icon: Bookmark },
-    { label: 'Sources', path: '/app/sources', icon: Database },
+    { label: 'Sources', path: '/app/sources', icon: Layers },
     { label: 'Settings', path: '/app/settings', icon: Settings },
   ]
 
   const isActive = (path) => {
-    if (path === '/app/research') return location.pathname === '/app/research'
     if (path === '/app/dashboard') return location.pathname === '/app/dashboard'
     return location.pathname.startsWith(path)
   }
 
+  // Initials e.g. AB
+  const getInitials = (name) => {
+    if (!name) return 'AB'
+    const parts = name.trim().split(' ')
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase()
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  }
+
   return (
     <aside
-      className={`flex flex-col justify-between w-64 shrink-0 border-r border-slate-200/90 bg-white py-5 px-4 h-screen sticky top-0 ${className}`}
+      className={`flex flex-col justify-between w-64 shrink-0 border-r border-[#E2E8F0] bg-[#FFFFFF] py-6 px-4 h-screen sticky top-0 shadow-[2px_0_12px_rgba(15,23,42,0.03)] ${className}`}
       aria-label="App Sidebar"
     >
-      {/* TOP: Brand and Navigation */}
+      {/* TOP SECTION: Brand & Navigation */}
       <div className="space-y-6">
-        <div className="px-2">
+        {/* Brand Logo */}
+        <div className="px-2 pt-1">
           <BrandLogo />
         </div>
 
+        {/* Primary CTA Button: + New Research */}
+        <div className="px-1">
+          <Link
+            to="/app/research"
+            onClick={onNavClick}
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#1E40AF] px-4 py-3 text-sm font-semibold text-white shadow-md transition-all duration-150 transform hover:-translate-y-0.5 cursor-pointer"
+          >
+            <Sparkles className="h-4.5 w-4.5" strokeWidth={2.5} />
+            <span>New Research</span>
+          </Link>
+        </div>
+
+        {/* Navigation items */}
         <nav className="space-y-1.5" aria-label="Sidebar Navigation">
           {navItems.map((item) => {
             const active = isActive(item.path)
             const Icon = item.icon
-
-            if (item.highlight) {
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={onNavClick}
-                  className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-150 ${
-                    active
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'bg-blue-50 text-blue-700 hover:bg-blue-100/80 border border-blue-200/60'
-                  }`}
-                >
-                  <Icon className={`h-4 w-4 shrink-0 ${active ? 'text-white' : 'text-blue-600'}`} />
-                  <span>{item.label}</span>
-                </Link>
-              )
-            }
 
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={onNavClick}
-                className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-150 ${
                   active
-                    ? 'bg-slate-100 text-blue-600 font-semibold'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-[#EFF6FF] text-[#2563EB]'
+                    : 'text-[#334155] hover:bg-[#F8FAFC] hover:text-[#0F172A]'
                 }`}
               >
                 <Icon
-                  className={`h-4 w-4 shrink-0 ${
-                    active ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'
+                  className={`h-4.5 w-4.5 shrink-0 ${
+                    active ? 'text-[#2563EB]' : 'text-[#64748B]'
                   }`}
                 />
                 <span>{item.label}</span>
@@ -90,33 +93,42 @@ export function Sidebar({ className = '', onNavClick }) {
         </nav>
       </div>
 
-      {/* BOTTOM: User profile & Logout */}
-      <div className="border-t border-slate-100 pt-4 space-y-3">
+      {/* BOTTOM SECTION: Landing Page link & User Card */}
+      <div className="border-t border-[#E2E8F0] pt-4 space-y-3">
         <Link
           to="/"
-          className="flex items-center justify-between rounded-lg px-2 py-1.5 text-xs text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-colors"
+          className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-[#334155] hover:bg-[#F8FAFC] transition-colors"
         >
-          <span>Landing Page</span>
-          <ExternalLink className="h-3 w-3" />
+          <div className="flex items-center gap-2.5">
+            <LinkIcon className="h-4 w-4 text-[#64748B]" />
+            <span>Landing Page</span>
+          </div>
+          <ArrowUpRight className="h-4 w-4 text-[#64748B]" />
         </Link>
 
-        <div className="flex items-center justify-between rounded-xl bg-slate-50/80 p-2.5 border border-slate-100 hover:border-slate-200 transition-colors">
-          <Link to="/app/profile" onClick={onNavClick} className="min-w-0 pr-2 flex-1 block group">
-            <p className="truncate text-xs font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
-              {user?.full_name || 'Dr. Alex Bennett'}
-            </p>
-            <p className="truncate text-[11px] text-slate-400">
-              {user?.email || 'alex.bennett@verisearch.ai'}
-            </p>
+        {/* User Card Pill matching reference image */}
+        <div className="flex items-center justify-between rounded-2xl bg-[#F8FAFC] p-2.5 border border-[#E2E8F0] shadow-2xs">
+          <Link to="/app/profile" onClick={onNavClick} className="flex items-center gap-2.5 min-w-0 flex-1 group">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#3B82F6] via-[#1E40AF] to-[#1D4ED8] text-white text-xs font-bold shadow-2xs">
+              {getInitials(user?.full_name)}
+            </div>
+            <div className="min-w-0 pr-1">
+              <p className="truncate text-xs font-bold text-[#0F172A] group-hover:text-[#2563EB] transition-colors">
+                {user?.full_name?.toLowerCase() || 'alex bennett'}
+              </p>
+              <p className="truncate text-[10.5px] font-medium text-[#64748B]">
+                {user?.email || 'alex.bennett@verisearch.ai'}
+              </p>
+            </div>
           </Link>
 
           <button
             type="button"
             onClick={logout}
             title="Log out"
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-white hover:text-rose-600 hover:shadow-xs transition-all cursor-pointer"
+            className="rounded-lg p-1 text-[#64748B] hover:text-rose-600 transition-colors cursor-pointer shrink-0"
           >
-            <LogOut className="h-4 w-4" />
+            <MoreHorizontal className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -125,3 +137,4 @@ export function Sidebar({ className = '', onNavClick }) {
 }
 
 export default Sidebar
+

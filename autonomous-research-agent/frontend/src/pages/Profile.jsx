@@ -1,38 +1,40 @@
 import { useState } from 'react'
 import { useAuth } from '../auth/useAuth'
 import { Card } from '../components/ui/Card'
-import { Button } from '../components/ui/Button'
-import { Input } from '../components/ui/Input'
-import { Textarea } from '../components/ui/Textarea'
 import {
   User,
-  Building,
   CheckCircle2,
-  BookOpen,
-  Layers,
-  Award,
-  Link as LinkIcon,
+  Mail,
+  Phone,
+  MapPin,
+  ShieldCheck,
+  Edit3,
+  Check,
+  SlidersHorizontal,
+  Search,
+  Settings,
+  Calendar,
   Plus,
   X,
+  Bell,
+  ChevronRight,
 } from 'lucide-react'
 
 export function Profile() {
   const { user, setUser } = useAuth()
 
-  // Storage key for user-specific extended profile
+  // Storage key for user profile
   const storageKey = `verisearchai:user_profile:${user?.email || 'guest'}`
 
   const defaultProfile = {
-    fullName: user?.full_name || 'Dr. Alex Bennett',
+    fullName: user?.full_name?.toLowerCase() || 'alex bennett',
     email: user?.email || 'alex.bennett@verisearch.ai',
+    phone: '+1 (555) 234-5678',
+    location: '100 Innovation Way',
+    city: 'Cambridge',
+    pincode: '02138',
     title: 'Senior Research Analyst',
     institution: 'Institute for Evidence & Fact Analysis',
-    department: 'Cognitive Science & Public Health Division',
-    credentials: 'Ph.D. in Cognitive Neuroscience',
-    location: 'Cambridge, MA',
-    orcid: '0000-0002-1825-0097',
-    website: 'https://verisearch.ai/researchers/alex-bennett',
-    bio: 'Dedicated to empirical fact-checking, systematic meta-analyses, and evaluating multi-source scientific literature. Specializes in neurobiology, cognitive longevity, and public health misinformation detection.',
     expertise: ['Cognitive Health', 'Neuroscience', 'Clinical Trials', 'Public Health', 'Meta-Analysis'],
   }
 
@@ -48,8 +50,19 @@ export function Profile() {
     return defaultProfile
   })
 
+  // Preferences State
+  const [preferences, setPreferences] = useState({
+    language: 'English (US)',
+    notifications: 'Email Alerts & Synthesis Digest',
+    researchUpdates: true,
+    weeklyDigest: true,
+    securityAlerts: true,
+  })
+
+  const [isEditing, setIsEditing] = useState(false)
   const [newTag, setNewTag] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [prefSuccess, setPrefSuccess] = useState(false)
 
   const handleAddTag = () => {
     const trimmed = newTag.trim()
@@ -68,12 +81,10 @@ export function Profile() {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSaveProfile = (e) => {
     e?.preventDefault()
     try {
       localStorage.setItem(storageKey, JSON.stringify(profile))
-
-      // Also sync user session in AuthContext & localStorage
       const updatedUser = {
         ...user,
         full_name: profile.fullName,
@@ -83,306 +94,474 @@ export function Profile() {
       localStorage.setItem('verisearchai:current_user', JSON.stringify(updatedUser))
 
       setSaveSuccess(true)
-      setTimeout(() => setSaveSuccess(false), 2800)
+      setIsEditing(false)
+      setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
       console.error('Failed to save profile', err)
     }
   }
 
+  const handleSavePreferences = (e) => {
+    e?.preventDefault()
+    try {
+      localStorage.setItem(`verisearchai:user_prefs:${user?.email || 'guest'}`, JSON.stringify(preferences))
+      setPrefSuccess(true)
+      setTimeout(() => setPrefSuccess(false), 3000)
+    } catch (err) {
+      console.error('Failed to save preferences', err)
+    }
+  }
+
+  // Generate Initials e.g. AB
+  const getInitials = (name) => {
+    if (!name) return 'AB'
+    const parts = name.trim().split(' ')
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase()
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  }
+
   return (
-    <div className="max-w-6xl mx-auto flex flex-col justify-between">
-      {/* Page Header - Ultra-compact */}
-      <div className="border-b border-slate-200/70 pb-1.5 mb-2 flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-slate-900 leading-tight">
-            Researcher Profile
-          </h1>
-          <p className="text-[11px] text-slate-500 hidden sm:block">
-            Manage your researcher identity, institution credentials, and verification domains.
-          </p>
+    <div className="max-w-6xl mx-auto h-[calc(100vh-2.5rem)] flex flex-col justify-between space-y-2 bg-[#F8FAFC]">
+      {/* Toast Notification */}
+      {(saveSuccess || prefSuccess) && (
+        <div className="fixed top-16 right-6 z-50 flex items-center gap-2.5 rounded-xl border border-[#bbf7d0] bg-[#DCFCE7] px-4 py-2.5 text-xs font-semibold text-[#166534] shadow-lg animate-in slide-in-from-top-4 duration-200">
+          <CheckCircle2 className="h-4 w-4 text-[#22C55E]" />
+          <span>{saveSuccess ? 'Profile saved successfully!' : 'Preferences updated successfully!'}</span>
+        </div>
+      )}
+
+      {/* TOP BAR: Breadcrumb & Actions */}
+      <div className="flex items-center justify-between gap-4 py-0.5">
+        <div className="text-xs font-semibold text-[#64748B] flex items-center gap-1.5">
+          <span>Profile</span>
+          <ChevronRight className="h-3 w-3 text-[#64748B]" />
+          <span className="text-[#0F172A] font-bold">Researcher Profile</span>
         </div>
 
-        {saveSuccess && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200 animate-in fade-in">
-            <CheckCircle2 className="h-3 w-3" />
-            Profile Saved
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsEditing(!isEditing)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] shadow-2xs hover:bg-[#F8FAFC] transition-colors cursor-pointer"
+          >
+            <Edit3 className="h-3.5 w-3.5" />
+            <span>{isEditing ? 'Close Editing' : 'Edit Profile'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => alert('Search functionality coming soon.')}
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer shadow-2xs"
+          >
+            <Search className="h-3.5 w-3.5" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => alert('You have 3 new notifications!')}
+            className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer shadow-2xs"
+          >
+            <Bell className="h-3.5 w-3.5" />
+            <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#2563EB] text-[9px] font-bold text-white">
+              3
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer shadow-2xs"
+          >
+            <Settings className="h-3.5 w-3.5" />
+          </button>
+
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#3B82F6] to-[#1D4ED8] text-white font-bold text-xs shadow-2xs">
+            {getInitials(profile.fullName)}
+          </div>
+        </div>
       </div>
 
-      {/* Main 2-Column Responsive Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 lg:gap-3.5 items-start">
-        {/* LEFT COLUMN: Profile Form */}
-        <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-1.5">
-          {/* Card 1: Professional Identification */}
-          <Card className="p-2 sm:p-2.5">
-            <div className="flex items-center gap-1.5 border-b border-slate-100 pb-1 mb-1.5">
-              <User className="h-3.5 w-3.5 text-blue-600" />
-              <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-800">
-                Personal & Professional Info
-              </h2>
+      {/* ========================================================================= */}
+      {/* 1. HEADER BANNER CARD (Compact Desktop Height)                           */}
+      {/* ========================================================================= */}
+      <Card className="p-3 sm:p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.06)] shrink-0">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-3 text-left">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#3B82F6] via-[#1E40AF] to-[#1D4ED8] text-white font-extrabold text-lg shadow-md ring-4 ring-[#EFF6FF]">
+              {getInitials(profile.fullName)}
             </div>
 
-            <div className="space-y-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                <Input
-                  size="sm"
-                  label="Full Name"
-                  value={profile.fullName}
-                  onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-                  placeholder="e.g. Dr. Alex Bennett"
-                  required
-                />
-
-                <Input
-                  size="sm"
-                  label="Email Address"
-                  value={profile.email}
-                  disabled
-                  helperText="Registered login email"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                <Input
-                  size="sm"
-                  label="Professional Title / Role"
-                  value={profile.title}
-                  onChange={(e) => setProfile({ ...profile, title: e.target.value })}
-                  placeholder="e.g. Senior Research Analyst"
-                />
-
-                <Input
-                  size="sm"
-                  label="Academic Credentials"
-                  value={profile.credentials}
-                  onChange={(e) => setProfile({ ...profile, credentials: e.target.value })}
-                  placeholder="e.g. Ph.D. in Cognitive Science"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                <Input
-                  size="sm"
-                  label="Primary Institution"
-                  value={profile.institution}
-                  onChange={(e) => setProfile({ ...profile, institution: e.target.value })}
-                  placeholder="e.g. University / Research Center"
-                />
-
-                <Input
-                  size="sm"
-                  label="Department / Laboratory"
-                  value={profile.department}
-                  onChange={(e) => setProfile({ ...profile, department: e.target.value })}
-                  placeholder="e.g. Division of Health Policy"
-                />
-              </div>
-            </div>
-          </Card>
-
-          {/* Card 2: Research Biography */}
-          <Card className="p-2 sm:p-2.5">
-            <div className="flex items-center gap-1.5 border-b border-slate-100 pb-1 mb-1">
-              <BookOpen className="h-3.5 w-3.5 text-blue-600" />
-              <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-800">
-                About & Research Statement
-              </h2>
-            </div>
-
-            <Textarea
-              size="sm"
-              rows={2}
-              value={profile.bio}
-              onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-              placeholder="Tell others about your verification methodology, background, published papers, or research focus..."
-            />
-          </Card>
-
-          {/* Card 3: Research Expertise / Topics (Compact inline chips + adder) */}
-          <Card className="p-2 sm:p-2.5">
-            <div className="flex items-center gap-1.5 border-b border-slate-100 pb-1 mb-1">
-              <Layers className="h-3.5 w-3.5 text-blue-600" />
-              <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-800">
-                Fields of Expertise
-              </h2>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1">
-              {profile.expertise.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-1.5 py-0.5 text-[10.5px] font-semibold text-blue-700 border border-blue-200"
-                >
-                  <span>{tag}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="p-0.5 hover:text-rose-600 cursor-pointer"
-                    aria-label={`Remove ${tag}`}
-                  >
-                    <X className="h-2.5 w-2.5" />
-                  </button>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight text-[#0F172A]">
+                  {profile.fullName}
+                </h1>
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#bbf7d0] bg-[#DCFCE7] px-2.5 py-0.5 text-[11px] font-semibold text-[#166534]">
+                  <CheckCircle2 className="h-3 w-3 text-[#22C55E] fill-[#22C55E] text-white" />
+                  Verified Researcher
                 </span>
-              ))}
+              </div>
 
-              <div className="inline-flex items-center gap-1">
-                <input
-                  type="text"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      handleAddTag()
-                    }
-                  }}
-                  placeholder="+ Add topic..."
-                  className="w-28 sm:w-36 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none"
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  icon={Plus}
-                  onClick={handleAddTag}
-                  className="py-0.5 px-2 text-[10px] h-6"
-                >
-                  Add
-                </Button>
+              <p className="text-xs font-semibold text-[#334155]">
+                {profile.title} at {profile.institution}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-medium text-[#64748B] pt-0.5">
+                <span className="inline-flex items-center gap-1">
+                  <Mail className="h-3 w-3 text-[#64748B]" />
+                  {profile.email}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Phone className="h-3 w-3 text-[#64748B]" />
+                  {profile.phone}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-3 w-3 text-[#64748B]" />
+                  {profile.city} • {profile.location}
+                </span>
               </div>
             </div>
-          </Card>
+          </div>
 
-          {/* Card 4: Academic Links & Identifiers */}
-          <Card className="p-2 sm:p-2.5">
-            <div className="flex items-center gap-1.5 border-b border-slate-100 pb-1 mb-1">
-              <LinkIcon className="h-3.5 w-3.5 text-blue-600" />
-              <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-800">
-                Academic Links & Identifiers
+          <div className="shrink-0">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-3.5 py-1 text-xs font-semibold text-[#334155]">
+              <span className="h-2 w-2 rounded-full bg-[#22C55E] animate-pulse" />
+              <span>Active • Verified since Jan 2024</span>
+            </span>
+          </div>
+        </div>
+      </Card>
+
+      {/* ========================================================================= */}
+      {/* 2. MAIN TWO-COLUMN GRID                                                   */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-start flex-1 min-h-0 overflow-y-auto pb-2">
+        {/* LEFT STACK (Personal Info & Credentials) */}
+        <div className="lg:col-span-7 space-y-3">
+          {/* Personal Information */}
+          <Card className="p-3 sm:p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
+            <div className="flex items-center gap-2 border-b border-[#E2E8F0] pb-2">
+              <User className="h-4.5 w-4.5 text-[#2563EB]" />
+              <h2 className="text-sm font-bold text-[#0F172A]">
+                Personal Information
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              <Input
-                size="sm"
-                label="ORCID Identifier"
-                value={profile.orcid}
-                onChange={(e) => setProfile({ ...profile, orcid: e.target.value })}
-                placeholder="e.g. 0000-0002-1825-0097"
-              />
-
-              <Input
-                size="sm"
-                label="Academic Website / Publications"
-                value={profile.website}
-                onChange={(e) => setProfile({ ...profile, website: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
-          </Card>
-
-          {/* Action Button - Always visible without scroll */}
-          <div className="flex justify-end pt-0.5">
-            <Button type="submit" variant="primary" size="sm" className="py-1.5 px-4 text-xs font-semibold shadow-xs">
-              Save Profile Information
-            </Button>
-          </div>
-        </form>
-
-        {/* RIGHT COLUMN: Live Card Preview */}
-        <div className="lg:col-span-5 space-y-2">
-          <Card className="p-2.5 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-1.5 border-slate-200/90">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Public Researcher Card Preview
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-1.5 py-0.2 text-[9.5px] font-semibold text-emerald-700 border border-emerald-200">
-                <CheckCircle2 className="h-2.5 w-2.5" />
-                Verified
-              </span>
-            </div>
-
-            {/* Profile Info Header without any picture */}
-            <div className="space-y-0.2">
-              <h3 className="text-base font-extrabold text-slate-900 leading-snug truncate">
-                {profile.fullName || 'Researcher Name'}
-              </h3>
-              <p className="text-xs font-semibold text-blue-600 truncate">
-                {profile.title || 'Research Analyst'}
-              </p>
-              {profile.credentials && (
-                <p className="text-[10.5px] text-slate-500 font-medium truncate">
-                  {profile.credentials}
-                </p>
-              )}
-            </div>
-
-            {/* Affiliation & Department */}
-            <div className="rounded-lg bg-slate-50/80 p-2 border border-slate-100 space-y-1 text-xs">
-              {profile.institution && (
-                <div className="flex items-start gap-1.5 text-slate-700">
-                  <Building className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
-                  <div className="min-w-0">
-                    <span className="font-semibold block truncate text-[11.5px]">{profile.institution}</span>
-                    {profile.department && (
-                      <span className="text-slate-500 block text-[10.5px] truncate">{profile.department}</span>
-                    )}
+            {isEditing ? (
+              <form onSubmit={handleSaveProfile} className="space-y-3">
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      value={profile.fullName}
+                      onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#0F172A] focus:bg-white outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={profile.email}
+                      disabled
+                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#64748B]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">Mobile</label>
+                    <input
+                      type="text"
+                      value={profile.phone}
+                      onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#0F172A] focus:bg-white outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">Location</label>
+                    <input
+                      type="text"
+                      value={profile.location}
+                      onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#0F172A] focus:bg-white outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">City</label>
+                    <input
+                      type="text"
+                      value={profile.city}
+                      onChange={(e) => setProfile({ ...profile, city: e.target.value })}
+                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#0F172A] focus:bg-white outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">Pincode</label>
+                    <input
+                      type="text"
+                      value={profile.pincode}
+                      onChange={(e) => setProfile({ ...profile, pincode: e.target.value })}
+                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#0F172A] focus:bg-white outline-none"
+                    />
                   </div>
                 </div>
-              )}
-              {profile.orcid && (
-                <div className="flex items-center gap-1 pt-0.5 border-t border-slate-200/60 text-slate-500 font-mono text-[9.5px]">
-                  <Award className="h-3 w-3 text-emerald-600 shrink-0" />
-                  <span className="truncate">ORCID: {profile.orcid}</span>
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1E40AF] transition-all cursor-pointer shadow-xs"
+                  >
+                    <Check className="h-3.5 w-3.5" />
+                    <span>Save Personal Information</span>
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Full Name</span>
+                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                    {profile.fullName}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Email</span>
+                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A] truncate">
+                    {profile.email}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Mobile</span>
+                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                    {profile.phone}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Location</span>
+                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                    {profile.location}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">City</span>
+                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                    {profile.city}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Pincode</span>
+                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                    {profile.pincode}
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
+
+          {/* Academic Credentials */}
+          <Card className="p-3 sm:p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
+            <div className="flex items-center gap-2 border-b border-[#E2E8F0] pb-2">
+              <ShieldCheck className="h-4.5 w-4.5 text-[#2563EB]" />
+              <h2 className="text-sm font-bold text-[#0F172A]">
+                Academic &amp; Institutional Credentials
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Professional Title</span>
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                  {profile.title}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Institution</span>
+                <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                  {profile.institution}
+                </div>
+              </div>
+            </div>
+
+            {/* Credentials & Expertise Tags */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-[11px] font-semibold text-[#334155] block">Credentials &amp; Expertise</span>
+              <div className="flex flex-wrap gap-1.5">
+                {profile.expertise.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 rounded-lg border border-[#bfdbfe] bg-[#DBEAFE] px-2.5 py-0.8 text-xs font-semibold text-[#1E40AF]"
+                  >
+                    <span>{tag}</span>
+                    {isEditing && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(tag)}
+                        className="hover:text-rose-600 cursor-pointer"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+
+              {isEditing && (
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Add field..."
+                    className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1 text-xs text-[#0F172A] focus:bg-white outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddTag}
+                    className="inline-flex items-center gap-1 rounded-xl bg-[#2563EB] px-3 py-1 text-xs font-semibold text-white hover:bg-[#1E40AF] transition-colors cursor-pointer"
+                  >
+                    <Plus className="h-3 w-3" />
+                    <span>Add</span>
+                  </button>
                 </div>
               )}
             </div>
 
-            {/* Bio */}
-            {profile.bio && (
-              <div>
-                <p className="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                  Research Statement
-                </p>
-                <p className="text-[11px] text-slate-600 leading-snug italic bg-slate-50/50 p-1.5 rounded-lg border border-slate-100 line-clamp-2">
-                  "{profile.bio}"
-                </p>
+            <div className="pt-2 border-t border-[#E2E8F0] flex flex-wrap items-center justify-between text-xs text-[#64748B] gap-2">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-[#64748B]" />
+                <span>Verified by:</span>
+                <span className="font-semibold text-[#0F172A]">{profile.institution}</span>
               </div>
-            )}
-
-            {/* Fields of Study */}
-            {profile.expertise.length > 0 && (
-              <div>
-                <p className="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
-                  Research Domains
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {profile.expertise.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-md bg-blue-50/80 px-1.5 py-0.2 text-[10px] font-medium text-blue-700 border border-blue-100"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Stats preview */}
-            <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-slate-100 text-center">
-              <div className="p-1 rounded-lg bg-slate-50">
-                <span className="block text-sm font-bold text-slate-900 leading-tight">24</span>
-                <span className="text-[9.5px] text-slate-400 font-medium">Claims Verified</span>
-              </div>
-              <div className="p-1 rounded-lg bg-slate-50">
-                <span className="block text-sm font-bold text-blue-600 leading-tight">82%</span>
-                <span className="text-[9.5px] text-slate-400 font-medium">Avg Confidence</span>
+              <div className="flex items-center gap-1 font-semibold text-[#166534]">
+                <Calendar className="h-3.5 w-3.5 text-[#166534]" />
+                <span>Verified on Jan 12, 2024</span>
               </div>
             </div>
           </Card>
         </div>
+
+        {/* RIGHT STACK (Preferences & Toggles) */}
+        <div className="lg:col-span-5 space-y-3">
+          {/* Preferences Settings */}
+          <Card className="p-3 sm:p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
+            <div className="flex items-center gap-2 border-b border-[#E2E8F0] pb-2">
+              <SlidersHorizontal className="h-4.5 w-4.5 text-[#2563EB]" />
+              <h2 className="text-sm font-bold text-[#0F172A]">
+                Preferences &amp; System Settings
+              </h2>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="text-[11px] font-semibold text-[#334155] block mb-1">Language</label>
+                <select
+                  value={preferences.language}
+                  onChange={(e) => setPreferences({ ...preferences, language: e.target.value })}
+                  className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 font-semibold text-[#0F172A] focus:bg-white outline-none cursor-pointer"
+                >
+                  <option value="English (US)">English (US)</option>
+                  <option value="English (UK)">English (UK)</option>
+                  <option value="Spanish">Spanish (Español)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-semibold text-[#334155] block mb-1">Notification Settings</label>
+                <select
+                  value={preferences.notifications}
+                  onChange={(e) => setPreferences({ ...preferences, notifications: e.target.value })}
+                  className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 font-semibold text-[#0F172A] focus:bg-white outline-none cursor-pointer"
+                >
+                  <option value="Email Alerts & Synthesis Digest">Email Alerts &amp; Synthesis Digest</option>
+                  <option value="Instant Claim Alerts Only">Instant Claim Alerts Only</option>
+                  <option value="Weekly Summary Only">Weekly Summary Only</option>
+                </select>
+              </div>
+            </div>
+          </Card>
+
+          {/* Email Notifications & Toggles Card */}
+          <Card className="p-3 sm:p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
+            <form onSubmit={handleSavePreferences} className="space-y-3">
+              <h3 className="text-xs font-bold text-[#0F172A] border-b border-[#E2E8F0] pb-1.5">
+                Email Notifications
+              </h3>
+
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs font-semibold text-[#334155]">Research Updates</span>
+                  <button
+                    type="button"
+                    onClick={() => setPreferences({ ...preferences, researchUpdates: !preferences.researchUpdates })}
+                    className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      preferences.researchUpdates ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
+                    }`}
+                    role="switch"
+                    aria-checked={preferences.researchUpdates}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        preferences.researchUpdates ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs font-semibold text-[#334155]">Weekly Digest</span>
+                  <button
+                    type="button"
+                    onClick={() => setPreferences({ ...preferences, weeklyDigest: !preferences.weeklyDigest })}
+                    className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      preferences.weeklyDigest ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
+                    }`}
+                    role="switch"
+                    aria-checked={preferences.weeklyDigest}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        preferences.weeklyDigest ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs font-semibold text-[#334155]">Security Alerts</span>
+                  <button
+                    type="button"
+                    onClick={() => setPreferences({ ...preferences, securityAlerts: !preferences.securityAlerts })}
+                    className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      preferences.securityAlerts ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
+                    }`}
+                    role="switch"
+                    aria-checked={preferences.securityAlerts}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        preferences.securityAlerts ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-[#E2E8F0] flex justify-end">
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#2563EB] hover:bg-[#1E40AF] px-5 py-2 text-xs font-semibold text-white shadow-xs transition-all cursor-pointer"
+                >
+                  <Check className="h-3.5 w-3.5" />
+                  <span>Save Preferences</span>
+                </button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      </div>
+
+      {/* Footer Timestamp */}
+      <div className="text-right text-[10.5px] font-medium text-[#64748B] pt-0.5">
+        Last updated • Sep 5, 2024 • 09:32 AM UTC
       </div>
     </div>
   )

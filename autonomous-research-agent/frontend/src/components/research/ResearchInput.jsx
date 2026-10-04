@@ -95,7 +95,7 @@ export function ResearchInput({
                   onClick={() => setDepth(d)}
                   className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
                     depth === d
-                      ? 'bg-white text-blue-600 shadow-xs font-semibold'
+                      ? 'bg-[#2563EB] text-white shadow-xs font-semibold'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >

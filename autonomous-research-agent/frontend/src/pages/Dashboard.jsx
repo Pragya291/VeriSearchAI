@@ -44,11 +44,30 @@ export function Dashboard() {
     })
   }
 
-  // Calculate statistics (matching Section 22 specs)
-  const totalResearches = recentReports.length > 0 ? 24 : 0
-  const claimsVerified = recentReports.length > 0 ? 18 : 0
-  const avgConfidence = recentReports.length > 0 ? '82%' : '0%'
-  const sourcesAnalyzed = recentReports.length > 0 ? 146 : 0
+  // Calculate real statistics from recentReports
+  const totalResearches = recentReports.length
+  const claimsVerified = recentReports.reduce((acc, r) => acc + (r.claim_count || 1), 0)
+  const avgConfidence = recentReports.length > 0 
+    ? `${Math.round(recentReports.reduce((acc, r) => acc + (r.confidence || 0), 0) / recentReports.length)}%` 
+    : '0%'
+  const sourcesAnalyzed = recentReports.reduce((acc, r) => acc + (r.source_count || 0), 0)
+
+  // Calculate chart data for ActivityChart (Mon-Sun)
+  const chartData = [
+    { label: 'Mon', sources: 0 },
+    { label: 'Tue', sources: 0 },
+    { label: 'Wed', sources: 0 },
+    { label: 'Thu', sources: 0 },
+    { label: 'Fri', sources: 0 },
+    { label: 'Sat', sources: 0 },
+    { label: 'Sun', sources: 0 },
+  ]
+  
+  recentReports.forEach(r => {
+    const d = new Date(r.completed_at || r.created_at || Date.now())
+    const day = (d.getDay() + 6) % 7 // Convert Sun=0 to Mon=0
+    chartData[day].sources += (r.source_count || 0)
+  })
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -96,13 +115,13 @@ export function Dashboard() {
           <StatCard
             label="Claims Verified"
             value={claimsVerified}
-            icon="check"
+            icon="compass"
             change="+12% vs last month"
           />
           <StatCard
             label="Average Confidence"
             value={avgConfidence}
-            icon="gauge"
+            icon="shield"
           />
           <StatCard
             label="Sources Analyzed"
@@ -114,7 +133,7 @@ export function Dashboard() {
       </section>
 
       {/* Research Activity Chart */}
-      <ActivityChart />
+      <ActivityChart data={chartData} />
 
       {/* Recent Research Section */}
       <section className="space-y-4">
