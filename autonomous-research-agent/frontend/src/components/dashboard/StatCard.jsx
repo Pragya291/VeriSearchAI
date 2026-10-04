@@ -1,25 +1,42 @@
-import { CheckCheck, Gauge, Link2, Search } from 'lucide-react'
+import { Search, CheckCircle2, Gauge, Link2, Sparkles, TrendingUp } from 'lucide-react'
 
-const iconMap = {
-  search: Search,
-  link: Link2,
-  check: CheckCheck,
-  gauge: Gauge,
-}
+export function StatCard({ label, value, icon, change, className = '' }) {
+  const ICON_MAP = {
+    search: Search,
+    check: CheckCircle2,
+    gauge: Gauge,
+    link: Link2,
+    sparkles: Sparkles,
+  }
 
-export default function StatCard({ label, value, icon, theme = 'light' }) {
-  const Icon = iconMap[icon] || Search
-  const isDark = theme === 'dark'
+  const IconComponent = typeof icon === 'string' ? ICON_MAP[icon] || Sparkles : icon || Sparkles
 
   return (
-    <div className={isDark ? 'rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md' : 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md'}>
-      <div className="mb-4 flex items-center justify-between">
-        <div className={isDark ? 'rounded-xl bg-slate-800 p-2 text-slate-300' : 'rounded-xl bg-slate-100 p-2 text-slate-600'}>
-          <Icon className="h-4 w-4" />
-        </div>
+    <div
+      className={`rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-all ${className}`}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          {label}
+        </span>
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+          <IconComponent className="h-4.5 w-4.5" />
+        </span>
       </div>
-      <p className={isDark ? 'text-3xl font-semibold tracking-tight text-slate-100' : 'text-3xl font-semibold tracking-tight text-slate-900'}>{value}</p>
-      <p className={isDark ? 'mt-2 text-sm text-slate-400' : 'mt-2 text-sm text-slate-500'}>{label}</p>
+
+      <div className="mt-3 flex items-baseline justify-between">
+        <span className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+          {value}
+        </span>
+        {change && (
+          <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600">
+            <TrendingUp className="h-3 w-3" />
+            {change}
+          </span>
+        )}
+      </div>
     </div>
   )
 }
+
+export default StatCard

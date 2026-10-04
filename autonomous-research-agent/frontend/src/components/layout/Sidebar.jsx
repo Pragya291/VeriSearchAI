@@ -1,83 +1,138 @@
-import { NavLink } from 'react-router-dom'
-import { FileText, History, LayoutDashboard, LogOut, Moon, Search, Settings, SunMedium, User } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import {
+  Sparkles,
+  LayoutDashboard,
+  History,
+  Bookmark,
+  Database,
+  Settings,
+  LogOut,
+  ExternalLink,
+} from 'lucide-react'
+import { BrandLogo } from './Navbar'
+import { useAuth } from '../../auth/useAuth'
 
-const navItems = [
-  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-  { label: 'New Research', to: '/new-research', icon: Search },
-  { label: 'Research History', to: '/history', icon: History },
-  { label: 'Saved Reports', to: '/saved', icon: FileText },
-  { label: 'Settings', to: '/settings', icon: Settings },
-]
+export function Sidebar({ className = '', onNavClick }) {
+  const location = useLocation()
+  const { user, logout } = useAuth()
 
-export default function Sidebar({ theme, user, onLogout, onToggleTheme }) {
-  const isDark = theme === 'dark'
+  const navItems = [
+    { label: 'New Research', path: '/app/research', icon: Sparkles, highlight: true },
+    { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
+    { label: 'Research History', path: '/app/history', icon: History },
+    { label: 'Saved Research', path: '/app/saved', icon: Bookmark },
+    { label: 'Sources', path: '/app/sources', icon: Database },
+    { label: 'Settings', path: '/app/settings', icon: Settings },
+  ]
+
+  const isActive = (path) => {
+    if (path === '/app/research') return location.pathname === '/app/research'
+    if (path === '/app/dashboard') return location.pathname === '/app/dashboard'
+    return location.pathname.startsWith(path)
+  }
 
   return (
-    <aside className={isDark ? 'hidden w-72 shrink-0 border-r border-slate-800 bg-slate-950/85 backdrop-blur xl:flex xl:flex-col' : 'hidden w-72 shrink-0 border-r border-slate-200 bg-white/80 backdrop-blur xl:flex xl:flex-col'}>
-      <div className={isDark ? 'border-b border-slate-800 px-6 py-6' : 'border-b border-slate-200 px-6 py-6'}>
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white shadow-sm">
-            VS
-          </div>
-          <div>
-            <p className={isDark ? 'text-lg font-semibold text-slate-100' : 'text-lg font-semibold text-slate-900'}>VeriSearchAI</p>
-            <p className={isDark ? 'text-xs text-slate-400' : 'text-xs text-slate-500'}>Research &amp; Verification</p>
-          </div>
+    <aside
+      className={`flex flex-col justify-between w-64 shrink-0 border-r border-slate-200/90 bg-white py-5 px-4 h-screen sticky top-0 ${className}`}
+      aria-label="App Sidebar"
+    >
+      {/* TOP: Brand and Navigation */}
+      <div className="space-y-6">
+        <div className="px-2">
+          <BrandLogo />
         </div>
+
+        <nav className="space-y-1.5" aria-label="Sidebar Navigation">
+          {navItems.map((item) => {
+            const active = isActive(item.path)
+            const Icon = item.icon
+
+            if (item.highlight) {
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={onNavClick}
+                  className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-150 ${
+                    active
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'bg-blue-50 text-blue-700 hover:bg-blue-100/80 border border-blue-200/60'
+                  }`}
+                >
+                  <Icon className={`h-4 w-4 shrink-0 ${active ? 'text-white' : 'text-blue-600'}`} />
+                  <span>{item.label}</span>
+                </Link>
+              )
+            }
+
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={onNavClick}
+                className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
+                  active
+                    ? 'bg-slate-100 text-blue-600 font-semibold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <Icon
+                  className={`h-4 w-4 shrink-0 ${
+                    active ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'
+                  }`}
+                />
+                <span>{item.label}</span>
+              </Link>
+            )
+          })}
+        </nav>
       </div>
 
-      <nav className="flex-1 px-4 py-6">
-        <div className="space-y-1">
-          {navItems.map(({ label, to, icon: Icon }) => (
-            <NavLink
-              key={label}
-              to={to}
-              end={to === '/dashboard'}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
-                  isActive
-                    ? isDark ? 'bg-indigo-500/15 text-indigo-300 ring-1 ring-indigo-400/30' : 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100'
-                    : isDark ? 'text-slate-300 hover:bg-slate-800 hover:text-slate-100' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`
-              }
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-            </NavLink>
-          ))}
-        </div>
-      </nav>
+      {/* BOTTOM: User profile & Logout */}
+      <div className="border-t border-slate-100 pt-4 space-y-3">
+        <Link
+          to="/"
+          className="flex items-center justify-between rounded-lg px-2 py-1.5 text-xs text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-colors"
+        >
+          <span>Landing Page</span>
+          <ExternalLink className="h-3 w-3" />
+        </Link>
 
-      <div className={isDark ? 'border-t border-slate-800 p-4' : 'border-t border-slate-200 p-4'}>
-        <div className={isDark ? 'mb-4 flex items-center justify-between rounded-xl border border-slate-700 bg-slate-900 p-3' : 'mb-4 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3'}>
-          <div className="flex items-center gap-3">
-            <div className={isDark ? 'flex h-9 w-9 items-center justify-center rounded-full bg-slate-700 text-slate-200' : 'flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-slate-700'}>
-              <User className="h-4 w-4" />
-            </div>
-            <div>
-              <p className={isDark ? 'text-sm font-medium text-slate-100' : 'text-sm font-medium text-slate-800'}>{user.full_name}</p>
-              <p className={isDark ? 'text-[11px] text-slate-400' : 'text-[11px] text-slate-500'}>{user.email}</p>
+        <div className="flex items-center justify-between rounded-xl bg-slate-50/80 p-2.5 border border-slate-100">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.full_name || 'User avatar'}
+                className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200"
+              />
+            ) : (
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-xs font-semibold text-blue-700">
+                {(user?.full_name || user?.email || 'U')[0].toUpperCase()}
+              </div>
+            )}
+            <div className="min-w-0">
+              <p className="truncate text-xs font-semibold text-slate-900">
+                {user?.full_name || 'Dr. Alex Bennett'}
+              </p>
+              <p className="truncate text-[11px] text-slate-400">
+                {user?.email || 'alex.bennett@verisearch.ai'}
+              </p>
             </div>
           </div>
-          <button type="button" onClick={onLogout} aria-label="Log out" title="Log out" className={isDark ? 'rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white' : 'rounded-lg p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-900'}>
+
+          <button
+            type="button"
+            onClick={logout}
+            title="Log out"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-white hover:text-rose-600 hover:shadow-xs transition-all cursor-pointer"
+          >
             <LogOut className="h-4 w-4" />
           </button>
         </div>
-
-        <button
-          type="button"
-          onClick={onToggleTheme}
-          className={isDark ? 'mb-3 flex w-full items-center justify-between rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-800' : 'mb-3 flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50'}
-        >
-          <span className="flex items-center gap-2">
-            {theme === 'dark' ? <Moon className="h-4 w-4" /> : <SunMedium className="h-4 w-4" />}
-            Theme
-          </span>
-          <span className={isDark ? 'text-xs uppercase tracking-wide text-slate-400' : 'text-xs uppercase tracking-wide text-slate-500'}>{theme === 'dark' ? 'Dark' : 'Light'}</span>
-        </button>
-
-        <div className={isDark ? 'text-center text-[11px] text-slate-500' : 'text-center text-[11px] text-slate-500'}>Version 2.4.1</div>
       </div>
     </aside>
   )
 }
+
+export default Sidebar

@@ -1,46 +1,32 @@
-import { Check, CircleDashed, CircleSlash2, HelpCircle } from 'lucide-react'
+import { getVerdictConfig } from '../../utils/verdictUtils'
 
-const verdictMeta = {
-  supported: {
-    label: 'Supported',
-    bg: 'bg-emerald-100 text-emerald-700',
-    icon: Check,
-  },
-  'partially-supported': {
-    label: 'Partially Supported',
-    bg: 'bg-amber-100 text-amber-700',
-    icon: CircleDashed,
-  },
-  contradicted: {
-    label: 'Contradicted',
-    bg: 'bg-red-100 text-red-700',
-    icon: CircleSlash2,
-  },
-  unverified: {
-    label: 'Unverified',
-    bg: 'bg-slate-100 text-slate-600',
-    icon: HelpCircle,
-  },
-}
+export function VerdictBadge({ verdict, size = 'md', className = '' }) {
+  const config = getVerdictConfig(verdict)
+  const Icon = config.icon
 
-export default function VerdictBadge({ verdict = 'supported', theme = 'light' }) {
-  const isDark = theme === 'dark'
-  const normalizedVerdict = verdict.toLowerCase().replaceAll(' ', '-')
-  const verdictKey = normalizedVerdict === 'insufficient-evidence' ? 'unverified' : normalizedVerdict
-  const meta = verdictMeta[verdictKey] || verdictMeta.unverified
-  const Icon = meta.icon
+  const sizeClasses = {
+    sm: 'px-2 py-0.5 text-xs gap-1',
+    md: 'px-3 py-1 text-xs gap-1.5',
+    lg: 'px-4 py-1.5 text-sm gap-2',
+  }
 
-  const darkTone = {
-    supported: 'bg-emerald-400/10 text-emerald-300',
-    'partially-supported': 'bg-amber-400/10 text-amber-300',
-    contradicted: 'bg-rose-400/10 text-rose-300',
-    unverified: 'bg-slate-700 text-slate-300',
+  const iconSizes = {
+    sm: 'h-3 w-3',
+    md: 'h-3.5 w-3.5',
+    lg: 'h-4 w-4',
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${isDark ? darkTone[verdictKey] : meta.bg}`}>
-      <Icon className="h-3.5 w-3.5" />
-      {meta.label}
+    <span
+      className={`inline-flex items-center font-bold tracking-wide rounded-full border ring-1 ${
+        config.badgeClass
+      } ${sizeClasses[size] || sizeClasses.md} ${className}`}
+      title={config.description}
+    >
+      <Icon className={`${iconSizes[size] || iconSizes.md} shrink-0`} strokeWidth={2.5} />
+      <span>{config.label}</span>
     </span>
   )
 }
+
+export default VerdictBadge

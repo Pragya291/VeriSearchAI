@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createAccount, getCurrentUser, login as loginRequest, logout as logoutRequest } from '../services/api'
+import { getCurrentUser, login as apiLogin, logout as apiLogout, signup as apiSignup } from '../services/api'
 import { AuthContext } from './AuthContext'
 
 export function AuthProvider({ children }) {
@@ -10,8 +10,8 @@ export function AuthProvider({ children }) {
     let isMounted = true
 
     getCurrentUser()
-      .then(({ data }) => {
-        if (isMounted) setUser(data)
+      .then((userData) => {
+        if (isMounted) setUser(userData)
       })
       .catch(() => {
         if (isMounted) setUser(null)
@@ -26,26 +26,27 @@ export function AuthProvider({ children }) {
   }, [])
 
   const signup = async (account) => {
-    const { data } = await createAccount(account)
-    return data.user
+    const newUser = await apiSignup(account)
+    setUser(newUser)
+    return newUser
   }
 
   const login = async (credentials) => {
-    const { data } = await loginRequest(credentials)
-    setUser(data.user)
-    return data.user
+    const loggedInUser = await apiLogin(credentials)
+    setUser(loggedInUser)
+    return loggedInUser
   }
 
   const logout = async () => {
     try {
-      await logoutRequest()
+      await apiLogout()
     } finally {
       setUser(null)
     }
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signup, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, isLoading, signup, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

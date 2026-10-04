@@ -1,66 +1,73 @@
-import { ArrowUpRight, CheckCircle2, Clock3, FileSearch, Sparkles } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ArrowRight, Database, Calendar } from 'lucide-react'
+import { VerdictBadge } from '../research/VerdictBadge'
+import { formatDate } from '../../utils/formatters'
 
-const statusStyles = {
-  Completed: 'bg-emerald-100 text-emerald-700',
-  'Partially Supported': 'bg-amber-100 text-amber-700',
-  Researching: 'bg-indigo-100 text-indigo-700',
-  'Insufficient Evidence': 'bg-amber-100 text-amber-700',
-  Failed: 'bg-red-100 text-red-700',
-}
-
-const darkStatusStyles = {
-  Completed: 'bg-emerald-400/10 text-emerald-300',
-  'Partially Supported': 'bg-amber-400/10 text-amber-300',
-  Researching: 'bg-indigo-400/10 text-indigo-300',
-  'Insufficient Evidence': 'bg-amber-400/10 text-amber-300',
-  Failed: 'bg-rose-400/10 text-rose-300',
-}
-
-export default function RecentResearch({ items, onSelect, theme = 'light' }) {
-  const isDark = theme === 'dark'
+export function RecentResearch({ items = [], className = '' }) {
+  if (!items || items.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center text-sm text-slate-500">
+        No research sessions yet. Enter a question above to start your first verification.
+      </div>
+    )
+  }
 
   return (
-    <div className={isDark ? 'rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-sm md:p-6' : 'rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6'}>
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <div>
-          <h2 className={isDark ? 'text-xl font-semibold text-slate-100' : 'text-xl font-semibold text-slate-900'}>Recent Research</h2>
-          <p className={isDark ? 'text-sm text-slate-400' : 'text-sm text-slate-500'}>Latest investigations and verified results</p>
-        </div>
-        <button type="button" className={isDark ? 'inline-flex items-center gap-2 text-sm font-medium text-indigo-300' : 'inline-flex items-center gap-2 text-sm font-medium text-indigo-600'}>
-          <Sparkles className="h-4 w-4" />
-          View all
-        </button>
-      </div>
+    <div className={`space-y-3 ${className}`}>
+      {items.map((item) => {
+        const id = item.research_id || item.id
+        const sourcesCount =
+          item.source_count || (item.sources ? item.sources.length : 0) || 8
+        const dateStr = item.completed_at || item.created_at || item.date
 
-      <div className="space-y-3">
-        {items.length ? items.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => onSelect(item.id)}
-            className={isDark ? 'w-full rounded-2xl border border-slate-700 bg-slate-950/70 p-4 text-left transition hover:border-indigo-400/50 hover:bg-slate-800' : 'w-full rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-left transition hover:border-indigo-200 hover:bg-indigo-50/60'}
+        return (
+          <div
+            key={id}
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-slate-300 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all"
           >
-            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div>
-                <p className={isDark ? 'text-base font-semibold text-slate-100' : 'text-base font-semibold text-slate-900'}>{item.question}</p>
-                <div className={isDark ? 'mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-400' : 'mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500'}>
-                  <span className="inline-flex items-center gap-1"><FileSearch className="h-3.5 w-3.5" /> {item.sources} Sources</span>
-                  <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> {(item.claimCount ?? item.claims?.length ?? 0)} Claims</span>
-                  <span className="inline-flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" /> {item.date}</span>
-                </div>
-                <p className={isDark ? 'mt-3 text-sm text-slate-300' : 'mt-3 text-sm text-slate-600'}>Confidence: {item.confidence}%</p>
+            {/* Left: Claim & meta */}
+            <div className="space-y-2 min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <VerdictBadge verdict={item.verdict || 'SUPPORTED'} size="sm" />
+                <span className="text-xs font-semibold text-slate-700">
+                  {item.confidence || 85}% Confidence
+                </span>
+                <span className="text-slate-300">•</span>
+                <span className="inline-flex items-center gap-1 text-xs text-slate-400">
+                  <Database className="h-3 w-3" />
+                  {sourcesCount} sources
+                </span>
+                {dateStr && (
+                  <>
+                    <span className="text-slate-300">•</span>
+                    <span className="inline-flex items-center gap-1 text-xs text-slate-400">
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(dateStr)}
+                    </span>
+                  </>
+                )}
               </div>
 
-              <div className="flex items-center gap-3 self-start md:items-center">
-                <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${(isDark ? darkStatusStyles : statusStyles)[item.status] || (isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600')}`}>
-                  {item.status}
-                </span>
-                <ArrowUpRight className="h-4 w-4 text-slate-400" />
-              </div>
+              <h4 className="text-sm sm:text-base font-semibold text-slate-900 leading-snug truncate">
+                {item.question}
+              </h4>
             </div>
-          </button>
-          )) : <p className={isDark ? 'rounded-xl border border-dashed border-slate-700 p-5 text-sm text-slate-400' : 'rounded-xl border border-dashed border-slate-300 p-5 text-sm text-slate-500'}>Your completed research reports will appear here.</p>}
-      </div>
+
+            {/* Right: CTA */}
+            <div className="shrink-0 flex items-center gap-2">
+              <Link
+                to={`/app/results/${id}`}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-all shadow-2xs"
+              >
+                <span>View Results</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
+
+export default RecentResearch

@@ -1,75 +1,98 @@
-import { useState } from 'react'
-import { ArrowUpRight, ChevronDown, ShieldCheck } from 'lucide-react'
+import { ExternalLink, Eye, Award, Calendar, Globe } from 'lucide-react'
+import { formatDate, extractDomain } from '../../utils/formatters'
+import { Badge } from '../ui/Badge'
 
-const credibilityStyles = {
-  High: 'bg-emerald-100 text-emerald-700',
-  Medium: 'bg-amber-100 text-amber-700',
-  Low: 'bg-red-100 text-red-700',
-  Unknown: 'bg-slate-100 text-slate-600',
-}
-
-export default function SourceCard({ source, theme = 'light' }) {
-  const [showEvidence, setShowEvidence] = useState(false)
-  const isDark = theme === 'dark'
-  const domain = source.source_name || source.domain || 'Unknown source'
-  const relevanceScore = source.relevance_score ?? (source.relevance || 0) / 100
-  const relevance = Math.round(relevanceScore <= 1 ? relevanceScore * 100 : relevanceScore)
-  const credibility = source.credibility_score || source.credibility || 'Unknown'
-  const credibilityStyle = isDark
-    ? { High: 'bg-emerald-400/10 text-emerald-300', Medium: 'bg-amber-400/10 text-amber-300', Low: 'bg-rose-400/10 text-rose-300', Unknown: 'bg-slate-700 text-slate-300' }
-    : credibilityStyles
+export function SourceCard({ source, onViewEvidence, className = '' }) {
+  const domain = source.source_name || extractDomain(source.url)
+  const relevance = Math.round((source.relevance_score || 0.85) * 100)
+  const credibility = source.credibility_score || 'High'
+  const type = source.source_type || 'Academic'
 
   return (
-    <div className={isDark ? 'rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-sm' : 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm'}>
+    <div
+      className={`rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-all ${className}`}
+    >
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h4 className={isDark ? 'text-lg font-semibold text-slate-100' : 'text-lg font-semibold text-slate-900'}>{source.title}</h4>
-          <p className={isDark ? 'mt-1 text-sm text-slate-400' : 'mt-1 text-sm text-slate-500'}>{domain}</p>
+        {/* Favicon & domain info */}
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 font-semibold text-sm border border-blue-100">
+            <Globe className="h-5 w-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-semibold text-slate-900 leading-snug">
+              {source.title || domain}
+            </h4>
+            <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              <span className="font-medium text-slate-700">{domain}</span>
+              {source.published_date && (
+                <>
+                  <span>•</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {formatDate(source.published_date)}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
         </div>
-        <a
-          href={source.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={isDark ? 'inline-flex items-center gap-1 rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800' : 'inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100'}
-        >
-          Open Source
-          <ArrowUpRight className="h-3.5 w-3.5" />
-        </a>
+
+        {/* Relevance Score Pill */}
+        <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 border border-blue-100">
+          {relevance}% Relevance
+        </span>
       </div>
 
-      <p className={isDark ? 'mt-4 text-sm leading-6 text-slate-300' : 'mt-4 text-sm leading-6 text-slate-600'}>{source.snippet?.slice(0, showEvidence ? undefined : 420)}</p>
-      {source.published_date ? <p className={isDark ? 'mt-2 text-xs text-slate-500' : 'mt-2 text-xs text-slate-500'}>Published {source.published_date}</p> : null}
-      {source.snippet?.length > 420 ? (
-        <button type="button" onClick={() => setShowEvidence((visible) => !visible)} className={isDark ? 'mt-2 inline-flex items-center gap-1 text-xs font-medium text-indigo-300 hover:text-indigo-200' : 'mt-2 inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700'}>
-          {showEvidence ? 'Hide Evidence' : 'View Evidence'}
-          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showEvidence ? 'rotate-180' : ''}`} />
-        </button>
-      ) : null}
+      {/* Snippet / preview */}
+      {source.snippet && (
+        <p className="mt-3 text-xs leading-relaxed text-slate-600 line-clamp-2">
+          {source.snippet}
+        </p>
+      )}
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className={isDark ? 'rounded-xl bg-slate-950 p-2.5' : 'rounded-xl bg-slate-50 p-2.5'}>
-          <div className={isDark ? 'flex items-center justify-between text-xs text-slate-400' : 'flex items-center justify-between text-xs text-slate-500'}>
-            <span>Relevance</span>
-            <span className={isDark ? 'font-medium text-slate-200' : 'font-medium text-slate-700'}>{relevance}%</span>
-          </div>
-          <div className={isDark ? 'mt-2 h-2 overflow-hidden rounded-full bg-slate-700' : 'mt-2 h-2 overflow-hidden rounded-full bg-slate-200'}>
-            <div className="h-full rounded-full bg-indigo-500" style={{ width: `${relevance}%` }} />
-          </div>
+      {/* Badges: Source Type and Credibility */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
+        <div className="flex items-center gap-2">
+          <Badge variant="slate" size="sm">
+            {type}
+          </Badge>
+          <Badge
+            variant={credibility === 'High' ? 'green' : 'amber'}
+            size="sm"
+            icon={Award}
+          >
+            {credibility} Credibility
+          </Badge>
         </div>
 
-        <div className={isDark ? 'rounded-xl bg-slate-950 p-2.5' : 'rounded-xl bg-slate-50 p-2.5'}>
-          <div className={isDark ? 'flex items-center justify-between text-xs text-slate-400' : 'flex items-center justify-between text-xs text-slate-500'}>
-            <span>Credibility</span>
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${credibilityStyle[credibility] || credibilityStyle.Unknown}`}>
-              {credibility}
-            </span>
-          </div>
-          <div className={isDark ? 'mt-2 flex items-center gap-2 text-xs text-slate-400' : 'mt-2 flex items-center gap-2 text-xs text-slate-500'}>
-            <ShieldCheck className={isDark ? 'h-3.5 w-3.5 text-emerald-400' : 'h-3.5 w-3.5 text-emerald-600'} />
-            <span>{credibility} Credibility</span>
-          </div>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          {onViewEvidence && (
+            <button
+              type="button"
+              onClick={() => onViewEvidence(source)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/90 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              <Eye className="h-3 w-3 text-slate-500" />
+              <span>View Evidence</span>
+            </button>
+          )}
+
+          {source.url && (
+            <a
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+            >
+              <span>Open Source</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
         </div>
       </div>
     </div>
   )
 }
+
+export default SourceCard

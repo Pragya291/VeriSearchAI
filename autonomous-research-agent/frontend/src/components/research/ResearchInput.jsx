@@ -1,145 +1,170 @@
-import { ArrowRight, FileCheck2, Search, ShieldCheck, Scale } from 'lucide-react'
-import Button from '../common/Button'
+import { useState } from 'react'
+import { ArrowRight, Sparkles, SlidersHorizontal, Check } from 'lucide-react'
+import { Button } from '../ui/Button'
 
-const researchModes = [
-  { id: 'quick', label: 'Quick Verification', description: 'Fast answer with supporting evidence.', icon: ShieldCheck },
-  { id: 'deep', label: 'Deep Research', description: 'Analyze multiple sources and compare evidence.', icon: Search },
-  { id: 'claim', label: 'Claim Verification', description: 'Check whether a specific claim is true or misleading.', icon: FileCheck2 },
-  { id: 'comparative', label: 'Comparative Research', description: 'Compare topics using evidence from multiple sources.', icon: Scale },
+export const SAMPLE_QUESTIONS = [
+  'Does regular exercise improve cognitive performance?',
+  'Does intermittent fasting extend human lifespan?',
+  'Does remote work improve overall employee productivity?',
+  'Is red light therapy clinically proven for wrinkle reduction?',
 ]
 
-const sourceOptions = ['Web', 'Research Papers', 'News', 'Government / Official Sources']
-
-export default function ResearchInput({
-  value,
+export function ResearchInput({
+  value = '',
   onChange,
   onSubmit,
-  examples,
-  theme = 'light',
-  advanced = false,
-  mode = 'deep',
-  onModeChange,
-  sourceTypes = ['Web', 'Research Papers', 'News', 'Government / Official Sources'],
-  onSourceTypesChange,
-  depth = 'Standard',
-  onDepthChange,
+  loading = false,
+  className = '',
 }) {
-  const isDark = theme === 'dark'
-  const fieldClass = isDark
-    ? 'w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-slate-100 focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/20'
-    : 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 focus:border-indigo-300 focus:outline-none focus:ring-4 focus:ring-indigo-100'
+  const [depth, setDepth] = useState('Standard')
+  const [selectedSourceType, setSelectedSourceType] = useState('All Sources')
+  const [showOptions, setShowOptions] = useState(false)
+
+  const depths = ['Quick', 'Standard', 'Deep']
+  const sourceTypes = ['All Sources', 'News', 'Academic', 'Government', 'Web']
+
+  const handleSubmit = (e) => {
+    e?.preventDefault()
+    if (!value.trim() || loading) return
+    onSubmit?.({
+      question: value.trim(),
+      depth,
+      sourceType: selectedSourceType,
+    })
+  }
+
+  const handleSelectSample = (sample) => {
+    onChange?.(sample)
+  }
 
   return (
-    <div className={isDark ? 'rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-sm md:p-7' : 'rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-7'}>
-      <div className="mb-4 flex items-center gap-3">
-        <div className={isDark ? 'flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/15 text-indigo-300' : 'flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600'}>
-          <Search className="h-5 w-5" />
-        </div>
-        <div>
-          <h2 className={isDark ? 'text-xl font-semibold text-slate-100' : 'text-xl font-semibold text-slate-900'}>
-            {advanced ? 'What would you like to investigate?' : 'Ask a Research Question'}
-          </h2>
-          <p className={isDark ? 'text-sm text-slate-400' : 'text-sm text-slate-500'}>
-            {advanced ? 'Start an AI-powered investigation and discover reliable evidence.' : 'The AI will search multiple sources, compare evidence, and generate a verified report.'}
-          </p>
-        </div>
-      </div>
+    <div
+      className={`rounded-2xl border border-slate-200/90 bg-white p-6 md:p-8 shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${className}`}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">
+              What would you like to verify?
+            </h3>
+          </div>
 
-      <label className="sr-only" htmlFor="research-input">Ask a Research Question</label>
-      <textarea
-        id="research-input"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={advanced ? 'Ask a research question or enter a claim to verify…' : 'What would you like me to research?'}
-        className={isDark ? 'min-h-28 w-full resize-none rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-base text-slate-100 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/30' : 'min-h-28 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-800 placeholder:text-slate-400 focus:border-indigo-300 focus:outline-none focus:ring-4 focus:ring-indigo-100'}
-      />
+          <button
+            type="button"
+            onClick={() => setShowOptions(!showOptions)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 transition-colors cursor-pointer"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            <span>{showOptions ? 'Hide Options' : 'Search Options'}</span>
+          </button>
+        </div>
 
-      {advanced ? (
-        <div className="mt-6 space-y-6">
-          <fieldset>
-            <legend className={isDark ? 'mb-3 text-sm font-semibold text-slate-200' : 'mb-3 text-sm font-semibold text-slate-800'}>Research Mode</legend>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {researchModes.map(({ id, label, description, icon: Icon }) => {
-                const selected = mode === id
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
-                    onClick={() => onModeChange(id)}
-                    className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${selected
-                      ? isDark ? 'border-indigo-400/60 bg-indigo-500/10 ring-1 ring-indigo-400/30' : 'border-indigo-300 bg-indigo-50/70 ring-1 ring-indigo-200'
-                      : isDark ? 'border-slate-700 bg-slate-950 hover:border-slate-600' : 'border-slate-200 bg-white hover:border-indigo-200'}`}
-                  >
-                    <Icon className={selected ? 'mt-0.5 h-4 w-4 shrink-0 text-indigo-400' : 'mt-0.5 h-4 w-4 shrink-0 text-slate-400'} />
-                    <span>
-                      <span className={isDark ? 'block text-sm font-medium text-slate-100' : 'block text-sm font-medium text-slate-900'}>{label}</span>
-                      <span className={isDark ? 'mt-1 block text-xs leading-5 text-slate-400' : 'mt-1 block text-xs leading-5 text-slate-500'}>{description}</span>
-                    </span>
-                  </button>
-                )
-              })}
+        {/* Textarea */}
+        <div className="relative">
+          <textarea
+            value={value}
+            onChange={(e) => onChange?.(e.target.value)}
+            rows={3}
+            placeholder="Example: Does regular exercise improve cognitive performance?"
+            className="w-full rounded-xl border border-slate-200/90 bg-slate-50/50 p-4 text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all resize-y"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                handleSubmit(e)
+              }
+            }}
+          />
+        </div>
+
+        {/* Depth & Source Type toggles */}
+        <div
+          className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1 ${
+            showOptions ? 'block' : 'flex'
+          }`}
+        >
+          {/* Depth selection */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-slate-500 mr-1">Search depth:</span>
+            <div className="inline-flex rounded-xl bg-slate-100 p-0.5 border border-slate-200/60">
+              {depths.map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDepth(d)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
+                    depth === d
+                      ? 'bg-white text-blue-600 shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
             </div>
-          </fieldset>
+          </div>
 
-          <fieldset>
-            <legend className={isDark ? 'mb-3 text-sm font-semibold text-slate-200' : 'mb-3 text-sm font-semibold text-slate-800'}>Sources</legend>
-            <div className="flex flex-wrap gap-2">
-              {sourceOptions.map((source) => {
-                const selected = sourceTypes.includes(source)
+          {/* Primary Action Button */}
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            loading={loading}
+            disabled={!value.trim()}
+            iconRight={ArrowRight}
+            className="sm:w-auto w-full"
+          >
+            Start Verification →
+          </Button>
+        </div>
+
+        {/* Source Preferences if expanded */}
+        {showOptions && (
+          <div className="border-t border-slate-100 pt-3 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-slate-500 mr-1">Source preferences:</span>
+            <div className="flex flex-wrap gap-1.5">
+              {sourceTypes.map((source) => {
+                const isSelected = selectedSourceType === source
                 return (
                   <button
                     key={source}
                     type="button"
-                    role="checkbox"
-                    aria-checked={selected}
-                    onClick={() => onSourceTypesChange(selected ? sourceTypes.filter((item) => item !== source) : [...sourceTypes, source])}
-                    className={`rounded-full border px-3 py-1.5 text-sm transition ${selected
-                      ? isDark ? 'border-indigo-400/50 bg-indigo-500/10 text-indigo-200' : 'border-indigo-200 bg-indigo-50 text-indigo-700'
-                      : isDark ? 'border-slate-700 text-slate-400 hover:border-slate-600' : 'border-slate-200 text-slate-600 hover:border-indigo-200'}`}
+                    onClick={() => setSelectedSourceType(source)}
+                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.8 text-xs font-medium transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                    }`}
                   >
-                    {source}
+                    {isSelected && <Check className="h-3 w-3 text-blue-600" />}
+                    <span>{source}</span>
                   </button>
                 )
               })}
             </div>
-          </fieldset>
+          </div>
+        )}
 
-          <label className={isDark ? 'block max-w-xs text-sm font-medium text-slate-300' : 'block max-w-xs text-sm font-medium text-slate-700'}>
-            Research depth
-            <select value={depth} onChange={(event) => onDepthChange(event.target.value)} className={`${fieldClass} mt-2`}>
-              <option>Quick</option>
-              <option>Standard</option>
-              <option>Deep</option>
-            </select>
-          </label>
+        {/* Example Suggestions */}
+        <div className="pt-2">
+          <p className="text-xs font-semibold text-slate-400 mb-2">Try an example inquiry:</p>
+          <div className="flex flex-wrap gap-2">
+            {SAMPLE_QUESTIONS.map((q) => (
+              <button
+                key={q}
+                type="button"
+                onClick={() => handleSelectSample(q)}
+                className="rounded-lg bg-slate-50 hover:bg-blue-50/70 hover:text-blue-700 hover:border-blue-200 px-2.5 py-1 text-xs text-slate-600 border border-slate-200/80 transition-colors text-left cursor-pointer"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
         </div>
-      ) : null}
-
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className={isDark ? 'text-sm text-slate-400' : 'text-sm text-slate-500'}>Example: “Is electric vehicle adoption increasing worldwide?”</div>
-        <Button type="button" onClick={onSubmit} className="w-full sm:w-auto">
-          {advanced ? 'Start Research' : 'Start Research'}
-          {advanced ? <ArrowRight className="ml-2 h-4 w-4" /> : null}
-        </Button>
-      </div>
-
-      <div className="mt-6">
-        <p className={isDark ? 'mb-3 text-xs font-medium uppercase tracking-wide text-slate-400' : 'mb-3 text-xs font-medium uppercase tracking-wide text-slate-400'}>Example Questions</p>
-        <div className="flex flex-wrap gap-2">
-          {examples.map((example) => (
-            <button
-              key={example}
-              type="button"
-              onClick={() => onChange(example)}
-              className={isDark ? 'rounded-full border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-300 transition hover:border-indigo-400 hover:bg-indigo-500/10 hover:text-indigo-300' : 'rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700'}
-            >
-              {example}
-            </button>
-          ))}
-        </div>
-      </div>
+      </form>
     </div>
   )
 }
+
+export default ResearchInput

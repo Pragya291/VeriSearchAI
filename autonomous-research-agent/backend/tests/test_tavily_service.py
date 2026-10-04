@@ -11,7 +11,7 @@ def test_tavily_domain_extraction():
 
 
 def test_tavily_missing_api_key():
-    service = TavilyService(api_key=None)
+    service = TavilyService(api_key="")
     with pytest.raises(TavilyServiceError, match="TAVILY_API_KEY is not configured"):
         service.search("What is AI?")
 
