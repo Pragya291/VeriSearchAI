@@ -33,13 +33,15 @@ const features = [
 
 function Brand({ compact = false }) {
   return (
-    <Link to="/" className="inline-flex items-center gap-3" aria-label="VeriSearchAI home">
-      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
-        <Search className="h-5 w-5" />
-      </span>
+    <Link to="/" className="inline-flex items-center gap-3 group" aria-label="VeriSearch AI home">
+      <img 
+        src="/verisearch-icon.png" 
+        alt="VeriSearch AI" 
+        className="h-10 w-10 shrink-0 object-contain rounded-xl transition-transform duration-200 group-hover:scale-105" 
+      />
       <span>
-        <span className="block text-base font-semibold tracking-tight text-slate-100">VeriSearchAI</span>
-        {!compact && <span className="block text-xs text-slate-400">Research &amp; source verification</span>}
+        <span className="block text-base font-bold tracking-tight text-slate-100">VeriSearch AI</span>
+        {!compact && <span className="block text-xs text-slate-400">Research &amp; fact verification</span>}
       </span>
     </Link>
   )

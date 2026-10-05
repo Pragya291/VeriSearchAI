@@ -64,7 +64,7 @@ export function Signup() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <BrandLogo className="justify-center mb-6" iconSize="h-6 w-6" textSize="text-2xl" />
+        <BrandLogo className="justify-center mb-6" iconSize="h-9 w-9" textSize="text-2xl" />
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
           Create your VeriSearchAI account
         </h1>

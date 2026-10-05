@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Official VeriSearch AI Squircle Icon -->
+  <rect width="100" height="100" rx="26" fill="#2563EB" />
+  
+  <!-- Optical Search Lens -->
+  <circle cx="44" cy="44" r="18.5" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" />
+  <line x1="58" y1="58" x2="78" y2="78" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" />
+  
+  <!-- Integrated Fact Verification Checkmark -->
+  <path d="M32 44L44 56L73 27" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

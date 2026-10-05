@@ -19,9 +19,13 @@ export default function MobileMenu({ open, onClose, theme, user, onLogout, onTog
       <div className={isDark ? 'h-full w-4/5 max-w-sm border-r border-slate-800 bg-slate-950 p-4' : 'h-full w-4/5 max-w-sm border-r border-slate-200 bg-white p-4'}>
         <div className={isDark ? 'mb-6 flex items-center justify-between border-b border-slate-800 pb-4' : 'mb-6 flex items-center justify-between border-b border-slate-200 pb-4'}>
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-sm font-bold text-white">VS</div>
+            <img 
+              src="/verisearch-icon.png" 
+              alt="VeriSearch AI" 
+              className="h-9 w-9 shrink-0 object-contain rounded-xl"
+            />
             <div>
-              <p className={isDark ? 'font-semibold text-slate-100' : 'font-semibold text-slate-900'}>VeriSearchAI</p>
+              <p className={isDark ? 'font-bold text-slate-100' : 'font-bold text-slate-900'}>VeriSearch AI</p>
               <p className={isDark ? 'text-xs text-slate-400' : 'text-xs text-slate-500'}>Research &amp; Verification</p>
             </div>
           </div>

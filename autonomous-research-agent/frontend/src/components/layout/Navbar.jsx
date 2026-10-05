@@ -3,18 +3,65 @@ import { Link, useLocation } from 'react-router-dom'
 import { Search, Check, Menu, X, ArrowRight, LogOut, User } from 'lucide-react'
 import { useAuth } from '../../auth/useAuth'
 
-export function BrandLogo({ className = '', iconSize = 'h-5 w-5', textSize = 'text-lg' }) {
-  const { user } = useAuth()
+export function BrandIcon({ className = 'h-9 w-9', alt = 'VeriSearch AI' }) {
   return (
-    <Link to={user ? "/app/dashboard" : "/home"} className={`inline-flex items-center gap-2.5 font-bold text-slate-900 group ${className}`}>
-      <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#2563EB] text-white shadow-xs transition-transform duration-200 group-hover:scale-105">
-        <Search className="h-5 w-5 stroke-[2.5]" />
-        <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#22C55E] text-white ring-2 ring-white">
-          <Check className="h-2.5 w-2.5 stroke-[3]" />
+    <img 
+      src="/verisearch-icon.png" 
+      alt={alt}
+      className={`shrink-0 object-contain rounded-xl transition-transform duration-200 group-hover:scale-105 ${className}`} 
+      loading="eager"
+    />
+  )
+}
+
+export function BrandLogo({ 
+  className = '', 
+  iconSize = 'h-9 w-9', 
+  textSize = 'text-lg',
+  compact = false,
+  stacked = false,
+  theme = 'light',
+  to
+}) {
+  const { user } = useAuth()
+  const targetLink = to !== undefined ? to : (user ? "/app/dashboard" : "/home")
+
+  if (compact) {
+    return (
+      <Link 
+        to={targetLink} 
+        className={`inline-flex items-center group ${className}`}
+        aria-label="VeriSearch AI"
+      >
+        <BrandIcon className={iconSize} />
+      </Link>
+    )
+  }
+
+  if (stacked) {
+    return (
+      <Link 
+        to={targetLink} 
+        className={`inline-flex flex-col items-center gap-3 group text-center ${className}`}
+        aria-label="VeriSearch AI"
+      >
+        <BrandIcon className={iconSize} />
+        <span className={`font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'} ${textSize} leading-none`}>
+          VeriSearch AI
         </span>
-      </span>
-      <span className={`tracking-tight ${textSize} font-extrabold text-[#0F172A] leading-none`}>
-        VeriSearch<span className="text-[#2563EB]">AI</span>
+      </Link>
+    )
+  }
+
+  return (
+    <Link 
+      to={targetLink} 
+      className={`inline-flex items-center gap-3 font-bold group ${className}`}
+      aria-label="VeriSearch AI"
+    >
+      <BrandIcon className={iconSize} />
+      <span className={`tracking-tight ${textSize} font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'} leading-none`}>
+        VeriSearch AI
       </span>
     </Link>
   )
