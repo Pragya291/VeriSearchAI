@@ -7,7 +7,6 @@ import {
   Layers,
   Settings,
   Sparkles,
-  ExternalLink,
   LogOut,
 } from 'lucide-react'
 import { BrandLogo } from './Navbar'

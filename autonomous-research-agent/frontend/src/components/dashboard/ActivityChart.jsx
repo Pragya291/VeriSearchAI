@@ -35,7 +35,7 @@ export function ActivityChart({ data = [], className = '' }) {
       <div className="relative pl-6 pt-2">
         {/* Y Axis Labels & Grid Lines */}
         <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-[11px] font-semibold text-slate-400">
-          <span>15</span>
+          <span>20</span>
           <span>15</span>
           <span>10</span>
           <span>5</span>

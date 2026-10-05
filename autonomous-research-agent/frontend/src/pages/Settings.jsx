@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Settings as SettingsIcon,
   Bell,
   Sun,
+  Moon,
   User,
   Mail,
   ShieldCheck,
@@ -15,6 +16,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Check,
+  X,
 } from 'lucide-react'
 import { useAuth } from '../auth/useAuth'
 
@@ -41,31 +43,120 @@ function ToggleSwitch({ checked, onChange, id, label }) {
 }
 
 export function Settings() {
-  const { user } = useAuth()
+  const { user, setUser } = useAuth()
+
+  // Storage keys
+  const emailKey = user?.email || 'guest'
+  const prefsStorageKey = `verisearchai:user_prefs:${emailKey}`
+  const profileStorageKey = `verisearchai:user_profile:${emailKey}`
 
   // Profile Form state
-  const [fullName, setFullName] = useState(user?.full_name || 'alex bennett')
+  const [fullName, setFullName] = useState(() => {
+    try {
+      const savedProfile = localStorage.getItem(profileStorageKey)
+      if (savedProfile) {
+        const parsed = JSON.parse(savedProfile)
+        if (parsed.fullName) return parsed.fullName
+      }
+    } catch {
+      // fallback
+    }
+    return user?.full_name || 'alex bennett'
+  })
   const email = user?.email || 'alex.bennett@verisearch.ai'
 
   // Preferences state
   const [searchDepth, setSearchDepth] = useState('Quick (Rapid Synthesis)')
   const [citationFormat, setCitationFormat] = useState('APA 7th Edition')
-
-  // Notification toggles
   const [completionAlert, setCompletionAlert] = useState(true)
   const [contradictionWarning, setContradictionWarning] = useState(true)
+
+  // Theme state (light / dark)
+  const [theme, setTheme] = useState(() => localStorage.getItem('verisearchai:theme') || 'light')
+  const [themeToast, setThemeToast] = useState('')
+
+  // Notifications state
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [notificationsList, setNotificationsList] = useState([
+    { id: 1, title: 'Verification Completed', text: 'Exercise & Cognitive Performance analysis finished with 87% confidence.', time: '10m ago', unread: true },
+    { id: 2, title: 'Contradiction Alert', text: 'High conflict level detected in intermittent fasting trial meta-analysis.', time: '2h ago', unread: true },
+    { id: 3, title: 'Weekly Digest Ready', text: 'Summary of 12 newly evaluated academic sources added to repository.', time: '1d ago', unread: false },
+  ])
+
+  // Load saved preferences on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(prefsStorageKey)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (parsed.searchDepth) setSearchDepth(parsed.searchDepth)
+        if (parsed.citationFormat) setCitationFormat(parsed.citationFormat)
+        if (typeof parsed.completionAlert === 'boolean') setCompletionAlert(parsed.completionAlert)
+        if (typeof parsed.contradictionWarning === 'boolean') setContradictionWarning(parsed.contradictionWarning)
+      }
+    } catch {
+      // fallback
+    }
+  }, [prefsStorageKey])
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(nextTheme)
+    localStorage.setItem('verisearchai:theme', nextTheme)
+    setThemeToast(`Switched to ${nextTheme === 'dark' ? 'Dark' : 'Light'} appearance`)
+    setTimeout(() => setThemeToast(''), 2200)
+  }
 
   // Save feedback
   const [saveSuccess, setSaveSuccess] = useState(false)
 
   const handleSave = (e) => {
     e?.preventDefault()
-    setSaveSuccess(true)
-    setTimeout(() => setSaveSuccess(false), 2500)
+    try {
+      // 1. Update user profile
+      const updatedUser = {
+        ...user,
+        full_name: fullName,
+      }
+      if (setUser) setUser(updatedUser)
+      localStorage.setItem('verisearchai:current_user', JSON.stringify(updatedUser))
+
+      // 2. Update user profile record
+      const existingProfile = localStorage.getItem(profileStorageKey)
+      const parsedProfile = existingProfile ? JSON.parse(existingProfile) : {}
+      localStorage.setItem(
+        profileStorageKey,
+        JSON.stringify({ ...parsedProfile, fullName })
+      )
+
+      // 3. Update user preferences record
+      localStorage.setItem(
+        prefsStorageKey,
+        JSON.stringify({
+          searchDepth,
+          citationFormat,
+          completionAlert,
+          contradictionWarning,
+        })
+      )
+
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+    } catch (err) {
+      console.error('Failed to save settings', err)
+    }
   }
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
+      {/* Toast for theme toggle or save */}
+      {themeToast && (
+        <div className="fixed top-16 right-6 z-50 flex items-center gap-2.5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs font-semibold text-blue-700 shadow-lg animate-in slide-in-from-top-4 duration-200">
+          <Sun className="h-4 w-4 text-blue-600" />
+          <span>{themeToast}</span>
+        </div>
+      )}
+
       {/* 1. Header matching Reference Image */}
       <div className="flex items-center justify-between gap-4">
         {/* Left: Gear Icon inside soft blue container + Title & Subtitle */}
@@ -83,25 +174,61 @@ export function Settings() {
           </div>
         </div>
 
-        {/* Right: Notification Bell with Badge & Theme Light-Mode Toggle */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        {/* Right: Notification Bell with Badge & Theme Toggle */}
+        <div className="flex items-center gap-2.5 shrink-0 relative">
           <button
             type="button"
+            onClick={() => setNotificationsOpen(!notificationsOpen)}
             className="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/90 bg-white/90 text-slate-600 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer"
             title="Notifications"
             aria-label="View notifications"
           >
             <Bell className="h-4.5 w-4.5" />
-            <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+            {notificationsList.some((n) => n.unread) && (
+              <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+            )}
           </button>
+
+          {/* Notifications Popover Dropdown */}
+          {notificationsOpen && (
+            <div className="absolute right-12 top-full mt-2 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                <h4 className="text-xs font-bold text-slate-900">Notifications</h4>
+                <button
+                  type="button"
+                  onClick={() => setNotificationsList(notificationsList.map((n) => ({ ...n, unread: false })))}
+                  className="text-[10px] font-semibold text-blue-600 hover:underline cursor-pointer"
+                >
+                  Mark all read
+                </button>
+              </div>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {notificationsList.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`p-2.5 rounded-xl text-xs space-y-1 transition-colors ${
+                      item.unread ? 'bg-blue-50/60 border border-blue-100' : 'bg-slate-50/50 hover:bg-slate-100/60'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between font-bold text-slate-800">
+                      <span>{item.title}</span>
+                      <span className="text-[10px] font-normal text-slate-400">{item.time}</span>
+                    </div>
+                    <p className="text-slate-600 text-[11px] leading-relaxed">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <button
             type="button"
+            onClick={toggleTheme}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/90 bg-white/90 text-slate-600 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer"
-            title="Switch theme"
+            title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} mode`}
             aria-label="Toggle light/dark mode"
           >
-            <Sun className="h-4.5 w-4.5" />
+            {theme === 'light' ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5 text-blue-600" />}
           </button>
         </div>
       </div>

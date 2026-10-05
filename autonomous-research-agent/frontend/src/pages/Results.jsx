@@ -5,13 +5,11 @@ import {
   Share2,
   Download,
   ArrowLeft,
-  Sparkles,
   CheckCircle2,
   AlertTriangle,
   Database,
   Layers,
   FileText,
-  Copy,
   ExternalLink,
 } from 'lucide-react'
 import { VerdictCard } from '../components/research/VerdictCard'

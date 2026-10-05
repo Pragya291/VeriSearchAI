@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { BrandLogo } from './Navbar'
-import { Menu, X, LogOut, Bell } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useAuth } from '../../auth/useAuth'
 
 export function AppLayout() {
-  const { user, isLoading, logout } = useAuth()
+  const { user, isLoading } = useAuth()
   const location = useLocation()
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 

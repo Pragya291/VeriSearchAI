@@ -16,7 +16,6 @@ export function EvidenceCard({ source, className = '' }) {
   const [modalOpen, setModalOpen] = useState(false)
 
   const domain = source.source_name || extractDomain(source.url)
-  const isSupporting = source.supports_claim !== false
   const evidenceStrength = source.evidence_strength || 'Strong'
   const credibility = source.credibility_score || 'High'
 

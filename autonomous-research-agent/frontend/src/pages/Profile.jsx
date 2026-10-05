@@ -20,7 +20,6 @@ import {
   X,
   Bell,
   ChevronRight,
-  ExternalLink,
 } from 'lucide-react'
 
 export function Profile() {
@@ -135,7 +134,7 @@ export function Profile() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto h-[calc(100vh-2.5rem)] flex flex-col justify-between space-y-2 bg-[#F8FAFC]">
+    <div className="max-w-6xl mx-auto min-h-[calc(100vh-2.5rem)] pb-8 flex flex-col justify-between space-y-3 bg-[#F8FAFC]">
       {/* Toast Notification */}
       {(saveSuccess || prefSuccess) && (
         <div className="fixed top-16 right-6 z-50 flex items-center gap-2.5 rounded-xl border border-[#bbf7d0] bg-[#DCFCE7] px-4 py-2.5 text-xs font-semibold text-[#166534] shadow-lg animate-in slide-in-from-top-4 duration-200">

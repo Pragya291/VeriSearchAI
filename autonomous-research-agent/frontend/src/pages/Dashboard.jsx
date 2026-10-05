@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 import { ResearchInput } from '../components/research/ResearchInput'
 import { StatCard } from '../components/dashboard/StatCard'
@@ -14,7 +14,6 @@ export function Dashboard() {
 
   const [query, setQuery] = useState('')
   const [recentReports, setRecentReports] = useState([])
-  const [loadingHistory, setLoadingHistory] = useState(true)
 
   useEffect(() => {
     let isMounted = true
@@ -27,9 +26,6 @@ export function Dashboard() {
       })
       .catch((err) => {
         console.warn('Could not load history on dashboard', err)
-      })
-      .finally(() => {
-        if (isMounted) setLoadingHistory(false)
       })
 
     return () => {
@@ -59,7 +55,7 @@ export function Dashboard() {
   const claimsVerified = recentReports.length > 3 
     ? recentReports.reduce((acc, r) => acc + (r.claim_count || 1), 0)
     : 18
-  const avgConfidence = recentReports.length > 3 && recentReports.length > 0
+  const avgConfidence = recentReports.length > 3
     ? `${Math.round(recentReports.reduce((acc, r) => acc + (r.confidence || 0), 0) / recentReports.length)}%` 
     : '82%'
   const sourcesAnalyzed = recentReports.length > 3
@@ -67,7 +63,7 @@ export function Dashboard() {
     : 146
 
   // Activity chart values matching Screenshot 2 (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
-  const chartData = [
+  const baseChartData = [
     { label: 'Mon', sources: 3 },
     { label: 'Tue', sources: 12 },
     { label: 'Wed', sources: 16 },
@@ -77,12 +73,12 @@ export function Dashboard() {
     { label: 'Sun', sources: 8 },
   ]
   
-  if (recentReports.length > 3) {
-    // Dynamically add new sources count to today's day
-    const d = new Date()
-    const day = (d.getDay() + 6) % 7 // Mon=0
-    chartData[day].sources += (recentReports[0]?.source_count || 8)
-  }
+  const chartData = baseChartData.map((item, idx) => {
+    if (recentReports.length > 3 && idx === 2) {
+      return { ...item, sources: item.sources + (recentReports[0]?.source_count || 8) }
+    }
+    return item
+  })
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-12">
@@ -103,12 +99,15 @@ export function Dashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 text-xs font-medium text-slate-500 self-start sm:self-center">
-          <span>Logged in as <strong className="text-slate-900 font-bold">{usernameDisplay}</strong></span>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2563EB] text-white text-xs font-bold shadow-2xs">
+        <Link
+          to="/app/profile"
+          className="flex items-center gap-2.5 text-xs font-medium text-slate-500 hover:text-blue-600 transition-colors self-start sm:self-center group cursor-pointer"
+        >
+          <span>Logged in as <strong className="text-slate-900 group-hover:text-blue-600 font-bold transition-colors">{usernameDisplay}</strong></span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2563EB] text-white text-xs font-bold shadow-2xs group-hover:bg-[#1D4ED8] transition-colors">
             {getInitials(user?.full_name)}
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* New Research / Verification Input Card */}
