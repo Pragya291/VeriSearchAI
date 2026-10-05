@@ -1,22 +1,22 @@
-import ConfidenceBar from './ConfidenceBar'
+import { Sparkles } from 'lucide-react'
 
-export default function ResearchSummary({ summary, confidence, theme = 'light' }) {
-  const isDark = theme === 'dark'
+export function ResearchSummary({ summary, className = '' }) {
+  if (!summary) return null
 
   return (
-    <div className={isDark ? 'rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-sm md:p-6' : 'rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6'}>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h3 className={isDark ? 'text-xl font-semibold text-slate-100' : 'text-xl font-semibold text-slate-900'}>Executive Summary</h3>
-        <div className={isDark ? 'rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-300' : 'rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700'}>
-          {confidence}% Confidence
-        </div>
+    <div className={`space-y-2.5 ${className}`}>
+      <div className="flex items-center gap-2">
+        <Sparkles className="h-4.5 w-4.5 text-[#2563EB] shrink-0" />
+        <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+          Executive Summary
+        </h3>
       </div>
 
-      <p className={isDark ? 'text-base leading-7 text-slate-300' : 'text-base leading-7 text-slate-700'}>{summary}</p>
-
-      <div className="mt-5">
-        <ConfidenceBar value={confidence} theme={theme} />
-      </div>
+      <p className="text-sm sm:text-[15px] leading-relaxed text-slate-700 font-normal">
+        {summary}
+      </p>
     </div>
   )
 }
+
+export default ResearchSummary

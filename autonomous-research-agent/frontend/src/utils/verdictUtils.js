@@ -46,6 +46,17 @@ export const VERDICT_CONFIG = {
     icon: CheckCircle2,
     tone: 'positive',
   },
+  'MOSTLY SUPPORTED': {
+    label: 'MOSTLY SUPPORTED',
+    description: 'High-quality independent evidence predominantly supports this claim, though minor caveats or edge cases exist.',
+    badgeClass: 'bg-teal-50 text-teal-700 border-teal-200',
+    darkBadgeClass: 'bg-teal-950/60 text-teal-300 border-teal-800/80 ring-teal-500/30',
+    cardBorderClass: 'border-teal-200',
+    indicatorColor: '#0D9488',
+    accentBg: 'bg-teal-50/70',
+    icon: CheckCircle2,
+    tone: 'positive',
+  },
   'MIXED EVIDENCE': {
     label: 'MIXED EVIDENCE',
     description: 'Studies present competing outcomes or varying methodologies. Evidence neither conclusively proves nor disproves the claim.',
@@ -56,6 +67,39 @@ export const VERDICT_CONFIG = {
     accentBg: 'bg-amber-50/70',
     icon: AlertTriangle,
     tone: 'warning',
+  },
+  'MOSTLY UNSUPPORTED': {
+    label: 'MOSTLY UNSUPPORTED',
+    description: 'The majority of credible independent research contradicts this claim, with little to no robust counter-evidence.',
+    badgeClass: 'bg-[#FEF2F2] text-[#EA580C] border-[#FED7AA]',
+    darkBadgeClass: 'bg-orange-950/60 text-orange-300 border-orange-800/80 ring-orange-500/30',
+    cardBorderClass: 'border-orange-200',
+    indicatorColor: '#EA580C',
+    accentBg: 'bg-orange-50/70',
+    icon: AlertCircle,
+    tone: 'warning',
+  },
+  UNSUPPORTED: {
+    label: 'UNSUPPORTED',
+    description: 'Directly contradicted by overwhelming empirical evidence or robust experimental data.',
+    badgeClass: 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]',
+    darkBadgeClass: 'bg-rose-950/60 text-rose-300 border-rose-800/80 ring-rose-500/30',
+    cardBorderClass: 'border-rose-200',
+    indicatorColor: '#E11D48',
+    accentBg: 'bg-rose-50/70',
+    icon: XCircle,
+    tone: 'negative',
+  },
+  'INSUFFICIENT EVIDENCE': {
+    label: 'INSUFFICIENT EVIDENCE',
+    description: 'Insufficient high-credibility peer-reviewed or independent data exists to verify or dispute this claim.',
+    badgeClass: 'bg-slate-100 text-slate-700 border-slate-200',
+    darkBadgeClass: 'bg-slate-800 text-slate-300 border-slate-700 ring-slate-400/20',
+    cardBorderClass: 'border-slate-200',
+    indicatorColor: '#64748B',
+    accentBg: 'bg-slate-100/70',
+    icon: HelpCircle,
+    tone: 'neutral',
   },
   UNVERIFIED: {
     label: 'UNVERIFIED',
@@ -105,16 +149,23 @@ export function getVerdictConfig(verdictStr) {
   }
 
   // Fuzzy matches
+  if (cleaned.includes('INSUFFICIENT')) {
+    return VERDICT_CONFIG['INSUFFICIENT EVIDENCE']
+  }
+  if (cleaned.includes('MOSTLY SUPPORT') || cleaned.includes('PARTIAL')) {
+    return VERDICT_CONFIG['MOSTLY SUPPORTED']
+  }
+  if (cleaned.includes('MOSTLY UNSUPPORT') || cleaned.includes('LIKELY FALSE')) {
+    return VERDICT_CONFIG['MOSTLY UNSUPPORTED']
+  }
+  if (cleaned.includes('UNSUPPORT') || cleaned.includes('FALSE') || cleaned.includes('CONTRADICT')) {
+    return VERDICT_CONFIG.UNSUPPORTED
+  }
   if (cleaned.includes('SUPPORT') || cleaned === 'TRUE' || cleaned.includes('VERIFIED')) {
-    if (cleaned.includes('PARTIAL') || cleaned.includes('LIKELY')) return VERDICT_CONFIG['LIKELY TRUE']
     return VERDICT_CONFIG.SUPPORTED
   }
   if (cleaned.includes('MIX') || cleaned.includes('DISPUT')) {
     return VERDICT_CONFIG['MIXED EVIDENCE']
-  }
-  if (cleaned.includes('FALSE') || cleaned.includes('CONTRADICT')) {
-    if (cleaned.includes('LIKELY')) return VERDICT_CONFIG['LIKELY FALSE']
-    return VERDICT_CONFIG.FALSE
   }
 
   return VERDICT_CONFIG.UNVERIFIED
