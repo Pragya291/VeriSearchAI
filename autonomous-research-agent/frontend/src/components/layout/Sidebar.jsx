@@ -44,7 +44,7 @@ export function Sidebar({ className = '', onNavClick }) {
 
   return (
     <aside
-      className={`flex flex-col justify-between w-[230px] shrink-0 bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.03)] ${className}`}
+      className={`flex flex-col justify-between w-[260px] lg:w-[270px] shrink-0 bg-white p-4.5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] ${className}`}
       aria-label="App Sidebar"
     >
       {/* TOP SECTION: Brand & Navigation */}
