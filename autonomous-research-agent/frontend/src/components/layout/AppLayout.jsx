@@ -26,9 +26,9 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#F8FAFC] flex flex-col md:flex-row text-slate-900">
-      {/* Desktop Sticky Sidebar */}
-      <Sidebar className="hidden md:flex" />
+    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#F4F6F9] flex flex-col md:flex-row text-slate-900">
+      {/* Desktop Sticky Floating Sidebar matching reference image */}
+      <Sidebar className="hidden md:flex my-3.5 ml-3.5 rounded-[26px] border border-slate-200/80 h-[calc(100vh-1.75rem)] sticky top-3.5" />
 
       {/* Mobile Top Header */}
       <div className="md:hidden sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200/90 bg-white px-4">

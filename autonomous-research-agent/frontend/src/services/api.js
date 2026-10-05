@@ -42,7 +42,18 @@ function getStoredHistory() {
       localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(INITIAL_RESEARCH_DATA))
       return INITIAL_RESEARCH_DATA
     }
-    return JSON.parse(raw)
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      const ids = new Set(parsed.map((p) => p.research_id || p.id))
+      const missing = INITIAL_RESEARCH_DATA.filter((init) => !ids.has(init.research_id))
+      if (missing.length > 0) {
+        const combined = [...parsed, ...missing]
+        localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(combined))
+        return combined
+      }
+      return parsed
+    }
+    return INITIAL_RESEARCH_DATA
   } catch {
     return INITIAL_RESEARCH_DATA
   }

@@ -335,4 +335,61 @@ Evidence strongly supports that focused knowledge work benefits from remote envi
       processing_time: 3.1,
     },
   },
+  {
+    research_id: 'res-5g-health-effects',
+    question: 'Do 5G cellular frequencies transmit biological pathogens or suppress immunity?',
+    verdict: 'FALSE',
+    confidence: 94,
+    status: 'completed',
+    created_at: '2026-09-29T14:15:00Z',
+    completed_at: '2026-09-29T14:15:10Z',
+    source_count: 14,
+    claim_count: 3,
+    supporting_count: 0,
+    conflicting_count: 12,
+    independent_count: 8,
+    evidence_strength: 94,
+    source_agreement: 96,
+    research_coverage: 95,
+    conflict_level: 'Very Low',
+    summary:
+      'Rigorous empirical testing, peer-reviewed epidemiology, and physical principles demonstrate that non-ionizing radiofrequency radiation from 5G cellular equipment cannot generate biological pathogens or impair systemic immune cell function.',
+    verdict_description:
+      'Directly contradicted by overwhelming empirical evidence, physical electromagnetic principles, and official health organization analyses.',
+    claims: [
+      {
+        claim: 'Non-ionizing millimeter radio waves have sufficient photon energy to induce cellular damage.',
+        verdict: 'Contradicted',
+        confidence: 0.98,
+        explanation: 'Photon energy in the gigahertz spectrum is thousands of times lower than the threshold required for molecular ionization.',
+        supporting_sources: ['https://www.who.int/news-room/questions-and-answers/item/radiation-5g-mobile-networks-and-health'],
+      },
+    ],
+    contradictions: [
+      'Extensive international dosimetry studies confirm thermal exposure limits are respected by wide safety margins.',
+    ],
+    sources: [
+      {
+        title: '5G Mobile Networks and Health Considerations',
+        url: 'https://www.who.int/news-room/questions-and-answers/item/radiation-5g-mobile-networks-and-health',
+        source_name: 'who.int',
+        published_date: '2024-01-15',
+        snippet: 'To date, and after much research performed, no adverse health effect has been causally linked with exposure to wireless technologies.',
+        source_type: 'Government',
+        credibility_score: 'High',
+        relevance_score: 0.97,
+        supports_claim: false,
+        evidence_strength: 'Strong',
+      },
+    ],
+    report: `# Verification Report: 5G & Pathogen Transmission
+## Core Finding
+Extensive physical, medical, and biological evaluations confirm that RF emissions at regulatory compliance thresholds produce zero pathogenic material and exert no immunosuppressive effect.`,
+    metadata: {
+      search_count: 18,
+      source_count: 14,
+      processing_time: 2.75,
+    },
+  },
 ]
+

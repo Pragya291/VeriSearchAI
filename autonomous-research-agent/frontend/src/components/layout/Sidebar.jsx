@@ -31,26 +31,26 @@ export function Sidebar({ className = '', onNavClick }) {
     return location.pathname.startsWith(path)
   }
 
-  // Initials e.g. JV
+  // Initials e.g. AB
   const getInitials = (name) => {
-    if (!name) return 'JV'
+    if (!name) return 'AB'
     const parts = name.trim().split(' ')
     if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase()
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
   }
 
-  const usernameDisplay = user?.username || (user?.email ? user.email.split('@')[0] : 'janahviloke7265')
-  const emailDisplay = user?.email || 'janahviloke7265@gmail.com'
+  const usernameDisplay = user?.username || (user?.email ? user.email.split('@')[0] : 'alex.bennett')
+  const emailDisplay = user?.email || 'alex.bennett@verisearch.ai'
 
   return (
     <aside
-      className={`flex flex-col justify-between w-64 shrink-0 border-r border-[#E2E8F0] bg-white py-5 px-4 h-screen sticky top-0 shadow-[1px_0_6px_rgba(0,0,0,0.02)] ${className}`}
+      className={`flex flex-col justify-between w-64 shrink-0 bg-white p-4.5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] ${className}`}
       aria-label="App Sidebar"
     >
       {/* TOP SECTION: Brand & Navigation */}
-      <div className="space-y-6">
+      <div className="space-y-5">
         {/* Brand Logo */}
-        <div className="px-1 pt-1">
+        <div className="px-1 pt-0.5">
           <BrandLogo textSize="text-xl" />
         </div>
 
@@ -59,15 +59,15 @@ export function Sidebar({ className = '', onNavClick }) {
           <Link
             to="/app/research"
             onClick={onNavClick}
-            className="flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-all duration-150 cursor-pointer"
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-2.5 text-sm font-semibold text-white shadow-xs hover:shadow-sm transition-all duration-150 cursor-pointer group"
           >
-            <Sparkles className="h-4 w-4" strokeWidth={2.5} />
+            <Sparkles className="h-4 w-4 transition-transform duration-150 group-hover:scale-110" strokeWidth={2.5} />
             <span>New Research</span>
           </Link>
         </div>
 
         {/* Navigation items */}
-        <nav className="space-y-1" aria-label="Sidebar Navigation">
+        <nav className="space-y-1.5" aria-label="Sidebar Navigation">
           {navItems.map((item) => {
             const active = isActive(item.path)
             const Icon = item.icon
@@ -77,15 +77,15 @@ export function Sidebar({ className = '', onNavClick }) {
                 key={item.path}
                 to={item.path}
                 onClick={onNavClick}
-                className={`flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 ${
+                className={`group flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 ${
                   active
                     ? 'bg-[#EFF6FF] text-[#2563EB]'
-                    : 'text-[#334155] hover:bg-slate-50 hover:text-[#0F172A]'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
                 <Icon
-                  className={`h-4.5 w-4.5 shrink-0 ${
-                    active ? 'text-[#2563EB]' : 'text-[#64748B]'
+                  className={`h-4.5 w-4.5 shrink-0 transition-colors ${
+                    active ? 'text-[#2563EB]' : 'text-slate-400 group-hover:text-slate-600'
                   }`}
                 />
                 <span>{item.label}</span>
@@ -95,27 +95,19 @@ export function Sidebar({ className = '', onNavClick }) {
         </nav>
       </div>
 
-      {/* BOTTOM SECTION: Landing Page link & User Card */}
-      <div className="border-t border-[#E2E8F0] pt-4 space-y-3">
-        <Link
-          to="/"
-          className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50 transition-colors"
-        >
-          <span>Landing Page</span>
-          <ExternalLink className="h-4 w-4 text-[#64748B]" />
-        </Link>
-
+      {/* BOTTOM SECTION: User Card */}
+      <div className="pt-4">
         {/* User Card Pill matching reference image */}
-        <div className="flex items-center justify-between rounded-2xl bg-[#F8FAFC] p-2.5 border border-[#E2E8F0]">
+        <div className="flex items-center justify-between rounded-2xl bg-[#F8FAFC] p-2.5 border border-slate-200/80 shadow-2xs">
           <Link to="/app/profile" onClick={onNavClick} className="flex items-center gap-2.5 min-w-0 flex-1 group">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white text-xs font-bold shadow-2xs">
               {getInitials(user?.full_name)}
             </div>
             <div className="min-w-0 pr-1">
-              <p className="truncate text-xs font-bold text-[#0F172A] group-hover:text-[#2563EB] transition-colors">
+              <p className="truncate text-xs font-bold text-slate-900 group-hover:text-[#2563EB] transition-colors">
                 {usernameDisplay}
               </p>
-              <p className="truncate text-[10.5px] font-medium text-[#64748B]">
+              <p className="truncate text-[11px] font-medium text-slate-500">
                 {emailDisplay}
               </p>
             </div>
@@ -125,7 +117,7 @@ export function Sidebar({ className = '', onNavClick }) {
             type="button"
             onClick={logout}
             title="Log Out"
-            className="rounded-lg p-1.5 text-[#64748B] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
+            className="rounded-lg p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
           >
             <LogOut className="h-4 w-4" />
           </button>
