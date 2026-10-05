@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
 import { useAuth } from '../auth/useAuth'
-import { Mail, Lock, Sparkles, CheckCircle2 } from 'lucide-react'
+import { Mail, Lock, CheckCircle2 } from 'lucide-react'
 
 export function Login() {
   const navigate = useNavigate()
@@ -49,18 +49,6 @@ export function Login() {
     }
   }
 
-  const handleDemoLogin = async () => {
-    setLoading(true)
-    try {
-      await login({ email: 'alex.bennett@verisearch.ai', password: 'demoPassword123' })
-      navigate('/app/dashboard', { replace: true })
-    } catch {
-      navigate('/app/dashboard', { replace: true })
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleResetSubmit = (e) => {
     e.preventDefault()
     if (!resetEmail) return
@@ -73,7 +61,7 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <BrandLogo className="justify-center mb-6" iconSize="h-9 w-9" textSize="text-2xl" />
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
@@ -101,6 +89,7 @@ export function Login() {
               Sign Up
             </Link>
           </div>
+
           {error && (
             <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
               {error}
@@ -135,7 +124,7 @@ export function Login() {
             />
 
             <div className="flex items-center justify-between text-xs">
-              <label className="flex items-center gap-2 cursor-pointer text-slate-600">
+              <label className="flex items-center gap-2 cursor-pointer text-slate-600 select-none">
                 <input
                   type="checkbox"
                   checked={rememberMe}
@@ -165,20 +154,8 @@ export function Login() {
             </Button>
           </form>
 
-          {/* Quick Demo Mode Button */}
-          <div className="pt-2 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={handleDemoLogin}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-50 py-2.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors cursor-pointer"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-blue-600" />
-              <span>Explore as Demo Researcher (1-Click)</span>
-            </button>
-          </div>
-
           {/* Bottom Link */}
-          <div className="text-center text-xs text-slate-500 pt-2">
+          <div className="text-center text-xs text-slate-500 pt-3 border-t border-slate-100">
             Don't have an account?{' '}
             <Link to="/signup" className="font-semibold text-blue-600 hover:text-blue-700">
               Sign Up
