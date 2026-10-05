@@ -1,7 +1,7 @@
 import { ExternalLink } from 'lucide-react'
 import VerdictBadge from './VerdictBadge'
 
-export default function ClaimCard({ claim, theme = 'light' }) {
+export default function ClaimCard({ claim, theme = 'light', onViewEvidence }) {
   const isDark = theme === 'dark'
   const confidence = claim.confidence <= 1 ? Math.round(claim.confidence * 100) : claim.confidence
   const supportingSources = claim.supporting_sources || claim.sources || []
@@ -52,9 +52,19 @@ export default function ClaimCard({ claim, theme = 'light' }) {
             )
           ))}
         </div>
-        <a href="#sources-evidence" className={isDark ? 'mt-3 inline-flex text-xs font-medium text-indigo-300 hover:text-indigo-200' : 'mt-3 inline-flex text-xs font-medium text-indigo-600 hover:text-indigo-700'}>
+        <button
+          type="button"
+          onClick={() => {
+            if (onViewEvidence) onViewEvidence(claim)
+            else {
+              const el = document.getElementById('evidence-section')
+              if (el) el.scrollIntoView({ behavior: 'smooth' })
+            }
+          }}
+          className={isDark ? 'mt-3 inline-flex text-xs font-medium text-indigo-300 hover:text-indigo-200 cursor-pointer' : 'mt-3 inline-flex text-xs font-medium text-indigo-600 hover:text-indigo-700 cursor-pointer'}
+        >
           View Evidence
-        </a>
+        </button>
       </div>
     </div>
   )

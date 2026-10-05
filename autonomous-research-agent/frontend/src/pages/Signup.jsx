@@ -3,6 +3,7 @@ import { Link, useNavigate, Navigate } from 'react-router-dom'
 import { BrandLogo } from '../components/layout/Navbar'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { Modal } from '../components/ui/Modal'
 import { useAuth } from '../auth/useAuth'
 import { User, Mail, Lock, ShieldCheck } from 'lucide-react'
 
@@ -17,6 +18,9 @@ export function Signup() {
   const [agreed, setAgreed] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Terms & Privacy modal state
+  const [policyModal, setPolicyModal] = useState(null) // 'terms' | 'privacy' | null
 
   if (user) {
     return <Navigate to="/app/dashboard" replace />
@@ -155,13 +159,21 @@ export function Signup() {
               />
               <label htmlFor="terms" className="text-slate-600 leading-relaxed cursor-pointer">
                 I agree to the{' '}
-                <a href="#terms" onClick={(e) => e.preventDefault()} className="text-blue-600 hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setPolicyModal('terms')}
+                  className="text-blue-600 font-medium hover:underline cursor-pointer"
+                >
                   Terms of Service
-                </a>{' '}
+                </button>{' '}
                 and{' '}
-                <a href="#privacy" onClick={(e) => e.preventDefault()} className="text-blue-600 hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setPolicyModal('privacy')}
+                  className="text-blue-600 font-medium hover:underline cursor-pointer"
+                >
                   Privacy Policy
-                </a>
+                </button>
               </label>
             </div>
 
@@ -185,6 +197,42 @@ export function Signup() {
           </div>
         </div>
       </div>
+
+      {/* Terms & Privacy Modal */}
+      {policyModal && (
+        <Modal
+          isOpen={Boolean(policyModal)}
+          onClose={() => setPolicyModal(null)}
+          title={policyModal === 'terms' ? 'Terms of Service' : 'Privacy & Methodology Policy'}
+        >
+          <div className="space-y-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+            {policyModal === 'terms' ? (
+              <>
+                <p>
+                  Welcome to <strong>VeriSearchAI</strong>. By using our autonomous research agent, you agree to evaluate evidence objectively and respect intellectual property rights.
+                </p>
+                <p>
+                  VeriSearchAI retrieves multi-source academic and open web data to synthesize verdicts. All citations remain the property of their respective publishers.
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  <strong>VeriSearchAI Privacy Standards</strong>: We encrypt session data, respect research confidentiality, and never sell personal researcher logs.
+                </p>
+                <p>
+                  Our evidence scoring uses empirical domain verification, peer-review checks, and multi-source consensus metrics.
+                </p>
+              </>
+            )}
+            <div className="pt-2 flex justify-end">
+              <Button variant="primary" size="sm" onClick={() => setPolicyModal(null)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -10,6 +11,7 @@ import {
   Link as LinkIcon,
   ArrowUpRight,
   MoreHorizontal,
+  LogOut,
 } from 'lucide-react'
 import { BrandLogo } from './Navbar'
 import { useAuth } from '../../auth/useAuth'
@@ -17,6 +19,7 @@ import { useAuth } from '../../auth/useAuth'
 export function Sidebar({ className = '', onNavClick }) {
   const location = useLocation()
   const { user, logout } = useAuth()
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   const navItems = [
     { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
@@ -107,29 +110,71 @@ export function Sidebar({ className = '', onNavClick }) {
         </Link>
 
         {/* User Card Pill matching reference image */}
-        <div className="flex items-center justify-between rounded-2xl bg-[#F8FAFC] p-2.5 border border-[#E2E8F0] shadow-2xs">
-          <Link to="/app/profile" onClick={onNavClick} className="flex items-center gap-2.5 min-w-0 flex-1 group">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#3B82F6] via-[#1E40AF] to-[#1D4ED8] text-white text-xs font-bold shadow-2xs">
-              {getInitials(user?.full_name)}
-            </div>
-            <div className="min-w-0 pr-1">
-              <p className="truncate text-xs font-bold text-[#0F172A] group-hover:text-[#2563EB] transition-colors">
-                {user?.full_name?.toLowerCase() || 'alex bennett'}
-              </p>
-              <p className="truncate text-[10.5px] font-medium text-[#64748B]">
-                {user?.email || 'alex.bennett@verisearch.ai'}
-              </p>
-            </div>
-          </Link>
+        <div className="relative">
+          <div className="flex items-center justify-between rounded-2xl bg-[#F8FAFC] p-2.5 border border-[#E2E8F0] shadow-2xs">
+            <Link to="/app/profile" onClick={onNavClick} className="flex items-center gap-2.5 min-w-0 flex-1 group">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#3B82F6] via-[#1E40AF] to-[#1D4ED8] text-white text-xs font-bold shadow-2xs">
+                {getInitials(user?.full_name)}
+              </div>
+              <div className="min-w-0 pr-1">
+                <p className="truncate text-xs font-bold text-[#0F172A] group-hover:text-[#2563EB] transition-colors">
+                  {user?.full_name?.toLowerCase() || 'alex bennett'}
+                </p>
+                <p className="truncate text-[10.5px] font-medium text-[#64748B]">
+                  {user?.email || 'alex.bennett@verisearch.ai'}
+                </p>
+              </div>
+            </Link>
 
-          <button
-            type="button"
-            onClick={logout}
-            title="Log out"
-            className="rounded-lg p-1 text-[#64748B] hover:text-rose-600 transition-colors cursor-pointer shrink-0"
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
+            <button
+              type="button"
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              title="User menu"
+              className="rounded-lg p-1.5 text-[#64748B] hover:text-[#0F172A] hover:bg-slate-200/60 transition-colors cursor-pointer shrink-0"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* User Popover Dropup Menu */}
+          {userMenuOpen && (
+            <div className="absolute bottom-full left-0 right-0 mb-2 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-lg z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+              <Link
+                to="/app/profile"
+                onClick={() => {
+                  setUserMenuOpen(false)
+                  onNavClick?.()
+                }}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600"
+              >
+                <User className="h-3.5 w-3.5 text-slate-400" />
+                <span>View Profile</span>
+              </Link>
+              <Link
+                to="/app/settings"
+                onClick={() => {
+                  setUserMenuOpen(false)
+                  onNavClick?.()
+                }}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600"
+              >
+                <Settings className="h-3.5 w-3.5 text-slate-400" />
+                <span>Account Settings</span>
+              </Link>
+              <div className="my-1 border-t border-slate-100" />
+              <button
+                type="button"
+                onClick={() => {
+                  setUserMenuOpen(false)
+                  logout()
+                }}
+                className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer"
+              >
+                <LogOut className="h-3.5 w-3.5 text-rose-500" />
+                <span>Log Out</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </aside>

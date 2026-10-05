@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { BrandLogo } from '../components/layout/Navbar'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { Modal } from '../components/ui/Modal'
 import { useAuth } from '../auth/useAuth'
 import { Mail, Lock, Sparkles, CheckCircle2 } from 'lucide-react'
 
@@ -16,6 +17,11 @@ export function Login() {
   const [rememberMe, setRememberMe] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Forgot password modal state
+  const [resetModalOpen, setResetModalOpen] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetSubmitted, setResetSubmitted] = useState(false)
 
   const from = location.state?.from || '/app/dashboard'
 
@@ -53,6 +59,17 @@ export function Login() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleResetSubmit = (e) => {
+    e.preventDefault()
+    if (!resetEmail) return
+    setResetSubmitted(true)
+    setTimeout(() => {
+      setResetSubmitted(false)
+      setResetModalOpen(false)
+      setResetEmail('')
+    }, 2500)
   }
 
   return (
@@ -130,7 +147,7 @@ export function Login() {
 
               <button
                 type="button"
-                onClick={() => alert('Password reset link would be sent in production backend.')}
+                onClick={() => setResetModalOpen(true)}
                 className="font-medium text-blue-600 hover:text-blue-700 cursor-pointer"
               >
                 Forgot password?
@@ -169,6 +186,58 @@ export function Login() {
           </div>
         </div>
       </div>
+
+      {/* Reset Password Modal */}
+      {resetModalOpen && (
+        <Modal
+          isOpen={resetModalOpen}
+          onClose={() => {
+            setResetModalOpen(false)
+            setResetSubmitted(false)
+          }}
+          title="Reset Password"
+        >
+          {resetSubmitted ? (
+            <div className="py-6 text-center space-y-3">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <h4 className="text-base font-bold text-slate-900">Password Reset Link Sent</h4>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                We've dispatched password reset instructions to <strong>{resetEmail}</strong>. Please check your inbox.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleResetSubmit} className="space-y-4">
+              <p className="text-xs text-slate-600">
+                Enter your registered researcher email address and we will send you a secure link to reset your password.
+              </p>
+              <Input
+                type="email"
+                label="Registered Email"
+                placeholder="name@example.com"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                icon={Mail}
+                required
+              />
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setResetModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary" size="sm">
+                  Send Reset Link
+                </Button>
+              </div>
+            </form>
+          )}
+        </Modal>
+      )}
     </div>
   )
 }

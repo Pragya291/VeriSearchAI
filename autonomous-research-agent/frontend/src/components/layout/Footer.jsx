@@ -1,8 +1,13 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandLogo } from './Navbar'
+import { Modal } from '../ui/Modal'
+import { Button } from '../ui/Button'
 import { ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react'
 
 export function Footer() {
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false)
+
   return (
     <footer className="border-t border-slate-200/80 bg-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -82,13 +87,13 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a
-                  href="#privacy"
-                  onClick={(e) => e.preventDefault()}
-                  className="hover:text-blue-600 transition-colors"
+                <button
+                  type="button"
+                  onClick={() => setPrivacyModalOpen(true)}
+                  className="hover:text-blue-600 transition-colors cursor-pointer text-left"
                 >
                   Privacy & Methodology
-                </a>
+                </button>
               </li>
             </ul>
           </div>
@@ -114,6 +119,35 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Privacy & Methodology Modal */}
+      {privacyModalOpen && (
+        <Modal
+          isOpen={privacyModalOpen}
+          onClose={() => setPrivacyModalOpen(false)}
+          title="Privacy & Verification Methodology"
+        >
+          <div className="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
+            <div>
+              <h5 className="font-bold text-slate-900 mb-1">Data Privacy & Security</h5>
+              <p>
+                VeriSearchAI does not monetize user queries or share confidential research dossiers with third parties. All history records are stored in private local/user session storage.
+              </p>
+            </div>
+            <div>
+              <h5 className="font-bold text-slate-900 mb-1">Autonomous Verification Pipeline</h5>
+              <p>
+                Our agent analyzes claims by searching primary literature, evaluating domain credibility scores, detecting contradictions, and generating evidence-backed confidence metrics.
+              </p>
+            </div>
+            <div className="pt-2 flex justify-end">
+              <Button variant="primary" size="sm" onClick={() => setPrivacyModalOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </footer>
   )
 }

@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import { Card } from '../components/ui/Card'
+import { Modal } from '../components/ui/Modal'
 import {
   User,
   CheckCircle2,
@@ -18,9 +20,11 @@ import {
   X,
   Bell,
   ChevronRight,
+  ExternalLink,
 } from 'lucide-react'
 
 export function Profile() {
+  const navigate = useNavigate()
   const { user, setUser } = useAuth()
 
   // Storage key for user profile
@@ -63,6 +67,16 @@ export function Profile() {
   const [newTag, setNewTag] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [prefSuccess, setPrefSuccess] = useState(false)
+
+  // Interactive UI Popups
+  const [searchModalOpen, setSearchModalOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [notificationsList, setNotificationsList] = useState([
+    { id: 1, title: 'Verification Completed', text: 'Exercise & Cognitive Performance analysis finished with 87% confidence.', time: '10m ago', unread: true },
+    { id: 2, title: 'Contradiction Alert', text: 'High conflict level detected in intermittent fasting trial meta-analysis.', time: '2h ago', unread: true },
+    { id: 3, title: 'Weekly Digest Ready', text: 'Summary of 12 newly evaluated academic sources added to repository.', time: '1d ago', unread: false },
+  ])
 
   const handleAddTag = () => {
     const trimmed = newTag.trim()
@@ -150,26 +164,66 @@ export function Profile() {
 
           <button
             type="button"
-            onClick={() => alert('Search functionality coming soon.')}
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer shadow-2xs"
+            onClick={() => setSearchModalOpen(true)}
+            title="Search Repository"
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:border-blue-300 transition-colors cursor-pointer shadow-2xs"
           >
             <Search className="h-3.5 w-3.5" />
           </button>
 
-          <button
-            type="button"
-            onClick={() => alert('You have 3 new notifications!')}
-            className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer shadow-2xs"
-          >
-            <Bell className="h-3.5 w-3.5" />
-            <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#2563EB] text-[9px] font-bold text-white">
-              3
-            </span>
-          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setNotificationsOpen(!notificationsOpen)}
+              title="Notifications"
+              className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:border-blue-300 transition-colors cursor-pointer shadow-2xs"
+            >
+              <Bell className="h-3.5 w-3.5" />
+              {notificationsList.some((n) => n.unread) && (
+                <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#2563EB] text-[9px] font-bold text-white">
+                  {notificationsList.filter((n) => n.unread).length}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Popover Dropdown */}
+            {notificationsOpen && (
+              <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                  <h4 className="text-xs font-bold text-slate-900">Notifications</h4>
+                  <button
+                    type="button"
+                    onClick={() => setNotificationsList(notificationsList.map((n) => ({ ...n, unread: false })))}
+                    className="text-[10px] font-semibold text-blue-600 hover:underline"
+                  >
+                    Mark all read
+                  </button>
+                </div>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {notificationsList.map((item) => (
+                    <div
+                      key={item.id}
+                      className={`p-2.5 rounded-xl text-xs space-y-1 transition-colors ${
+                        item.unread ? 'bg-blue-50/60 border border-blue-100' : 'bg-slate-50/50 hover:bg-slate-100/60'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between font-bold text-slate-800">
+                        <span>{item.title}</span>
+                        <span className="text-[10px] font-normal text-slate-400">{item.time}</span>
+                      </div>
+                      <p className="text-slate-600 text-[11px] leading-relaxed">{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           <button
             type="button"
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] transition-colors cursor-pointer shadow-2xs"
+            onClick={() => navigate('/app/settings')}
+            title="Go to Settings"
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:border-blue-300 transition-colors cursor-pointer shadow-2xs"
           >
             <Settings className="h-3.5 w-3.5" />
           </button>
@@ -563,6 +617,75 @@ export function Profile() {
       <div className="text-right text-[10.5px] font-medium text-[#64748B] pt-0.5">
         Last updated • Sep 5, 2024 • 09:32 AM UTC
       </div>
+
+      {/* Global Quick Search Modal */}
+      {searchModalOpen && (
+        <Modal
+          isOpen={searchModalOpen}
+          onClose={() => setSearchModalOpen(false)}
+          title="Search Research Repository"
+        >
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search topics, claims, or citations..."
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 focus:bg-white focus:border-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-slate-400">Quick Navigation</p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchModalOpen(false)
+                    navigate('/app/history')
+                  }}
+                  className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-blue-50 hover:border-blue-200 text-left transition-colors font-medium text-slate-700"
+                >
+                  🔍 View Research History
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchModalOpen(false)
+                    navigate('/app/sources')
+                  }}
+                  className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-blue-50 hover:border-blue-200 text-left transition-colors font-medium text-slate-700"
+                >
+                  📚 Evaluated Sources
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchModalOpen(false)
+                    navigate('/app/saved')
+                  }}
+                  className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-blue-50 hover:border-blue-200 text-left transition-colors font-medium text-slate-700"
+                >
+                  🔖 Saved Reports
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchModalOpen(false)
+                    navigate('/app/research')
+                  }}
+                  className="p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-blue-50 hover:border-blue-200 text-left transition-colors font-medium text-slate-700"
+                >
+                  ✨ Start New Research
+                </button>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

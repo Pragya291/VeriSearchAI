@@ -15,7 +15,7 @@ class TavilyService:
     """Service to perform web research queries via the Tavily Search API."""
 
     def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or settings.TAVILY_API_KEY
+        self.api_key = api_key if api_key is not None else settings.TAVILY_API_KEY
         self._client = None
         if self.api_key:
             try:

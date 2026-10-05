@@ -1,7 +1,9 @@
+from unittest.mock import patch
 from app.services.firebase_service import FirebaseService
 
 
-def test_firebase_service_crud_flow():
+@patch("app.services.firebase_service.get_firestore_client", return_value=None)
+def test_firebase_service_crud_flow(mock_get_db):
     service = FirebaseService()
 
     # 1. Create Research
@@ -53,7 +55,8 @@ def test_firebase_service_crud_flow():
     assert history["items"][0]["confidence"] == 73
 
 
-def test_research_records_are_scoped_to_their_owner():
+@patch("app.services.firebase_service.get_firestore_client", return_value=None)
+def test_research_records_are_scoped_to_their_owner(mock_get_db):
     service = FirebaseService()
     research_id = service.create_research("A private research query", owner_id="user-a")
     service.save_research_result(research_id, {"status": "completed", "confidence": 73})
@@ -62,3 +65,4 @@ def test_research_records_are_scoped_to_their_owner():
     assert service.get_research(research_id, owner_id="user-b") is None
     assert service.get_research_history(owner_id="user-a")["total"] == 1
     assert service.get_research_history(owner_id="user-b")["total"] == 0
+
