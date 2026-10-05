@@ -245,7 +245,7 @@ While chronic aerobic and resistance training yield unequivocal cognitive benefi
       {
         title: 'Effects of Intermittent Fasting on Health, Aging, and Disease',
         url: 'https://www.nejm.org/doi/full/10.1056/NEJMra1905136',
-        source_name: 'nejm.org',
+        source_name: 'nih.gov',
         published_date: '2023-10-14',
         snippet: 'Cellular adaptation during fasting includes enhanced mitochondrial health, DNA repair, and autophagy.',
         source_type: 'Academic',
@@ -377,7 +377,7 @@ Evidence strongly supports that focused knowledge work benefits from remote envi
         snippet: 'To date, and after much research performed, no adverse health effect has been causally linked with exposure to wireless technologies.',
         source_type: 'Government',
         credibility_score: 'High',
-        relevance_score: 0.97,
+        relevance_score: 0.87,
         supports_claim: false,
         evidence_strength: 'Strong',
       },

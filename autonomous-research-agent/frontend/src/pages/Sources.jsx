@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Search, ExternalLink, Award, Globe, Database, Calendar } from 'lucide-react'
+import { Search, X, FileText, CheckCircle2, ChevronDown, ArrowRight } from 'lucide-react'
 import { getSources } from '../services/api'
 import { formatDate, extractDomain } from '../utils/formatters'
-import { Badge } from '../components/ui/Badge'
 
 export function Sources() {
   const [sources, setSources] = useState([])
@@ -16,8 +14,9 @@ export function Sources() {
     let isMounted = true
     getSources('All')
       .then((data) => {
-        if (isMounted) setSources(data)
+        if (isMounted) setSources(data || [])
       })
+      .catch((err) => console.warn('Sources fetch error', err))
       .finally(() => {
         if (isMounted) setLoading(false)
       })
@@ -36,7 +35,8 @@ export function Sources() {
       return (
         (s.title || '').toLowerCase().includes(q) ||
         (s.source_name || '').toLowerCase().includes(q) ||
-        (s.snippet || '').toLowerCase().includes(q)
+        (s.snippet || '').toLowerCase().includes(q) ||
+        (s.source_type || '').toLowerCase().includes(q)
       )
     })
     .filter((s) => {
@@ -59,122 +59,161 @@ export function Sources() {
     })
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="border-b border-slate-200/70 pb-4">
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+    <div className="max-w-6xl mx-auto space-y-4">
+      {/* 1. Page Header matching Reference Image */}
+      <div>
+        <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-slate-900 leading-tight">
           Evaluated Sources
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-xs sm:text-sm text-slate-500 font-normal">
           Independent publications, academic archives, and official public registries evaluated by VeriSearchAI.
         </p>
       </div>
 
-      {/* Filter and Search Bar matching Section 18 */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+      {/* 2. Compact Search & Filter Toolbar */}
+      <div className="rounded-xl lg:rounded-2xl border border-slate-200/80 bg-white p-2.5 sm:p-3 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.03)] flex flex-col md:flex-row gap-2.5 items-stretch md:items-center justify-between">
+        {/* Search Field */}
+        <div className="relative flex-1 min-w-0">
+          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search domain, title, or keywords..."
-            className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            className="w-full rounded-lg border border-slate-200/80 bg-[#F8FAFC] py-1.5 pl-8 pr-7 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors cursor-pointer"
+              title="Clear search"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Filter Pills & Sort Selector */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 shrink-0">
           {/* Category Tabs */}
-          <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-0.5 border border-slate-200/60 overflow-x-auto">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setFilterType(cat)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                  filterType === cat
-                    ? 'bg-white text-blue-600 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="flex items-center gap-1.5" role="tablist" aria-label="Filter sources by category">
+            {categories.map((cat) => {
+              const isSelected = filterType === cat
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setFilterType(cat)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#0F172A] text-white shadow-2xs'
+                      : 'border border-slate-200/90 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  }`}
+                >
+                  {cat}
+                </button>
+              )
+            })}
           </div>
 
           {/* Sort Selector */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 focus:border-blue-500 focus:outline-none cursor-pointer"
-          >
-            <option value="Relevance">Sort: Relevance</option>
-            <option value="Newest">Sort: Newest</option>
-            <option value="Credibility">Sort: Credibility</option>
-          </select>
+          <div className="relative inline-flex items-center">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              aria-label="Sort evaluated sources"
+              className="appearance-none cursor-pointer rounded-lg border border-slate-200/90 bg-white py-1 pl-2.5 pr-7 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all shadow-2xs"
+            >
+              <option value="Relevance">Sort: Relevance</option>
+              <option value="Newest">Sort: Newest</option>
+              <option value="Credibility">Sort: Credibility</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+          </div>
         </div>
       </div>
 
-      {/* Desktop: Table layout / Mobile: Cards layout (matching Section 18) */}
-      {loading ? (
-        <div className="py-12 text-center text-sm text-slate-500">Loading sources...</div>
-      ) : filteredSources.length > 0 ? (
-        <>
-          {/* Desktop Table */}
-          <div className="hidden md:block rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-            <table className="w-full text-left border-collapse text-sm">
+      {/* 3. Compact Evaluated Sources Table Card */}
+      <div className="rounded-xl lg:rounded-2xl border border-slate-200/80 bg-white shadow-[0_2px_12px_-4px_rgba(0,0,0,0.03)] overflow-hidden">
+        {loading ? (
+          <div className="py-12 text-center text-xs text-slate-500 animate-pulse">Loading evaluated sources...</div>
+        ) : filteredSources.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[700px] text-left border-collapse text-xs sm:text-sm">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/60 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3.5 px-5">Source & Domain</th>
-                  <th className="py-3.5 px-4">Category</th>
-                  <th className="py-3.5 px-4">Credibility</th>
-                  <th className="py-3.5 px-4">Relevance</th>
-                  <th className="py-3.5 px-4">Date</th>
-                  <th className="py-3.5 px-5 text-right">Actions</th>
+                <tr className="border-b border-slate-100 bg-white text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                  <th className="py-2.5 px-4 w-[42%]">SOURCE &amp; DOMAIN</th>
+                  <th className="py-2.5 px-3">CATEGORY</th>
+                  <th className="py-2.5 px-3">CREDIBILITY</th>
+                  <th className="py-2.5 px-3">RELEVANCE</th>
+                  <th className="py-2.5 px-3">DATE</th>
+                  <th className="py-2.5 px-4 text-right">ACTIONS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100/90">
                 {filteredSources.map((source, idx) => {
                   const domain = source.source_name || extractDomain(source.url)
                   const relevance = Math.round((source.relevance_score || 0.85) * 100)
+
                   return (
-                    <tr key={idx} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-4 px-5 max-w-sm">
-                        <div className="font-semibold text-slate-900 leading-snug line-clamp-1">
-                          {source.title}
+                    <tr key={idx} className="hover:bg-slate-50/70 transition-colors group">
+                      {/* SOURCE & DOMAIN */}
+                      <td className="py-2.5 px-4">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200/80 bg-slate-50/80 text-slate-400 group-hover:border-blue-200 group-hover:text-blue-500 group-hover:bg-blue-50/40 transition-colors">
+                            <FileText className="h-3.5 w-3.5 stroke-[1.75]" />
+                          </div>
+                          <div className="min-w-0 pr-2">
+                            <div className="font-semibold text-slate-900 leading-snug line-clamp-1 text-xs sm:text-[13px] group-hover:text-blue-600 transition-colors">
+                              {source.title}
+                            </div>
+                            <div className="text-[11px] text-slate-400 font-normal leading-tight mt-0.5">
+                              {domain}
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-xs text-slate-400 mt-0.5">{domain}</div>
                       </td>
-                      <td className="py-4 px-4">
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                          {source.source_type || 'Web'}
+
+                      {/* CATEGORY */}
+                      <td className="py-2.5 px-3 text-xs text-slate-600 font-medium">
+                        {source.source_type || 'Academic'}
+                      </td>
+
+                      {/* CREDIBILITY */}
+                      <td className="py-2.5 px-3">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-[#A7F3D0] bg-[#E8F8F0] px-2 py-0.5 text-[11px] font-bold text-[#059669]">
+                          <CheckCircle2 className="h-3 w-3 stroke-[2.5]" />
+                          <span>{source.credibility_score || 'High'}</span>
                         </span>
                       </td>
-                      <td className="py-4 px-4">
-                        <Badge
-                          variant={source.credibility_score === 'High' ? 'green' : 'amber'}
-                          size="sm"
-                          icon={Award}
-                        >
-                          {source.credibility_score || 'High'}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-4 font-bold text-blue-600">
+
+                      {/* RELEVANCE */}
+                      <td className="py-2.5 px-3 font-bold text-[#2563EB] text-xs sm:text-[13.5px]">
                         {relevance}%
                       </td>
-                      <td className="py-4 px-4 text-xs text-slate-500 whitespace-nowrap">
+
+                      {/* DATE */}
+                      <td className="py-2.5 px-3 text-xs text-slate-600 font-medium whitespace-nowrap">
                         {formatDate(source.published_date)}
                       </td>
-                      <td className="py-4 px-5 text-right">
-                        {source.url && (
+
+                      {/* ACTIONS */}
+                      <td className="py-2.5 px-4 text-right">
+                        {source.url ? (
                           <a
                             href={source.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition-colors group/link cursor-pointer"
                           >
                             <span>Open</span>
-                            <ExternalLink className="h-3 w-3" />
+                            <ArrowRight className="h-3 w-3 transition-transform duration-150 group-hover/link:translate-x-0.5" />
                           </a>
+                        ) : (
+                          <span className="text-xs text-slate-300">—</span>
                         )}
                       </td>
                     </tr>
@@ -183,59 +222,12 @@ export function Sources() {
               </tbody>
             </table>
           </div>
-
-          {/* Mobile Cards Layout */}
-          <div className="md:hidden space-y-3">
-            {filteredSources.map((source, idx) => {
-              const domain = source.source_name || extractDomain(source.url)
-              const relevance = Math.round((source.relevance_score || 0.85) * 100)
-              return (
-                <div
-                  key={idx}
-                  className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-3"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="font-semibold text-sm text-slate-900 leading-snug">
-                        {source.title}
-                      </h4>
-                      <p className="text-xs text-slate-500 mt-0.5">{domain}</p>
-                    </div>
-                    <span className="font-bold text-xs text-blue-600 shrink-0">
-                      {relevance}% match
-                    </span>
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
-                    <Badge
-                      variant={source.credibility_score === 'High' ? 'green' : 'amber'}
-                      size="sm"
-                    >
-                      {source.credibility_score || 'High'}
-                    </Badge>
-
-                    {source.url && (
-                      <a
-                        href={source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:underline"
-                      >
-                        <span>Visit Source</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
+        ) : (
+          <div className="p-8 text-center text-xs text-slate-500">
+            No sources match your search or filter criteria.
           </div>
-        </>
-      ) : (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-sm text-slate-500">
-          No sources match your current search and filter settings.
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
