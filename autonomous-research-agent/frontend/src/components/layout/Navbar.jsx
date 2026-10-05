@@ -6,17 +6,15 @@ import { useAuth } from '../../auth/useAuth'
 export function BrandLogo({ className = '', iconSize = 'h-5 w-5', textSize = 'text-lg' }) {
   return (
     <Link to="/" className={`inline-flex items-center gap-2.5 font-bold text-slate-900 group ${className}`}>
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] text-white shadow-xs transition-transform duration-200 group-hover:scale-105">
-        <Check className="h-5 w-5 stroke-[3]" />
+      <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#2563EB] text-white shadow-xs transition-transform duration-200 group-hover:scale-105">
+        <Search className="h-5 w-5 stroke-[2.5]" />
+        <span className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#22C55E] text-white ring-2 ring-white">
+          <Check className="h-2.5 w-2.5 stroke-[3]" />
+        </span>
       </span>
-      <div className="flex flex-col">
-        <span className={`tracking-tight ${textSize} font-extrabold text-[#0F172A] leading-none`}>
-          VeriSearch<span className="text-[#2563EB]">AI</span>
-        </span>
-        <span className="text-[9px] font-bold text-[#2563EB] tracking-wider self-end mt-0.5 uppercase bg-[#EFF6FF] px-1 rounded">
-          AI
-        </span>
-      </div>
+      <span className={`tracking-tight ${textSize} font-extrabold text-[#0F172A] leading-none`}>
+        VeriSearch<span className="text-[#2563EB]">AI</span>
+      </span>
     </Link>
   )
 }
