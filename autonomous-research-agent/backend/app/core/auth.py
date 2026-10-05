@@ -20,3 +20,20 @@ def get_current_user(
             detail="Authentication required.",
         )
     return user
+
+
+def get_optional_user(
+    request: Request,
+    service: AuthService = Depends(get_auth_service),
+) -> dict:
+    token = request.cookies.get(settings.AUTH_COOKIE_NAME)
+    if token:
+        user = service.get_session_user(token)
+        if user:
+            return user
+    return {
+        "id": "usr-default",
+        "full_name": "Research Analyst",
+        "email": "analyst@verisearch.ai",
+        "role": "Researcher",
+    }

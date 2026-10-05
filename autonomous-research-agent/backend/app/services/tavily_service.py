@@ -17,6 +17,7 @@ class TavilyService:
     def __init__(self, api_key: Optional[str] = None):
         self.api_key = api_key if api_key is not None else settings.TAVILY_API_KEY
         self._client = None
+        self.last_answer = ""
         if self.api_key:
             try:
                 from tavily import TavilyClient
@@ -61,6 +62,8 @@ class TavilyService:
                 include_raw_content=True
             )
 
+            self.last_answer = response.get("answer") or ""
+
             raw_results = response.get("results", [])
             if not raw_results:
                 logger.warning(f"No search results returned by Tavily for query: '{query}'")
@@ -69,14 +72,13 @@ class TavilyService:
             sources: List[Source] = []
             for item in raw_results:
                 url = item.get("url", "")
-                title = item.get("title", "Untitled Source").strip()
-                evidence = (
-                    item.get("raw_content", "").strip()
-                    or item.get("content", "").strip()
-                    or item.get("snippet", "").strip()
-                )
+                title = (item.get("title") or "Untitled Source").strip()
+                raw_c = (item.get("raw_content") or "").strip()
+                content = (item.get("content") or "").strip()
+                snip = (item.get("snippet") or "").strip()
+                evidence = raw_c or content or snip
                 snippet = evidence[:6000]
-                score = float(item.get("score", 0.8))
+                score = float(item.get("score") or 0.8)
 
                 # Normalize score to [0.0, 1.0]
                 relevance_score = min(max(score, 0.0), 1.0)

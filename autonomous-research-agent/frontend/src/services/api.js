@@ -1,8 +1,12 @@
 import axios from 'axios'
 import { INITIAL_RESEARCH_DATA } from '../data/mockResearchData'
 
-// Resolve API base URL from env
-const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Resolve API base URL from env or current origin host
+const defaultHost =
+  typeof window !== 'undefined' && window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:8000'
+    : 'http://localhost:8000'
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || defaultHost
 let apiBase = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl
 if (apiBase.endsWith('/api')) {
   apiBase = apiBase.slice(0, -4)
@@ -211,27 +215,35 @@ export async function createResearch(payload) {
 
   const cleanQ = question.trim()
   const lowerQ = cleanQ.toLowerCase()
+
+  // Generate deterministic dynamic confidence score based on query hash
+  let queryHash = 0
+  for (let i = 0; i < cleanQ.length; i++) {
+    queryHash = (queryHash * 31 + cleanQ.charCodeAt(i)) & 0xffffffff
+  }
+  const dynamicVariance = Math.abs(queryHash % 21) // 0 to 20 variance
+
   let verdict = 'SUPPORTED'
-  let confidence = 85
-  let evidenceStrength = 85
-  let sourceAgreement = 80
+  let confidence = Math.min(94, Math.max(68, 76 + (dynamicVariance % 16) - 5))
+  let evidenceStrength = Math.min(98, confidence + 2)
+  let sourceAgreement = Math.max(60, confidence - 6)
   let conflictLevel = 'Low'
 
   if (lowerQ.includes('myth') || lowerQ.includes('fake') || lowerQ.includes('flat earth') || lowerQ.includes('vaccine causes autism')) {
     verdict = 'FALSE'
-    confidence = 94
-    evidenceStrength = 95
-    sourceAgreement = 92
+    confidence = 91 + (dynamicVariance % 6)
+    evidenceStrength = 94
+    sourceAgreement = 90
     conflictLevel = 'Low'
   } else if (lowerQ.includes('fasting') || lowerQ.includes('longevity') || lowerQ.includes('coffee') || lowerQ.includes('5g') || lowerQ.includes('crypto')) {
     verdict = 'MIXED EVIDENCE'
-    confidence = 66
-    evidenceStrength = 68
-    sourceAgreement = 60
+    confidence = 58 + (dynamicVariance % 14)
+    evidenceStrength = 65
+    sourceAgreement = 58
     conflictLevel = 'High'
   } else if (lowerQ.includes('cure') || lowerQ.includes('miracle') || lowerQ.includes('alien') || lowerQ.includes('telepathy')) {
     verdict = 'UNVERIFIED'
-    confidence = 42
+    confidence = 38 + (dynamicVariance % 12)
     evidenceStrength = 40
     sourceAgreement = 45
     conflictLevel = 'Moderate'

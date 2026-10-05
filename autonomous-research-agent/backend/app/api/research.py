@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from app.core.auth import get_current_user
+from app.core.auth import get_optional_user
 from app.models.research import ResearchRequest
 from app.models.report import ResearchResponse, ResearchHistoryResponse
 from app.agents.research_agent import research_agent
@@ -13,7 +13,7 @@ logger = logging.getLogger("api_research")
 router = APIRouter(
     prefix="/research",
     tags=["Research"],
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(get_optional_user)],
 )
 
 
@@ -24,7 +24,7 @@ router = APIRouter(
     summary="Start new autonomous research task",
     description="Accepts a research question, performs web search, claim extraction, fact checking, and report generation."
 )
-async def start_research(request: ResearchRequest, user: dict = Depends(get_current_user)):
+async def start_research(request: ResearchRequest, user: dict = Depends(get_optional_user)):
     """
     Endpoint to trigger autonomous research and fact-checking workflow.
     """
@@ -68,7 +68,7 @@ async def start_research(request: ResearchRequest, user: dict = Depends(get_curr
     summary="Retrieve research session by ID",
     description="Fetches stored research report, fact-check matrix, and sources from Firestore."
 )
-async def get_research(research_id: str, user: dict = Depends(get_current_user)):
+async def get_research(research_id: str, user: dict = Depends(get_optional_user)):
     """
     Retrieve stored research session details by research_id.
     """
@@ -100,7 +100,7 @@ async def get_research(research_id: str, user: dict = Depends(get_current_user))
 async def get_research_history(
     page: int = Query(default=1, ge=1, description="Page number starting at 1"),
     limit: int = Query(default=10, ge=1, le=50, description="Items per page (1 to 50)"),
-    user: dict = Depends(get_current_user),
+    user: dict = Depends(get_optional_user),
 ):
     """
     Fetch paginated research history items sorted by creation time descending.

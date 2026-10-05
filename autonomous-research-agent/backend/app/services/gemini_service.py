@@ -49,9 +49,9 @@ class GeminiService:
             raise ValueError(f"Could not parse valid JSON from text: {text[:200]}")
 
     def _call_gemini(self, prompt: str, system_instruction: Optional[str] = None) -> str:
-        """Calls Gemini API and returns the text response."""
-        if not self.api_key:
-            raise GeminiServiceError("GEMINI_API_KEY is not configured.")
+        """Calls Gemini API with strict validation and timeout protection."""
+        if not self.api_key or not self.api_key.startswith("AIza"):
+            raise GeminiServiceError("GEMINI_API_KEY is not configured or invalid. A valid AIza... key is required.")
 
         if not self._client:
             try:
@@ -64,17 +64,23 @@ class GeminiService:
         try:
             logger.info(f"Calling Gemini model '{self.model_name}'...")
             
-            # Use client.models.generate_content
             config = {}
             if system_instruction:
                 config["system_instruction"] = system_instruction
 
-            response = self._client.models.generate_content(
-                model=self.model_name,
-                contents=prompt,
-                config=config if config else None
-            )
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(
+                    self._client.models.generate_content,
+                    model=self.model_name,
+                    contents=prompt,
+                    config=config if config else None
+                )
+                response = future.result(timeout=12)
             return response.text or ""
+        except concurrent.futures.TimeoutError as te:
+            logger.warning("Gemini API call timed out after 12 seconds.")
+            raise GeminiServiceError("Gemini analysis timed out.") from te
         except Exception as e:
             logger.error("Gemini API call failed.", exc_info=True)
             raise GeminiServiceError("Gemini analysis is temporarily unavailable.") from e
