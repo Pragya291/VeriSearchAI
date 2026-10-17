@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm --prefix autonomous-research-agent/frontend install && npm --prefix autonomous-research-agent/frontend run build",
-  "outputDirectory": "autonomous-research-agent/frontend/dist",
+  "buildCommand": "node scripts/build.js",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/(.*)",
