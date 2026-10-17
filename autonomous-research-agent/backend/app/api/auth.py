@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
-from app.core.auth import get_auth_service, get_current_user
+from app.core.auth import get_auth_service, get_current_user, verify_firebase_bearer_token
 from app.core.config import settings
-from app.models.auth import AccountCreate, AuthResponse, LoginRequest, UserResponse
+from app.models.auth import AccountCreate, AuthResponse, GoogleLoginRequest, LoginRequest, UserResponse
 from app.services.auth_service import AuthService, DuplicateEmailError
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -21,7 +21,12 @@ def _set_session_cookie(response: Response, token: str) -> None:
     response.headers["Cache-Control"] = "no-store"
 
 
-@router.post("/signup", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/signup",
+    response_model=AuthResponse,
+    response_model_exclude_none=True,
+    status_code=status.HTTP_201_CREATED,
+)
 async def signup(
     account: AccountCreate,
     service: AuthService = Depends(get_auth_service),
@@ -36,7 +41,11 @@ async def signup(
     return {"user": user}
 
 
-@router.post("/login", response_model=AuthResponse)
+@router.post(
+    "/login",
+    response_model=AuthResponse,
+    response_model_exclude_none=True,
+)
 async def login(
     credentials: LoginRequest,
     response: Response,
@@ -53,7 +62,34 @@ async def login(
     return {"user": user}
 
 
-@router.get("/me", response_model=UserResponse)
+@router.post("/google", response_model=AuthResponse, response_model_exclude_none=True)
+async def google_auth(
+    payload: GoogleLoginRequest,
+    request: Request,
+    response: Response,
+):
+    """
+    Validates Firebase Google ID token provided in the body or Authorization header,
+    synchronizes researcher document in Firestore, and returns verified user payload.
+    """
+    token = payload.id_token or payload.credential
+    if not token:
+        auth_header = request.headers.get("Authorization") or ""
+        if auth_header.startswith("Bearer "):
+            token = auth_header.split(" ", 1)[1].strip()
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Firebase ID token is required for Google authentication.",
+        )
+
+    user = verify_firebase_bearer_token(token)
+    response.headers["Cache-Control"] = "no-store"
+    return {"user": user}
+
+
+@router.get("/me", response_model=UserResponse, response_model_exclude_none=True)
 async def get_me(
     response: Response,
     user: dict = Depends(get_current_user),

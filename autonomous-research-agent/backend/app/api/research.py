@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from app.core.auth import get_optional_user
+from app.core.auth import get_current_user
 from app.models.research import ResearchRequest
 from app.models.report import ResearchResponse, ResearchHistoryResponse
 from app.agents.research_agent import research_agent
@@ -13,7 +13,7 @@ logger = logging.getLogger("api_research")
 router = APIRouter(
     prefix="/research",
     tags=["Research"],
-    dependencies=[Depends(get_optional_user)],
+    dependencies=[Depends(get_current_user)],
 )
 
 
@@ -24,13 +24,15 @@ router = APIRouter(
     summary="Start new autonomous research task",
     description="Accepts a research question, performs web search, claim extraction, fact checking, and report generation."
 )
-async def start_research(request: ResearchRequest, user: dict = Depends(get_optional_user)):
+async def start_research(request: ResearchRequest, user: dict = Depends(get_current_user)):
     """
     Endpoint to trigger autonomous research and fact-checking workflow.
+    Tied securely to the authenticated researcher's UID.
     """
-    logger.info(f"Received research request for question: '{request.question}'")
+    user_uid = user.get("uid") or user.get("id")
+    logger.info(f"Received research request from user '{user_uid}' for question: '{request.question}'")
     try:
-        response = research_agent.run_research(question=request.question, owner_id=user["id"])
+        response = research_agent.run_research(question=request.question, owner_id=user_uid)
         return response
     except TavilyServiceError as error:
         logger.warning("Source retrieval failed: %s", error)
@@ -68,14 +70,16 @@ async def start_research(request: ResearchRequest, user: dict = Depends(get_opti
     summary="Retrieve research session by ID",
     description="Fetches stored research report, fact-check matrix, and sources from Firestore."
 )
-async def get_research(research_id: str, user: dict = Depends(get_optional_user)):
+async def get_research(research_id: str, user: dict = Depends(get_current_user)):
     """
     Retrieve stored research session details by research_id.
+    Ensures users can only access their own research records.
     """
-    logger.info(f"Fetching research report for ID: '{research_id}'")
-    session_data = firebase_service.get_research(research_id, owner_id=user["id"])
+    user_uid = user.get("uid") or user.get("id")
+    logger.info(f"Fetching research report for ID: '{research_id}' by user: '{user_uid}'")
+    session_data = firebase_service.get_research(research_id, owner_id=user_uid)
     if not session_data:
-        logger.warning(f"Research session with ID '{research_id}' not found.")
+        logger.warning(f"Research session with ID '{research_id}' not found or belongs to another researcher.")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Research report with ID '{research_id}' was not found."
@@ -95,19 +99,20 @@ async def get_research(research_id: str, user: dict = Depends(get_optional_user)
     "",
     response_model=ResearchHistoryResponse,
     summary="List historical research sessions",
-    description="Returns paginated list of previously completed research sessions."
+    description="Returns paginated list of previously completed research sessions for the authenticated researcher."
 )
 async def get_research_history(
     page: int = Query(default=1, ge=1, description="Page number starting at 1"),
     limit: int = Query(default=10, ge=1, le=50, description="Items per page (1 to 50)"),
-    user: dict = Depends(get_optional_user),
+    user: dict = Depends(get_current_user),
 ):
     """
-    Fetch paginated research history items sorted by creation time descending.
+    Fetch paginated research history items sorted by creation time descending for current user.
     """
-    logger.info(f"Fetching research history - page={page}, limit={limit}")
+    user_uid = user.get("uid") or user.get("id")
+    logger.info(f"Fetching research history for user '{user_uid}' - page={page}, limit={limit}")
     try:
-        history = firebase_service.get_research_history(page=page, limit=limit, owner_id=user["id"])
+        history = firebase_service.get_research_history(page=page, limit=limit, owner_id=user_uid)
         return ResearchHistoryResponse(**history)
     except Exception as e:
         logger.error(f"Error fetching research history: {e}")

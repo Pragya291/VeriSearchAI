@@ -33,10 +33,49 @@ export async function checkBackendHealth() {
 // Local storage keys for resilient offline/fallback state
 const STORAGE_KEYS = {
   USER: 'verisearchai:current_user',
+  TOKEN: 'verisearchai:auth_token',
   HISTORY: 'verisearchai:research_history',
   SAVED: 'verisearchai:saved_research',
   SOURCES: 'verisearchai:sources_cache',
 }
+
+let memoryToken = null
+try {
+  memoryToken = localStorage.getItem(STORAGE_KEYS.TOKEN)
+} catch {
+  // ignore
+}
+
+export function setAuthToken(token) {
+  memoryToken = token
+  try {
+    if (token) {
+      localStorage.setItem(STORAGE_KEYS.TOKEN, token)
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.TOKEN)
+    }
+  } catch {
+    // ignore
+  }
+}
+
+export function getAuthToken() {
+  if (memoryToken) return memoryToken
+  try {
+    return localStorage.getItem(STORAGE_KEYS.TOKEN)
+  } catch {
+    return null
+  }
+}
+
+// Request interceptor: attach Firebase Bearer token to all outgoing requests
+api.interceptors.request.use(async (config) => {
+  const token = getAuthToken()
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
 
 // Initialize local mock history if not present
 function getStoredHistory() {
@@ -75,6 +114,50 @@ function saveStoredHistory(items) {
 // AUTHENTICATION API
 // ==========================================
 
+export async function loginWithGoogleToken(idToken, firebaseUser = null) {
+  setAuthToken(idToken)
+  try {
+    const res = await api.post('/api/auth/google', { id_token: idToken }, {
+      headers: { Authorization: `Bearer ${idToken}` }
+    })
+    if (res.data?.user) {
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(res.data.user))
+      return res.data.user
+    }
+  } catch (backendError) {
+    console.warn('Backend /api/auth/google verification issue:', backendError?.message)
+    try {
+      const meRes = await api.get('/api/me', {
+        headers: { Authorization: `Bearer ${idToken}` }
+      })
+      if (meRes.data) {
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(meRes.data))
+        return meRes.data
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // Graceful client fallback if backend is offline
+  if (firebaseUser) {
+    const fallbackUser = {
+      id: firebaseUser.uid,
+      uid: firebaseUser.uid,
+      full_name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Researcher'),
+      email: firebaseUser.email,
+      profilePhoto: firebaseUser.photoURL || '',
+      avatar_url: firebaseUser.photoURL || '',
+      provider: 'google.com',
+      role: 'Researcher',
+    }
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(fallbackUser))
+    return fallbackUser
+  }
+
+  return null
+}
+
 export async function login(payload) {
   try {
     const res = await api.post('/api/auth/login', payload)
@@ -84,7 +167,6 @@ export async function login(payload) {
     }
     return res.data
   } catch (backendError) {
-    // If backend is unreachable or returns error, allow demo login
     console.warn('Backend login endpoint unavailable or errored. Using demo session.', backendError?.message)
     const demoUser = {
       id: 'usr-demo-01',
@@ -120,13 +202,22 @@ export async function signup(payload) {
 
 export async function getCurrentUser() {
   try {
-    const res = await api.get('/api/auth/me')
+    const res = await api.get('/api/me')
     if (res.data) {
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(res.data))
       return res.data
     }
   } catch (backendError) {
-    // Return stored session user if present
+    try {
+      const altRes = await api.get('/api/auth/me')
+      if (altRes.data) {
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(altRes.data))
+        return altRes.data
+      }
+    } catch {
+      // ignore
+    }
+
     const local = localStorage.getItem(STORAGE_KEYS.USER)
     if (local) {
       try {
@@ -146,6 +237,7 @@ export async function logout() {
   } catch (err) {
     console.warn('Logout API error:', err)
   } finally {
+    setAuthToken(null)
     localStorage.removeItem(STORAGE_KEYS.USER)
   }
 }

@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -37,10 +38,21 @@ class LoginRequest(BaseModel):
         return email
 
 
+class GoogleLoginRequest(BaseModel):
+    id_token: Optional[str] = None
+    credential: Optional[str] = None
+
+
 class UserResponse(BaseModel):
     id: str
     full_name: str
     email: str
+    uid: Optional[str] = None
+    profilePhoto: Optional[str] = None
+    avatar_url: Optional[str] = None
+    auth_provider: Optional[str] = None
+    provider: Optional[str] = None
+    role: Optional[str] = None
 
 
 class AuthResponse(BaseModel):

@@ -99,7 +99,24 @@ export function Sidebar({ className = '', onNavClick }) {
         {/* User Card Pill matching reference image */}
         <div className="flex items-center justify-between rounded-2xl bg-[#F8FAFC] p-2.5 border border-slate-200/80 shadow-2xs">
           <Link to="/app/profile" onClick={onNavClick} className="flex items-center gap-2.5 min-w-0 flex-1 group">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white text-xs font-bold shadow-2xs">
+            {user?.profilePhoto || user?.avatar_url || user?.photoURL ? (
+              <img
+                src={user.profilePhoto || user.avatar_url || user.photoURL}
+                alt={user?.full_name || 'User Avatar'}
+                className="h-9 w-9 shrink-0 rounded-full object-cover border border-slate-200/90 shadow-2xs"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                  if (e.currentTarget.nextElementSibling) {
+                    e.currentTarget.nextElementSibling.style.display = 'flex'
+                  }
+                }}
+              />
+            ) : null}
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white text-xs font-bold shadow-2xs ${
+                user?.profilePhoto || user?.avatar_url || user?.photoURL ? 'hidden' : ''
+              }`}
+            >
               {getInitials(user?.full_name)}
             </div>
             <div className="min-w-0 pr-1">

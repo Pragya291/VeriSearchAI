@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     AUTH_SESSION_DAYS: int = 14
     AUTH_COOKIE_NAME: str = "verisearchai_session"
     AUTH_COOKIE_SECURE: bool = False
+    GOOGLE_CLIENT_ID: Optional[str] = None
     
     # Firebase Settings
     FIREBASE_PROJECT_ID: Optional[str] = None
@@ -59,7 +60,12 @@ class Settings(BaseSettings):
                 item_clean = item.strip()
                 if item_clean and item_clean not in origins:
                     origins.append(item_clean)
-        return list(set(origins))
+        cleaned_origins = []
+        for o in origins:
+            c = o.strip().rstrip("/")
+            if c and c not in cleaned_origins:
+                cleaned_origins.append(c)
+        return cleaned_origins
 
 
 settings = Settings()

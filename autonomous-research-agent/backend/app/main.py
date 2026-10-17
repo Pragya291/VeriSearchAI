@@ -1,9 +1,11 @@
 import logging
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Depends, Request, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.core.auth import get_current_user
+from app.models.auth import UserResponse
 from app.api.health import router as health_router
 from app.api.auth import router as auth_router
 from app.api.research import router as research_router
@@ -36,6 +38,19 @@ app.add_middleware(
 app.include_router(health_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
 app.include_router(research_router, prefix="/api")
+
+
+@app.get(
+    "/api/me",
+    response_model=UserResponse,
+    response_model_exclude_none=True,
+    tags=["Authentication"],
+    summary="Get authenticated user profile",
+)
+async def get_authenticated_user(response: Response, user: dict = Depends(get_current_user)):
+    """Returns currently authenticated researcher profile."""
+    response.headers["Cache-Control"] = "no-store"
+    return user
 
 
 # Exception Handlers

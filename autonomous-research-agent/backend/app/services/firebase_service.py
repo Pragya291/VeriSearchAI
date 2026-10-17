@@ -201,6 +201,78 @@ class FirebaseService:
             "items": items
         }
 
+    USERS_COLLECTION = "users"
+
+    def upsert_user(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Stores or updates authenticated user profile in Firestore 'users' collection.
+        Fields: uid, name, email, profilePhoto, provider, createdAt, lastLoginAt.
+        Preserves existing createdAt and avoids duplicate entries.
+        """
+        uid = user_data.get("uid")
+        if not uid:
+            raise ValueError("User UID is required for upsert_user.")
+
+        now_iso = datetime.now(timezone.utc).isoformat()
+        db = self._get_db()
+
+        if db is not None:
+            try:
+                user_ref = db.collection(self.USERS_COLLECTION).document(uid)
+                doc = user_ref.get()
+                if doc.exists:
+                    existing = doc.to_dict() or {}
+                    created_at = existing.get("createdAt") or existing.get("created_at") or now_iso
+                else:
+                    created_at = user_data.get("createdAt") or now_iso
+
+                payload = {
+                    "uid": uid,
+                    "name": user_data.get("name") or user_data.get("full_name") or "",
+                    "email": (user_data.get("email") or "").lower().strip(),
+                    "profilePhoto": user_data.get("profilePhoto") or user_data.get("avatar_url") or "",
+                    "provider": user_data.get("provider") or "google.com",
+                    "createdAt": created_at,
+                    "lastLoginAt": now_iso,
+                }
+                user_ref.set(payload, merge=True)
+                logger.info(f"Upserted user in Firestore: {uid}")
+                return payload
+            except Exception as e:
+                logger.error(f"Firestore error in upsert_user for {uid}: {e}")
+
+        # In-memory store fallback
+        users_store = self._in_memory_store.setdefault("__users__", {})
+        existing = users_store.get(uid, {})
+        created_at = existing.get("createdAt") or now_iso
+        payload = {
+            "uid": uid,
+            "name": user_data.get("name") or user_data.get("full_name") or "",
+            "email": (user_data.get("email") or "").lower().strip(),
+            "profilePhoto": user_data.get("profilePhoto") or user_data.get("avatar_url") or "",
+            "provider": user_data.get("provider") or "google.com",
+            "createdAt": created_at,
+            "lastLoginAt": now_iso,
+        }
+        users_store[uid] = payload
+        return payload
+
+    def get_user(self, uid: str) -> Optional[Dict[str, Any]]:
+        """Retrieves user document from Firestore or in-memory fallback."""
+        if not uid:
+            return None
+        db = self._get_db()
+        if db is not None:
+            try:
+                doc = db.collection(self.USERS_COLLECTION).document(uid).get()
+                if doc.exists:
+                    return doc.to_dict()
+            except Exception as e:
+                logger.error(f"Firestore error in get_user for {uid}: {e}")
+
+        users_store = self._in_memory_store.get("__users__", {})
+        return users_store.get(uid)
+
 
 # Singleton service instance
 firebase_service = FirebaseService()
