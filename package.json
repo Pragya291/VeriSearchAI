@@ -5,7 +5,7 @@
     "dev": "npm --prefix autonomous-research-agent/frontend run dev",
     "dev:frontend": "npm --prefix autonomous-research-agent/frontend run dev",
     "dev:backend": "cd autonomous-research-agent/backend && venv\\Scripts\\python.exe -m uvicorn app.main:app --port 8000 --reload",
-    "build": "npm --prefix autonomous-research-agent/frontend run build",
+    "build": "npm --prefix autonomous-research-agent/frontend install && npm --prefix autonomous-research-agent/frontend run build",
     "lint": "npm --prefix autonomous-research-agent/frontend run lint"
   },
   "dependencies": {
