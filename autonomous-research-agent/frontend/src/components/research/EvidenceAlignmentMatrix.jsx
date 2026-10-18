@@ -1,33 +1,32 @@
 import { MetricCard } from './MetricCard'
 
 export function EvidenceAlignmentMatrix({
-  evidenceStrength = 87,
-  sourceAgreement = 82,
-  researchCoverage = 89,
+  evidenceStrength = 85,
+  sourceAgreement = 80,
+  researchCoverage = 88,
   conflictLevel = 'Low',
   className = '',
 }) {
-  // Determine dynamic subtitle descriptions based on values
   const evidenceSubtitle =
     evidenceStrength >= 80
-      ? 'Strong consensus'
+      ? 'Strong corroborating evidence'
       : evidenceStrength >= 65
-      ? 'Moderate consensus'
-      : 'Emerging consensus'
+      ? 'Moderate empirical support'
+      : 'Preliminary or inconclusive data'
 
   const agreementSubtitle =
     sourceAgreement >= 80
-      ? 'Consistent data'
+      ? 'Consistent multi-source consensus'
       : sourceAgreement >= 60
-      ? 'Slight divergence'
-      : 'Conflicting perspectives'
+      ? 'Contextual caveats noted'
+      : 'Conflicting perspectives documented'
 
   const coverageSubtitle =
     researchCoverage >= 85
-      ? 'Broad dataset'
+      ? 'Comprehensive source sample'
       : researchCoverage >= 70
-      ? 'Standard dataset'
-      : 'Limited sampling'
+      ? 'Standard representative sample'
+      : 'Limited source availability'
 
   const normalizedConflict =
     typeof conflictLevel === 'string'
@@ -41,38 +40,38 @@ export function EvidenceAlignmentMatrix({
   const conflictConfig = {
     Low: {
       color: 'green',
-      progress: 25,
-      subtitle: 'Minimal conflicts',
+      progress: 20,
+      subtitle: 'Minimal dissenting evidence',
     },
     Moderate: {
       color: 'amber',
       progress: 55,
-      subtitle: 'Moderate divergence',
+      subtitle: 'Moderate methodological variance',
     },
     High: {
       color: 'rose',
       progress: 85,
-      subtitle: 'Substantial conflicts',
+      subtitle: 'Directly contradictory findings',
     },
   }[normalizedConflict] || {
     color: 'green',
-    progress: 25,
-    subtitle: 'Minimal conflicts',
+    progress: 20,
+    subtitle: 'Minimal dissenting evidence',
   }
 
   return (
     <section
-      className={`rounded-[22px] border border-slate-200/80 bg-white p-6 sm:p-7 shadow-[0_2px_12px_rgba(0,0,0,0.03)] ${className}`}
+      className={`rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-7 shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.25)] transition-colors ${className}`}
       aria-label="Evidence Alignment Matrix"
     >
-      <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mb-5">
+      <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-5">
         Evidence Alignment Matrix
       </h2>
 
       {/* 2x2 Grid of Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         <MetricCard
-          label="Evidence Alignment"
+          label="Evidence Strength"
           value={`${evidenceStrength}%`}
           progress={evidenceStrength}
           color="blue"

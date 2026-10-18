@@ -299,168 +299,112 @@ export async function createResearch(payload) {
       return normalized
     }
   } catch (backendError) {
-    console.warn('Backend research API call failed. Generating verified synthesis response.', backendError?.message)
+    const errorMsg =
+      backendError.response?.data?.detail ||
+      backendError.message ||
+      'Backend research service is currently unavailable.'
+    throw new Error(errorMsg)
+  }
+}
+
+export async function createResearchStream({ question, onProgress, onComplete, onError, signal }) {
+  const token = getAuthToken()
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'text/event-stream',
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
   }
 
-  // Resilient synthesis response for offline / instant evaluation
-  await new Promise((resolve) => setTimeout(resolve, 1400))
+  const endpoint = `${apiBase}/api/research/stream`
 
-  const cleanQ = question.trim()
-  const lowerQ = cleanQ.toLowerCase()
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify({ question }),
+      signal,
+    })
 
-  // Generate deterministic dynamic confidence score based on query hash
-  let queryHash = 0
-  for (let i = 0; i < cleanQ.length; i++) {
-    queryHash = (queryHash * 31 + cleanQ.charCodeAt(i)) & 0xffffffff
+    if (!response.ok) {
+      let detail = 'Verification request failed'
+      try {
+        const errJson = await response.json()
+        detail = errJson.detail || detail
+      } catch {
+        detail = `Server returned status ${response.status} (${response.statusText})`
+      }
+      const err = new Error(detail)
+      err.status = response.status
+      onError?.(err)
+      return
+    }
+
+    if (!response.body) {
+      throw new Error('ReadableStream is not supported by your browser.')
+    }
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const blocks = buffer.split('\n\n')
+      buffer = blocks.pop() || ''
+
+      for (const block of blocks) {
+        if (!block.trim()) continue
+
+        let eventType = 'message'
+        let dataStr = ''
+
+        const lines = block.split('\n')
+        for (const line of lines) {
+          if (line.startsWith('event:')) {
+            eventType = line.replace('event:', '').trim()
+          } else if (line.startsWith('data:')) {
+            dataStr = line.replace('data:', '').trim()
+          }
+        }
+
+        if (!dataStr) continue
+
+        try {
+          const payload = JSON.parse(dataStr)
+
+          if (eventType === 'error' || payload.error) {
+            onError?.(new Error(payload.detail || payload.message || 'Research processing error'))
+            return
+          }
+
+          if (eventType === 'complete' || payload.stage === 'completed') {
+            const rawResult = payload.result || payload
+            const normalized = normalizeResearchResponse(rawResult)
+            const current = getStoredHistory()
+            saveStoredHistory([normalized, ...current.filter((item) => item.research_id !== normalized.research_id)])
+            onComplete?.(normalized)
+            return
+          }
+
+          onProgress?.(payload)
+        } catch (jsonErr) {
+          console.warn('Failed to parse SSE JSON chunk:', dataStr, jsonErr)
+        }
+      }
+    }
+  } catch (err) {
+    if (signal?.aborted) {
+      console.info('Research stream aborted.')
+      return
+    }
+    onError?.(err)
   }
-  const dynamicVariance = Math.abs(queryHash % 21) // 0 to 20 variance
-
-  let verdict = 'SUPPORTED'
-  let confidence = Math.min(94, Math.max(68, 76 + (dynamicVariance % 16) - 5))
-  let evidenceStrength = Math.min(98, confidence + 2)
-  let sourceAgreement = Math.max(60, confidence - 6)
-  let conflictLevel = 'Low'
-
-  if (lowerQ.includes('myth') || lowerQ.includes('fake') || lowerQ.includes('flat earth') || lowerQ.includes('vaccine causes autism')) {
-    verdict = 'FALSE'
-    confidence = 91 + (dynamicVariance % 6)
-    evidenceStrength = 94
-    sourceAgreement = 90
-    conflictLevel = 'Low'
-  } else if (lowerQ.includes('fasting') || lowerQ.includes('longevity') || lowerQ.includes('coffee') || lowerQ.includes('5g') || lowerQ.includes('crypto')) {
-    verdict = 'MIXED EVIDENCE'
-    confidence = 58 + (dynamicVariance % 14)
-    evidenceStrength = 65
-    sourceAgreement = 58
-    conflictLevel = 'High'
-  } else if (lowerQ.includes('cure') || lowerQ.includes('miracle') || lowerQ.includes('alien') || lowerQ.includes('telepathy')) {
-    verdict = 'UNVERIFIED'
-    confidence = 38 + (dynamicVariance % 12)
-    evidenceStrength = 40
-    sourceAgreement = 45
-    conflictLevel = 'Moderate'
-  }
-
-  const generatedReport = {
-    research_id: `res-${Date.now()}`,
-    question: cleanQ,
-    verdict,
-    confidence,
-    status: 'completed',
-    created_at: new Date().toISOString(),
-    completed_at: new Date().toISOString(),
-    source_count: 8,
-    claim_count: 3,
-    supporting_count: verdict === 'FALSE' ? 1 : 6,
-    conflicting_count: verdict === 'FALSE' ? 6 : verdict === 'MIXED EVIDENCE' ? 3 : 1,
-    independent_count: 6,
-    evidence_strength: evidenceStrength,
-    source_agreement: sourceAgreement,
-    research_coverage: 89,
-    conflict_level: conflictLevel,
-    summary: `Based on an autonomous multi-source synthesis, the inquiry "${cleanQ}" yielded high-credibility peer-reviewed findings and official datasets. The evidence indicates a verdict of ${verdict} with an aggregated confidence score of ${confidence}%.`,
-    verdict_description: `Our cross-referenced analysis of independent journals, institutional reports, and verified domains indicates ${verdict.toLowerCase()} status with ${confidence}% empirical confidence.`,
-    claims: [
-      {
-        claim: `Primary empirical literature supports core tenets relevant to "${cleanQ.slice(0, 70)}..."`,
-        verdict: verdict === 'FALSE' ? 'Contradicted' : 'Supported',
-        confidence: 0.88,
-        explanation: 'Systematic evaluations across multiple peer-reviewed publications demonstrate consistent findings under controlled conditions.',
-        supporting_sources: ['https://www.nature.com/', 'https://www.ncbi.nlm.nih.gov/'],
-      },
-      {
-        claim: 'Demographic and methodological variations yield slight differential outcomes in subgroup analyses.',
-        verdict: 'Partially Supported',
-        confidence: 0.74,
-        explanation: 'Minor observational discrepancies occur when examining variable dosages, durations, or heterogeneous cohort baselines.',
-        supporting_sources: ['https://www.health.harvard.edu/'],
-      },
-      {
-        claim: 'Uncontrolled anecdotal claims diverge from randomized prospective outcomes.',
-        verdict: 'Contradicted',
-        confidence: 0.82,
-        explanation: 'Rigorous control protocols eliminate placebo spikes observed in unverified survey representations.',
-        supporting_sources: ['https://www.cdc.gov/'],
-      },
-    ],
-    contradictions: [
-      'A subset of observational studies with limited sample sizes reported inconclusive statistical variance.',
-      'Potential confounding factors in observational self-reporting require careful qualification when interpreting broad outcomes.',
-    ],
-    sources: [
-      {
-        title: `Comprehensive Systematic Review: Evidence Regarding ${cleanQ}`,
-        url: 'https://www.nature.com/articles/evidence-analysis',
-        source_name: 'nature.com',
-        published_date: '2024-02-12',
-        snippet: `Scientific meta-analysis synthesizing 42 independent trials examining parameters related to ${cleanQ}. Statistically significant correlations observed across primary endpoints.`,
-        source_type: 'Research Paper',
-        credibility_score: 'High',
-        relevance_score: 0.96,
-        supports_claim: verdict !== 'FALSE',
-        evidence_strength: 'Strong',
-      },
-      {
-        title: 'Clinical Assessment and Consensus Guidelines',
-        url: 'https://www.health.harvard.edu/research/consensus',
-        source_name: 'health.harvard.edu',
-        published_date: '2024-01-18',
-        snippet: 'Institutional medical analysis confirming verified therapeutic and physiological benchmarks with extensive patient cohort monitoring.',
-        source_type: 'Academic',
-        credibility_score: 'High',
-        relevance_score: 0.92,
-        supports_claim: verdict !== 'FALSE',
-        evidence_strength: 'Strong',
-      },
-      {
-        title: 'National Health and Epidemiological Survey Database',
-        url: 'https://www.cdc.gov/data-reports/health-metrics',
-        source_name: 'cdc.gov',
-        published_date: '2023-11-04',
-        snippet: 'Federal public health statistics tracking longitudinal outcome measures and population-wide health indicators across a 10-year span.',
-        source_type: 'Government',
-        credibility_score: 'High',
-        relevance_score: 0.89,
-        supports_claim: true,
-        evidence_strength: 'Strong',
-      },
-      {
-        title: 'Critical Counter-Analysis and Methodological Re-examination',
-        url: 'https://www.sciencedirect.com/article/methodology-critique',
-        source_name: 'sciencedirect.com',
-        published_date: '2023-08-25',
-        snippet: 'Some sources provide evidence that does not fully align with the overall conclusion. Certain uncontrolled testing methodologies showed divergent outliers.',
-        source_type: 'Academic',
-        credibility_score: 'High',
-        relevance_score: 0.84,
-        supports_claim: false,
-        evidence_strength: 'Moderate',
-        conflict_explanation: 'Identifies potential confounding factors and variance when testing environments lack standardized controls.',
-      },
-    ],
-    report: `# Verification Report: ${cleanQ}
-
-## Executive Summary
-An exhaustive multi-source verification was executed across authoritative scientific repositories, clinical trial registries, and government health bodies.
-
-## Key Findings
-- **Consensus Verdict**: ${verdict} (${confidence}% confidence).
-- **Core Alignment**: Independent sources converge on verified physiological or structural indicators.
-- **Identified Nuances**: Discrepancies primarily emerge from varying test durations and self-reported survey limitations.`,
-    metadata: {
-      search_count: 12,
-      source_count: 8,
-      processing_time: 2.75,
-      depth: options.depth || 'Standard',
-      mode: options.mode || 'deep',
-    },
-  }
-
-  // Persist locally
-  const current = getStoredHistory()
-  saveStoredHistory([generatedReport, ...current])
-
-  return generatedReport
 }
 
 export async function getResearchResult(researchId) {

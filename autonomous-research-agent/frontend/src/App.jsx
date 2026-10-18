@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider'
+import { ThemeProvider } from './context/ThemeContext'
 import { AppLayout } from './components/layout/AppLayout'
 
 // Public Pages
@@ -27,10 +28,10 @@ function RootGateway() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4 shadow-sm">
           <img src="/verisearch-icon.png" alt="VeriSearch AI" className="h-6 w-6 animate-pulse" />
-          <span className="text-sm font-medium text-slate-700">Loading VeriSearch AI...</span>
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Loading VeriSearch AI...</span>
         </div>
       </div>
     )
@@ -77,43 +78,45 @@ function PageMetadata() {
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <PageMetadata />
-        <Routes>
-          {/* Initial Entry Route: Starts at Login/Signup page */}
-          <Route path="/" element={<RootGateway />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+      <ThemeProvider>
+        <AuthProvider>
+          <PageMetadata />
+          <Routes>
+            {/* Initial Entry Route: Starts at Login/Signup page */}
+            <Route path="/" element={<RootGateway />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
 
-          {/* Marketing & Informational Pages */}
-          <Route path="/home" element={<Home />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/features" element={<Features />} />
+            {/* Marketing & Informational Pages */}
+            <Route path="/home" element={<Home />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/features" element={<Features />} />
 
-          {/* Protected Application Routes under /app */}
-          <Route path="/app" element={<AppLayout />}>
-            <Route index element={<Navigate to="/app/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="research" element={<Research />} />
-            <Route path="results/:id" element={<Results />} />
-            <Route path="report/:id" element={<Results />} />
-            <Route path="history" element={<History />} />
-            <Route path="saved" element={<SavedResearch />} />
-            <Route path="sources" element={<Sources />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
+            {/* Protected Application Routes under /app */}
+            <Route path="/app" element={<AppLayout />}>
+              <Route index element={<Navigate to="/app/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="research" element={<Research />} />
+              <Route path="results/:id" element={<Results />} />
+              <Route path="report/:id" element={<Results />} />
+              <Route path="history" element={<History />} />
+              <Route path="saved" element={<SavedResearch />} />
+              <Route path="sources" element={<Sources />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
 
-          {/* Fallback routes */}
-          <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
-          <Route path="/profile" element={<Navigate to="/app/profile" replace />} />
-          <Route path="/new-research" element={<Navigate to="/app/research" replace />} />
-          <Route path="/history" element={<Navigate to="/app/history" replace />} />
-          <Route path="/saved" element={<Navigate to="/app/saved" replace />} />
-          <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
+            {/* Fallback routes */}
+            <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
+            <Route path="/profile" element={<Navigate to="/app/profile" replace />} />
+            <Route path="/new-research" element={<Navigate to="/app/research" replace />} />
+            <Route path="/history" element={<Navigate to="/app/history" replace />} />
+            <Route path="/saved" element={<Navigate to="/app/saved" replace />} />
+            <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

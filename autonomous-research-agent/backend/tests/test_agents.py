@@ -176,3 +176,43 @@ def test_confidence_changes_with_source_quality_and_agreement():
     weak_confidence = research_agent._calculate_confidence([weak_source], [weak_claim], ["Sources disagree."])
 
     assert strong_confidence > weak_confidence
+
+
+@pytest.mark.anyio
+@patch("app.services.tavily_service.tavily_service.search")
+@patch("app.services.gemini_service.gemini_service.extract_claims")
+@patch("app.services.gemini_service.gemini_service.verify_claim")
+@patch("app.services.gemini_service.gemini_service.detect_contradictions")
+@patch("app.services.gemini_service.gemini_service.generate_summary_and_report")
+async def test_stream_research_orchestration(
+    mock_gen_report, mock_contradictions, mock_verify, mock_claims, mock_tavily
+):
+    mock_tavily.return_value = [
+        Source(title="Nature Study", url="https://nature.com/study", snippet="Cognitive benefits proven", source_name="nature.com", relevance_score=0.92)
+    ]
+    mock_claims.return_value = ["Exercise boosts BDNF."]
+    mock_verify.return_value = {
+        "claim": "Exercise boosts BDNF.",
+        "verdict": "Supported",
+        "confidence": 0.9,
+        "explanation": "Supported by neuroscience data.",
+        "supporting_sources": ["https://nature.com/study"],
+    }
+    mock_contradictions.return_value = []
+    mock_gen_report.return_value = {
+        "summary": "Exercise promotes brain health.",
+        "report": "# Report\nExercise boosts BDNF.",
+    }
+
+    events = []
+    async for event in research_agent.stream_research(question="Does exercise improve brain health?"):
+        events.append(event)
+
+    assert len(events) >= 5
+    # Verify stages were emitted
+    full_stream = "".join(events)
+    assert "request_accepted" in full_stream
+    assert "searching_sources" in full_stream
+    assert "completed" in full_stream
+    assert "Exercise boosts BDNF." in full_stream
+

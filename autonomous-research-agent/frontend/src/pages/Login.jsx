@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { Modal } from '../components/ui/Modal'
 import { useAuth } from '../auth/useAuth'
+import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { ResearchIllustration } from '../components/ResearchIllustration'
 import { Mail, Lock, Eye, EyeOff, User, UserPlus, ArrowRight, CheckCircle2, ShieldCheck, Check } from 'lucide-react'
 
@@ -210,18 +211,23 @@ export function Login({ initialMode = 'login' }) {
   }
 
   return (
-    <div className="relative min-h-screen lg:h-screen w-full bg-[#F8FAFF] flex items-center justify-center p-4 sm:p-6 lg:py-3 lg:px-8 overflow-x-hidden overflow-y-auto lg:overflow-hidden selection:bg-blue-100 selection:text-blue-900 font-['Plus_Jakarta_Sans',sans-serif] no-scrollbar">
+    <div className="relative min-h-screen lg:h-screen w-full bg-[#F8FAFF] dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 lg:py-3 lg:px-8 overflow-x-hidden overflow-y-auto lg:overflow-hidden selection:bg-blue-100 selection:text-blue-900 font-['Plus_Jakarta_Sans',sans-serif] no-scrollbar transition-colors">
+      {/* Top-Right Theme Toggle */}
+      <div className="absolute top-4 right-4 z-30">
+        <ThemeToggle />
+      </div>
+
       {/* ============================================================== */}
-      {/* SOFT AMBIENT BACKGROUND GRADIENTS (Exact visual match)         */}
+      {/* SOFT AMBIENT BACKGROUND GRADIENTS                              */}
       {/* ============================================================== */}
       {/* Top-left soft blue radial shape */}
       <div
-        className="pointer-events-none absolute -top-24 -left-24 h-[420px] w-[420px] sm:h-[540px] sm:w-[540px] rounded-full bg-blue-100/60 blur-[100px]"
+        className="pointer-events-none absolute -top-24 -left-24 h-[420px] w-[420px] sm:h-[540px] sm:w-[540px] rounded-full bg-blue-100/60 dark:bg-blue-950/20 blur-[100px]"
         aria-hidden="true"
       />
       {/* Bottom-right soft blue radial shape */}
       <div
-        className="pointer-events-none absolute -bottom-28 -right-28 h-[480px] w-[480px] sm:h-[620px] sm:w-[620px] rounded-full bg-blue-100/50 blur-[110px]"
+        className="pointer-events-none absolute -bottom-28 -right-28 h-[480px] w-[480px] sm:h-[620px] sm:w-[620px] rounded-full bg-blue-100/50 dark:bg-blue-950/20 blur-[110px]"
         aria-hidden="true"
       />
 
@@ -270,19 +276,19 @@ export function Login({ initialMode = 'login' }) {
                 <circle cx="44" cy="44" r="5" fill="currentColor" />
               </svg>
             </div>
-            <span className="text-xl sm:text-2xl font-bold tracking-tight text-[#172554]">
+            <span className="text-xl sm:text-2xl font-bold tracking-tight text-[#172554] dark:text-slate-100">
               VeriSearch AI
             </span>
           </Link>
 
           {/* Headline & Supporting text */}
           <div className="space-y-2">
-            <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-extrabold tracking-tight text-[#172554] leading-[1.08]">
+            <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-extrabold tracking-tight text-[#172554] dark:text-slate-100 leading-[1.08]">
               Smarter<br />
               Research.<br />
-              <span className="text-[#2563EB]">Faster.</span>
+              <span className="text-[#2563EB] dark:text-blue-400">Faster.</span>
             </h1>
-            <p className="text-[#64748B] text-sm sm:text-base leading-relaxed max-w-sm pt-0.5">
+            <p className="text-[#64748B] dark:text-slate-400 text-sm sm:text-base leading-relaxed max-w-sm pt-0.5">
               Get accurate insights, explore deeper, and save time with AI.
             </p>
           </div>
@@ -294,19 +300,19 @@ export function Login({ initialMode = 'login' }) {
         </div>
 
         {/* ============================================================ */}
-        {/* RIGHT SECTION: WHITE LOGIN / SIGNUP CARD                   */}
+        {/* RIGHT SECTION: LOGIN / SIGNUP CARD                         */}
         {/* ============================================================ */}
         <div className="lg:col-span-6 flex justify-center lg:justify-end">
-          <div className="w-full max-w-[440px] rounded-[24px] border border-[#DBEAFE] bg-white p-6 sm:p-7 lg:p-7 shadow-[0_20px_50px_-15px_rgba(37,99,235,0.07),0_4px_16px_-4px_rgba(23,37,84,0.03)] transition-all">
+          <div className="w-full max-w-[440px] rounded-[24px] border border-[#DBEAFE] dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-7 lg:p-7 shadow-[0_20px_50px_-15px_rgba(37,99,235,0.07),0_4px_16px_-4px_rgba(23,37,84,0.03)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.5)] transition-all">
             {/* 1. TABS: Log In & Sign Up */}
-            <div className="flex rounded-xl bg-slate-100/80 p-1 border border-slate-100 mb-4 sm:mb-5">
+            <div className="flex rounded-xl bg-slate-100/80 dark:bg-slate-800 p-1 border border-slate-100 dark:border-slate-700/80 mb-4 sm:mb-5">
               <button
                 type="button"
                 onClick={() => handleTabChange('login')}
                 className={`flex-1 rounded-lg py-2 text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                   activeTab === 'login'
-                    ? 'bg-white text-[#2563EB] shadow-xs border border-[#DBEAFE]'
-                    : 'text-[#64748B] hover:text-[#172554]'
+                    ? 'bg-white dark:bg-slate-900 text-[#2563EB] dark:text-blue-400 shadow-xs border border-[#DBEAFE] dark:border-slate-700'
+                    : 'text-[#64748B] dark:text-slate-400 hover:text-[#172554] dark:hover:text-slate-200'
                 }`}
               >
                 <User className="h-4 w-4" />
@@ -317,8 +323,8 @@ export function Login({ initialMode = 'login' }) {
                 onClick={() => handleTabChange('signup')}
                 className={`flex-1 rounded-lg py-2 text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                   activeTab === 'signup'
-                    ? 'bg-white text-[#2563EB] shadow-xs border border-[#DBEAFE]'
-                    : 'text-[#64748B] hover:text-[#172554]'
+                    ? 'bg-white dark:bg-slate-900 text-[#2563EB] dark:text-blue-400 shadow-xs border border-[#DBEAFE] dark:border-slate-700'
+                    : 'text-[#64748B] dark:text-slate-400 hover:text-[#172554] dark:hover:text-slate-200'
                 }`}
               >
                 <UserPlus className="h-4 w-4" />
@@ -330,7 +336,7 @@ export function Login({ initialMode = 'login' }) {
             {error && (
               <div
                 role="alert"
-                className="mb-5 rounded-xl border border-rose-200 bg-rose-50/90 p-3 text-xs sm:text-[13px] text-rose-700 leading-relaxed flex items-start gap-2"
+                className="mb-5 rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/90 dark:bg-rose-950/40 p-3 text-xs sm:text-[13px] text-rose-700 dark:text-rose-300 leading-relaxed flex items-start gap-2"
               >
                 <span className="font-semibold shrink-0">•</span>
                 <span>{error}</span>
@@ -346,13 +352,13 @@ export function Login({ initialMode = 'login' }) {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] mb-1.5"
+                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] dark:text-slate-300 mb-1.5"
                   >
                     EMAIL
                   </label>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                      <Mail className="h-4.5 w-4.5 text-[#94A3B8]" />
+                      <Mail className="h-4.5 w-4.5 text-[#94A3B8] dark:text-slate-500" />
                     </div>
                     <input
                       id="email"
@@ -363,7 +369,7 @@ export function Login({ initialMode = 'login' }) {
                       placeholder="name@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-xl border border-[#DBEAFE] bg-white pl-10 pr-3.5 py-2.5 text-sm text-[#172554] placeholder:text-[#94A3B8] hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all"
+                      className="w-full rounded-xl border border-[#DBEAFE] dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-3.5 py-2.5 text-sm text-[#172554] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all font-medium"
                     />
                   </div>
                 </div>
@@ -372,13 +378,13 @@ export function Login({ initialMode = 'login' }) {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] mb-1.5"
+                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] dark:text-slate-300 mb-1.5"
                   >
                     PASSWORD
                   </label>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                      <Lock className="h-4.5 w-4.5 text-[#94A3B8]" />
+                      <Lock className="h-4.5 w-4.5 text-[#94A3B8] dark:text-slate-500" />
                     </div>
                     <input
                       id="password"
@@ -389,13 +395,13 @@ export function Login({ initialMode = 'login' }) {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full rounded-xl border border-[#DBEAFE] bg-white pl-10 pr-10 py-2.5 text-sm text-[#172554] placeholder:text-[#94A3B8] hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all tracking-normal"
+                      className="w-full rounded-xl border border-[#DBEAFE] dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-10 py-2.5 text-sm text-[#172554] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all tracking-normal font-medium"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#94A3B8] hover:text-[#64748B] focus:outline-none transition-colors cursor-pointer"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#94A3B8] hover:text-[#64748B] dark:hover:text-slate-300 focus:outline-none transition-colors cursor-pointer"
                     >
                       {showPassword ? (
                         <EyeOff className="h-4.5 w-4.5" />
@@ -408,20 +414,20 @@ export function Login({ initialMode = 'login' }) {
 
                 {/* 4. REMEMBER ME ON LEFT & FORGOT PASSWORD ON RIGHT */}
                 <div className="flex items-center justify-between text-xs sm:text-sm pt-0.5">
-                  <label className="flex items-center gap-2 cursor-pointer text-[#64748B] select-none">
+                  <label className="flex items-center gap-2 cursor-pointer text-[#64748B] dark:text-slate-400 select-none">
                     <input
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="h-4 w-4 rounded border-[#DBEAFE] text-[#2563EB] focus:ring-[#2563EB]/20 accent-[#2563EB] cursor-pointer"
+                      className="h-4 w-4 rounded border-[#DBEAFE] dark:border-slate-700 text-[#2563EB] focus:ring-[#2563EB]/20 accent-[#2563EB] cursor-pointer"
                     />
-                    <span className="font-normal text-[#64748B]">Remember me</span>
+                    <span className="font-normal text-[#64748B] dark:text-slate-400">Remember me</span>
                   </label>
 
                   <button
                     type="button"
                     onClick={() => setResetModalOpen(true)}
-                    className="font-medium text-[#2563EB] hover:text-blue-700 hover:underline transition-colors cursor-pointer"
+                    className="font-medium text-[#2563EB] dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors cursor-pointer"
                   >
                     Forgot password?
                   </button>
@@ -434,7 +440,7 @@ export function Login({ initialMode = 'login' }) {
                     type="button"
                     onClick={handleGoogleSignIn}
                     disabled={googleLoading || loading}
-                    className="w-full flex items-center justify-center gap-3 rounded-xl border border-[#DBEAFE] bg-white px-4 py-2.5 sm:py-2.5 text-sm font-semibold text-[#172554] shadow-xs hover:bg-slate-50 hover:border-blue-300 focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 active:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer"
+                    className="w-full flex items-center justify-center gap-3 rounded-xl border border-[#DBEAFE] dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 sm:py-2.5 text-sm font-semibold text-[#172554] dark:text-slate-200 shadow-xs hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-blue-300 dark:hover:border-slate-600 focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 active:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer"
                   >
                     {googleLoading ? (
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-[#2563EB]" />
@@ -464,8 +470,8 @@ export function Login({ initialMode = 'login' }) {
 
                 {/* 6. SUBTLE HORIZONTAL DIVIDER WITH "or" */}
                 <div className="relative flex items-center justify-center py-1">
-                  <div className="w-full border-t border-[#E2E8F0]" />
-                  <span className="absolute bg-white px-3 text-xs text-[#94A3B8] font-normal">
+                  <div className="w-full border-t border-[#E2E8F0] dark:border-slate-800" />
+                  <span className="absolute bg-white dark:bg-slate-900 px-3 text-xs text-[#94A3B8] dark:text-slate-500 font-normal">
                     or
                   </span>
                 </div>
@@ -475,7 +481,7 @@ export function Login({ initialMode = 'login' }) {
                   <button
                     type="submit"
                     disabled={loading || googleLoading}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-[0.99] text-white py-2.5 sm:py-3 px-4 text-sm font-semibold shadow-sm transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#2563EB]/25"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] dark:bg-blue-600 dark:hover:bg-blue-500 active:scale-[0.99] text-white py-2.5 sm:py-3 px-4 text-sm font-semibold shadow-sm transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#2563EB]/25"
                   >
                     {loading ? (
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
@@ -499,13 +505,13 @@ export function Login({ initialMode = 'login' }) {
                 <div>
                   <label
                     htmlFor="fullName"
-                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] mb-1"
+                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] dark:text-slate-300 mb-1"
                   >
                     FULL NAME
                   </label>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                      <User className="h-4 w-4 text-[#94A3B8]" />
+                      <User className="h-4 w-4 text-[#94A3B8] dark:text-slate-500" />
                     </div>
                     <input
                       id="fullName"
@@ -515,7 +521,7 @@ export function Login({ initialMode = 'login' }) {
                       placeholder="Jane Doe"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full rounded-xl border border-[#DBEAFE] bg-white pl-10 pr-3.5 py-2.5 text-sm text-[#172554] placeholder:text-[#94A3B8] hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all"
+                      className="w-full rounded-xl border border-[#DBEAFE] dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-3.5 py-2.5 text-sm text-[#172554] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all font-medium"
                     />
                   </div>
                 </div>
@@ -524,13 +530,13 @@ export function Login({ initialMode = 'login' }) {
                 <div>
                   <label
                     htmlFor="signupEmail"
-                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] mb-1"
+                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] dark:text-slate-300 mb-1"
                   >
                     EMAIL
                   </label>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                      <Mail className="h-4 w-4 text-[#94A3B8]" />
+                      <Mail className="h-4 w-4 text-[#94A3B8] dark:text-slate-500" />
                     </div>
                     <input
                       id="signupEmail"
@@ -541,7 +547,7 @@ export function Login({ initialMode = 'login' }) {
                       placeholder="name@example.com"
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
-                      className="w-full rounded-xl border border-[#DBEAFE] bg-white pl-10 pr-3.5 py-2.5 text-sm text-[#172554] placeholder:text-[#94A3B8] hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all"
+                      className="w-full rounded-xl border border-[#DBEAFE] dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-3.5 py-2.5 text-sm text-[#172554] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all font-medium"
                     />
                   </div>
                 </div>
@@ -550,13 +556,13 @@ export function Login({ initialMode = 'login' }) {
                 <div>
                   <label
                     htmlFor="signupPassword"
-                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] mb-1"
+                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] dark:text-slate-300 mb-1"
                   >
                     PASSWORD
                   </label>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                      <Lock className="h-4 w-4 text-[#94A3B8]" />
+                      <Lock className="h-4 w-4 text-[#94A3B8] dark:text-slate-500" />
                     </div>
                     <input
                       id="signupPassword"
@@ -566,13 +572,13 @@ export function Login({ initialMode = 'login' }) {
                       placeholder="••••••••"
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
-                      className="w-full rounded-xl border border-[#DBEAFE] bg-white pl-10 pr-10 py-2.5 text-sm text-[#172554] placeholder:text-[#94A3B8] hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all"
+                      className="w-full rounded-xl border border-[#DBEAFE] dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-10 py-2.5 text-sm text-[#172554] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all font-medium"
                     />
                     <button
                       type="button"
                       onClick={() => setShowSignupPassword(!showSignupPassword)}
                       aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#94A3B8] hover:text-[#64748B] focus:outline-none transition-colors cursor-pointer"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#94A3B8] hover:text-[#64748B] dark:hover:text-slate-300 focus:outline-none transition-colors cursor-pointer"
                     >
                       {showSignupPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -587,13 +593,13 @@ export function Login({ initialMode = 'login' }) {
                 <div>
                   <label
                     htmlFor="confirmPassword"
-                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] mb-1"
+                    className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] dark:text-slate-300 mb-1"
                   >
                     CONFIRM PASSWORD
                   </label>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                      <Lock className="h-4 w-4 text-[#94A3B8]" />
+                      <Lock className="h-4 w-4 text-[#94A3B8] dark:text-slate-500" />
                     </div>
                     <input
                       id="confirmPassword"
@@ -603,27 +609,27 @@ export function Login({ initialMode = 'login' }) {
                       placeholder="••••••••"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full rounded-xl border border-[#DBEAFE] bg-white pl-10 pr-3.5 py-2.5 text-sm text-[#172554] placeholder:text-[#94A3B8] hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all"
+                      className="w-full rounded-xl border border-[#DBEAFE] dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-3.5 py-2.5 text-sm text-[#172554] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all font-medium"
                     />
                   </div>
                 </div>
 
                 {/* Terms agreement */}
                 <div className="pt-1">
-                  <label className="flex items-start gap-2 cursor-pointer text-xs text-[#64748B] select-none">
+                  <label className="flex items-start gap-2 cursor-pointer text-xs text-[#64748B] dark:text-slate-400 select-none">
                     <input
                       type="checkbox"
                       checked={agreeTerms}
                       onChange={(e) => setAgreeTerms(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-[#DBEAFE] text-[#2563EB] focus:ring-[#2563EB]/20 accent-[#2563EB] cursor-pointer"
+                      className="mt-0.5 h-4 w-4 rounded border-[#DBEAFE] dark:border-slate-700 text-[#2563EB] focus:ring-[#2563EB]/20 accent-[#2563EB] cursor-pointer"
                     />
                     <span>
                       I agree to the{' '}
-                      <span className="text-[#2563EB] font-medium hover:underline">
+                      <span className="text-[#2563EB] dark:text-blue-400 font-medium hover:underline">
                         Terms of Service
                       </span>{' '}
                       and{' '}
-                      <span className="text-[#2563EB] font-medium hover:underline">
+                      <span className="text-[#2563EB] dark:text-blue-400 font-medium hover:underline">
                         Privacy Policy
                       </span>
                     </span>
@@ -636,7 +642,7 @@ export function Login({ initialMode = 'login' }) {
                     type="button"
                     onClick={handleGoogleSignIn}
                     disabled={googleLoading || loading}
-                    className="w-full flex items-center justify-center gap-3 rounded-xl border border-[#DBEAFE] bg-white px-4 py-2.5 text-sm font-semibold text-[#172554] shadow-xs hover:bg-slate-50 hover:border-blue-300 focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 active:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer"
+                    className="w-full flex items-center justify-center gap-3 rounded-xl border border-[#DBEAFE] dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm font-semibold text-[#172554] dark:text-slate-200 shadow-xs hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-blue-300 dark:hover:border-slate-600 focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 active:bg-slate-100 disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer"
                   >
                     {googleLoading ? (
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-[#2563EB]" />
@@ -666,8 +672,8 @@ export function Login({ initialMode = 'login' }) {
 
                 {/* Divider */}
                 <div className="relative flex items-center justify-center py-1">
-                  <div className="w-full border-t border-[#E2E8F0]" />
-                  <span className="absolute bg-white px-3 text-xs text-[#94A3B8] font-normal">
+                  <div className="w-full border-t border-[#E2E8F0] dark:border-slate-800" />
+                  <span className="absolute bg-white dark:bg-slate-900 px-3 text-xs text-[#94A3B8] dark:text-slate-500 font-normal">
                     or
                   </span>
                 </div>
@@ -676,7 +682,7 @@ export function Login({ initialMode = 'login' }) {
                 <button
                   type="submit"
                   disabled={loading || googleLoading}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] active:scale-[0.99] text-white py-2.5 sm:py-3 px-4 text-sm font-semibold shadow-sm transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#2563EB]/25"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] dark:bg-blue-600 dark:hover:bg-blue-500 active:scale-[0.99] text-white py-2.5 sm:py-3 px-4 text-sm font-semibold shadow-sm transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#2563EB]/25"
                 >
                   {loading ? (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
@@ -691,14 +697,14 @@ export function Login({ initialMode = 'login' }) {
             )}
 
             {/* 8. FOOTER TEXT: Don't have an account? Sign Up / Log In */}
-            <div className="mt-4 pt-2 text-center text-xs sm:text-sm text-[#64748B]">
+            <div className="mt-4 pt-2 text-center text-xs sm:text-sm text-[#64748B] dark:text-slate-400">
               {activeTab === 'login' ? (
                 <>
                   Don't have an account?{' '}
                   <button
                     type="button"
                     onClick={() => handleTabChange('signup')}
-                    className="font-semibold text-[#2563EB] hover:text-blue-700 hover:underline transition-colors cursor-pointer"
+                    className="font-semibold text-[#2563EB] dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors cursor-pointer"
                   >
                     Sign Up
                   </button>
@@ -709,7 +715,7 @@ export function Login({ initialMode = 'login' }) {
                   <button
                     type="button"
                     onClick={() => handleTabChange('login')}
-                    className="font-semibold text-[#2563EB] hover:text-blue-700 hover:underline transition-colors cursor-pointer"
+                    className="font-semibold text-[#2563EB] dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors cursor-pointer"
                   >
                     Log In
                   </button>
@@ -731,21 +737,21 @@ export function Login({ initialMode = 'login' }) {
         >
           {resetSubmitted ? (
             <div className="py-5 text-center space-y-3">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800">
                 <CheckCircle2 className="h-6 w-6" />
               </div>
-              <h4 className="text-base font-bold text-[#172554]">
+              <h4 className="text-base font-bold text-[#172554] dark:text-slate-100">
                 Password Reset Link Sent
               </h4>
-              <p className="text-xs sm:text-sm text-[#64748B] max-w-sm mx-auto leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#64748B] dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
                 We've dispatched password reset instructions to{' '}
-                <strong className="text-[#172554]">{resetEmail}</strong>. Please check your inbox and follow the link.
+                <strong className="text-[#172554] dark:text-slate-200">{resetEmail}</strong>. Please check your inbox and follow the link.
               </p>
               <div className="pt-2">
                 <button
                   type="button"
                   onClick={closeResetModal}
-                  className="rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white px-5 py-2 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+                  className="rounded-xl bg-[#2563EB] hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white px-5 py-2 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
                 >
                   Back to Log In
                 </button>
@@ -753,12 +759,12 @@ export function Login({ initialMode = 'login' }) {
             </div>
           ) : (
             <form onSubmit={handleResetSubmit} className="space-y-4">
-              <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#64748B] dark:text-slate-400 leading-relaxed">
                 Enter your registered researcher email address and we will send you a secure link to reset your password.
               </p>
 
               {resetError && (
-                <div className="rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-xs text-rose-700">
+                <div className="rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/40 p-2.5 text-xs text-rose-700 dark:text-rose-300">
                   {resetError}
                 </div>
               )}
@@ -766,13 +772,13 @@ export function Login({ initialMode = 'login' }) {
               <div>
                 <label
                   htmlFor="resetEmail"
-                  className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] mb-1.5"
+                  className="block text-[11px] font-bold uppercase tracking-wider text-[#172554] dark:text-slate-300 mb-1.5"
                 >
                   EMAIL
                 </label>
                 <div className="relative">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                    <Mail className="h-4.5 w-4.5 text-[#94A3B8]" />
+                    <Mail className="h-4.5 w-4.5 text-[#94A3B8] dark:text-slate-500" />
                   </div>
                   <input
                     id="resetEmail"
@@ -781,7 +787,7 @@ export function Login({ initialMode = 'login' }) {
                     placeholder="name@example.com"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
-                    className="w-full rounded-xl border border-[#DBEAFE] bg-white pl-10 pr-3.5 py-2.5 text-sm text-[#172554] placeholder:text-[#94A3B8] hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all"
+                    className="w-full rounded-xl border border-[#DBEAFE] dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-3.5 py-2.5 text-sm text-[#172554] dark:text-slate-100 placeholder:text-[#94A3B8] dark:placeholder:text-slate-500 hover:border-blue-300 focus:border-[#2563EB] focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 transition-all font-medium"
                   />
                 </div>
               </div>
@@ -790,14 +796,14 @@ export function Login({ initialMode = 'login' }) {
                 <button
                   type="button"
                   onClick={closeResetModal}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs sm:text-sm font-semibold text-[#64748B] hover:bg-slate-50 transition-colors cursor-pointer"
+                  className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-xs sm:text-sm font-semibold text-[#64748B] dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={resetLoading}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-blue-700 text-white px-4 py-2 text-xs sm:text-sm font-semibold shadow-xs transition-colors disabled:opacity-60 cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white px-4 py-2 text-xs sm:text-sm font-semibold shadow-xs transition-colors disabled:opacity-60 cursor-pointer"
                 >
                   {resetLoading ? (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />

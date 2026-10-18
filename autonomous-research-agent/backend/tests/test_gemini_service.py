@@ -6,7 +6,7 @@ from app.models.research import Source, Claim
 
 
 def test_json_extraction_from_markdown():
-    service = GeminiService(api_key="mock_key")
+    service = GeminiService(api_key="AIzaSyMockKeyForTesting123456789")
     
     # Test JSON in code fences
     fenced_text = '```json\n{"verdict": "Supported", "confidence": 0.9}\n```'
@@ -29,7 +29,7 @@ def test_extract_claims(mock_client_cls):
     mock_response.text = '["Global EV sales grew in 2023.", "China leads EV market."]'
     mock_client.models.generate_content.return_value = mock_response
 
-    service = GeminiService(api_key="mock_key")
+    service = GeminiService(api_key="AIzaSyMockKeyForTesting123456789")
     sources = [
         Source(title="EV Growth", url="https://example.com/ev", snippet="EV sales grew by 35%. China leads.", source_name="example.com")
     ]
@@ -52,7 +52,7 @@ def test_verify_claim(mock_client_cls):
     })
     mock_client.models.generate_content.return_value = mock_response
 
-    service = GeminiService(api_key="mock_key")
+    service = GeminiService(api_key="AIzaSyMockKeyForTesting123456789")
     sources = [
         Source(title="EV Growth", url="https://example.com/ev", snippet="EV sales grew by 35%.", source_name="example.com")
     ]
@@ -75,7 +75,7 @@ def test_verify_claim_discards_sources_not_in_retrieved_evidence(mock_client_cls
         "supporting_sources": ["https://example.com/evidence", "https://invented.example/fake"],
     })
     mock_client.models.generate_content.return_value = mock_response
-    service = GeminiService(api_key="mock_key")
+    service = GeminiService(api_key="AIzaSyMockKeyForTesting123456789")
     sources = [Source(title="Evidence", url="https://example.com/evidence", snippet="Evidence text.")]
 
     result = service.verify_claim("Evidence claim", "Evidence question", sources)
@@ -84,7 +84,7 @@ def test_verify_claim_discards_sources_not_in_retrieved_evidence(mock_client_cls
 
 
 def test_verify_claim_no_sources():
-    service = GeminiService(api_key="mock_key")
+    service = GeminiService(api_key="AIzaSyMockKeyForTesting123456789")
     result = service.verify_claim("Random unevidenced claim", "Question?", sources=[])
     assert result["verdict"] == "Unverified"
     assert result["confidence"] == 0.0

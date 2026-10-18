@@ -157,3 +157,31 @@ def test_get_research_history(mock_history):
     assert data["total"] == 1
     assert len(data["items"]) == 1
     assert data["items"][0]["research_id"] == "test-id-123"
+
+
+async def mock_stream_gen(*args, **kwargs):
+    yield 'event: complete\ndata: {"stage": "completed", "status": "completed", "result": {"research_id": "stream-123"}}\n\n'
+
+
+@patch("app.agents.research_agent.research_agent.stream_research", side_effect=mock_stream_gen)
+def test_stream_research_post(mock_stream):
+    client = authenticated_client()
+    response = client.post(
+        "/api/research/stream",
+        json={"question": "Does regular exercise improve brain health?"}
+    )
+    assert response.status_code == 200
+    assert "text/event-stream" in response.headers["content-type"]
+    assert "stream-123" in response.text
+
+
+@patch("app.agents.research_agent.research_agent.stream_research", side_effect=mock_stream_gen)
+def test_stream_research_get(mock_stream):
+    client = authenticated_client()
+    response = client.get(
+        "/api/research/stream?question=Does+regular+exercise+improve+brain+health%3F"
+    )
+    assert response.status_code == 200
+    assert "text/event-stream" in response.headers["content-type"]
+    assert "stream-123" in response.text
+

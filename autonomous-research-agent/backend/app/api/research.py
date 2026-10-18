@@ -1,5 +1,6 @@
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import StreamingResponse
 from app.core.auth import get_current_user
 from app.models.research import ResearchRequest
 from app.models.report import ResearchResponse, ResearchHistoryResponse
@@ -62,6 +63,51 @@ async def start_research(request: ResearchRequest, user: dict = Depends(get_curr
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while executing the research request. Please try again later."
         )
+
+
+@router.post(
+    "/stream",
+    summary="Start new autonomous research task with real-time SSE progress stream",
+    description="Streams real-time agent execution progress as Server-Sent Events, culminating in the final verified research report."
+)
+async def stream_research_post(request: ResearchRequest, user: dict = Depends(get_current_user)):
+    """
+    Streams research stages in real-time as Server-Sent Events (SSE).
+    Each event carries a distinct workflow stage and metadata.
+    """
+    user_uid = user.get("uid") or user.get("id")
+    logger.info(f"Initiating streaming research for user '{user_uid}' question: '{request.question}'")
+    return StreamingResponse(
+        research_agent.stream_research(question=request.question, owner_id=user_uid),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
+    )
+
+
+@router.get(
+    "/stream",
+    summary="Stream research progress via GET (SSE)",
+    description="Streams real-time research progress for GET requests with query parameter question."
+)
+async def stream_research_get(
+    question: str = Query(..., min_length=5, max_length=1000, description="The research question"),
+    user: dict = Depends(get_current_user),
+):
+    user_uid = user.get("uid") or user.get("id")
+    logger.info(f"Initiating streaming research GET for user '{user_uid}' question: '{question}'")
+    return StreamingResponse(
+        research_agent.stream_research(question=question.strip(), owner_id=user_uid),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
+    )
 
 
 @router.get(

@@ -134,10 +134,10 @@ export function Profile() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto min-h-[calc(100vh-2.5rem)] pb-8 flex flex-col justify-between space-y-3 bg-[#F8FAFC]">
+    <div className="max-w-6xl mx-auto min-h-[calc(100vh-2.5rem)] pb-8 flex flex-col justify-between space-y-3 bg-transparent">
       {/* Toast Notification */}
       {(saveSuccess || prefSuccess) && (
-        <div className="fixed top-16 right-6 z-50 flex items-center gap-2.5 rounded-xl border border-[#bbf7d0] bg-[#DCFCE7] px-4 py-2.5 text-xs font-semibold text-[#166534] shadow-lg animate-in slide-in-from-top-4 duration-200">
+        <div className="fixed top-16 right-6 z-50 flex items-center gap-2.5 rounded-xl border border-[#bbf7d0] dark:border-emerald-800/60 bg-[#DCFCE7] dark:bg-emerald-950/80 px-4 py-2.5 text-xs font-semibold text-[#166534] dark:text-emerald-300 shadow-lg animate-in slide-in-from-top-4 duration-200">
           <CheckCircle2 className="h-4 w-4 text-[#22C55E]" />
           <span>{saveSuccess ? 'Profile saved successfully!' : 'Preferences updated successfully!'}</span>
         </div>
@@ -145,17 +145,17 @@ export function Profile() {
 
       {/* TOP BAR: Breadcrumb & Actions */}
       <div className="flex items-center justify-between gap-4 py-0.5">
-        <div className="text-xs font-semibold text-[#64748B] flex items-center gap-1.5">
+        <div className="text-xs font-semibold text-[#64748B] dark:text-slate-400 flex items-center gap-1.5">
           <span>Profile</span>
-          <ChevronRight className="h-3 w-3 text-[#64748B]" />
-          <span className="text-[#0F172A] font-bold">Researcher Profile</span>
+          <ChevronRight className="h-3 w-3 text-[#64748B] dark:text-slate-500" />
+          <span className="text-[#0F172A] dark:text-slate-100 font-bold">Researcher Profile</span>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setIsEditing(!isEditing)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-semibold text-[#0F172A] shadow-2xs hover:bg-[#F8FAFC] transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-[#0F172A] dark:text-slate-200 shadow-2xs hover:bg-[#F8FAFC] dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <Edit3 className="h-3.5 w-3.5" />
             <span>{isEditing ? 'Close Editing' : 'Edit Profile'}</span>
@@ -165,7 +165,7 @@ export function Profile() {
             type="button"
             onClick={() => setSearchModalOpen(true)}
             title="Search Repository"
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:border-blue-300 transition-colors cursor-pointer shadow-2xs"
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 text-[#64748B] dark:text-slate-400 hover:text-[#0F172A] dark:hover:text-slate-100 hover:border-blue-300 dark:hover:border-slate-700 transition-colors cursor-pointer shadow-2xs"
           >
             <Search className="h-3.5 w-3.5" />
           </button>
@@ -175,7 +175,7 @@ export function Profile() {
               type="button"
               onClick={() => setNotificationsOpen(!notificationsOpen)}
               title="Notifications"
-              className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:border-blue-300 transition-colors cursor-pointer shadow-2xs"
+              className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 text-[#64748B] dark:text-slate-400 hover:text-[#0F172A] dark:hover:text-slate-100 hover:border-blue-300 dark:hover:border-slate-700 transition-colors cursor-pointer shadow-2xs"
             >
               <Bell className="h-3.5 w-3.5" />
               {notificationsList.some((n) => n.unread) && (
@@ -187,13 +187,13 @@ export function Profile() {
 
             {/* Notifications Popover Dropdown */}
             {notificationsOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                  <h4 className="text-xs font-bold text-slate-900">Notifications</h4>
+              <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">Notifications</h4>
                   <button
                     type="button"
                     onClick={() => setNotificationsList(notificationsList.map((n) => ({ ...n, unread: false })))}
-                    className="text-[10px] font-semibold text-blue-600 hover:underline"
+                    className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     Mark all read
                   </button>
@@ -203,14 +203,14 @@ export function Profile() {
                     <div
                       key={item.id}
                       className={`p-2.5 rounded-xl text-xs space-y-1 transition-colors ${
-                        item.unread ? 'bg-blue-50/60 border border-blue-100' : 'bg-slate-50/50 hover:bg-slate-100/60'
+                        item.unread ? 'bg-blue-50/60 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50' : 'bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/60 dark:hover:bg-slate-800'
                       }`}
                     >
-                      <div className="flex items-center justify-between font-bold text-slate-800">
+                      <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
                         <span>{item.title}</span>
-                        <span className="text-[10px] font-normal text-slate-400">{item.time}</span>
+                        <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500">{item.time}</span>
                       </div>
-                      <p className="text-slate-600 text-[11px] leading-relaxed">{item.text}</p>
+                      <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">{item.text}</p>
                     </div>
                   ))}
                 </div>
@@ -222,7 +222,7 @@ export function Profile() {
             type="button"
             onClick={() => navigate('/app/settings')}
             title="Go to Settings"
-            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:border-blue-300 transition-colors cursor-pointer shadow-2xs"
+            className="flex h-8 w-8 items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 text-[#64748B] dark:text-slate-400 hover:text-[#0F172A] dark:hover:text-slate-100 hover:border-blue-300 dark:hover:border-slate-700 transition-colors cursor-pointer shadow-2xs"
           >
             <Settings className="h-3.5 w-3.5" />
           </button>
@@ -234,41 +234,41 @@ export function Profile() {
       </div>
 
       {/* ========================================================================= */}
-      {/* 1. HEADER BANNER CARD (Compact Desktop Height)                           */}
+      {/* 1. HEADER BANNER CARD                                                    */}
       {/* ========================================================================= */}
-      <Card className="p-3 sm:p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.06)] shrink-0">
+      <Card className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 shadow-[0px_4px_12px_rgba(15,23,42,0.06)] shrink-0">
         <div className="flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3 text-left">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#3B82F6] via-[#1E40AF] to-[#1D4ED8] text-white font-extrabold text-lg shadow-md ring-4 ring-[#EFF6FF]">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#3B82F6] via-[#1E40AF] to-[#1D4ED8] text-white font-extrabold text-lg shadow-md ring-4 ring-[#EFF6FF] dark:ring-blue-950/60">
               {getInitials(profile.fullName)}
             </div>
 
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight text-[#0F172A]">
+                <h1 className="text-xl font-bold tracking-tight text-[#0F172A] dark:text-slate-100">
                   {profile.fullName}
                 </h1>
-                <span className="inline-flex items-center gap-1 rounded-full border border-[#bbf7d0] bg-[#DCFCE7] px-2.5 py-0.5 text-[11px] font-semibold text-[#166534]">
-                  <CheckCircle2 className="h-3 w-3 text-[#22C55E] fill-[#22C55E] text-white" />
+                <span className="inline-flex items-center gap-1 rounded-full border border-[#bbf7d0] dark:border-emerald-800/60 bg-[#DCFCE7] dark:bg-emerald-950/60 px-2.5 py-0.5 text-[11px] font-semibold text-[#166534] dark:text-emerald-300">
+                  <CheckCircle2 className="h-3 w-3 text-[#22C55E]" />
                   Verified Researcher
                 </span>
               </div>
 
-              <p className="text-xs font-semibold text-[#334155]">
+              <p className="text-xs font-semibold text-[#334155] dark:text-slate-300">
                 {profile.title} at {profile.institution}
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-medium text-[#64748B] pt-0.5">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-medium text-[#64748B] dark:text-slate-400 pt-0.5">
                 <span className="inline-flex items-center gap-1">
-                  <Mail className="h-3 w-3 text-[#64748B]" />
+                  <Mail className="h-3 w-3 text-[#64748B] dark:text-slate-500" />
                   {profile.email}
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <Phone className="h-3 w-3 text-[#64748B]" />
+                  <Phone className="h-3 w-3 text-[#64748B] dark:text-slate-500" />
                   {profile.phone}
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <MapPin className="h-3 w-3 text-[#64748B]" />
+                  <MapPin className="h-3 w-3 text-[#64748B] dark:text-slate-500" />
                   {profile.city} • {profile.location}
                 </span>
               </div>
@@ -276,7 +276,7 @@ export function Profile() {
           </div>
 
           <div className="shrink-0">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-3.5 py-1 text-xs font-semibold text-[#334155]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3.5 py-1 text-xs font-semibold text-[#334155] dark:text-slate-300">
               <span className="h-2 w-2 rounded-full bg-[#22C55E] animate-pulse" />
               <span>Active • Verified since Jan 2024</span>
             </span>
@@ -291,10 +291,10 @@ export function Profile() {
         {/* LEFT STACK (Personal Info & Credentials) */}
         <div className="lg:col-span-7 space-y-3">
           {/* Personal Information */}
-          <Card className="p-3 sm:p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
-            <div className="flex items-center gap-2 border-b border-[#E2E8F0] pb-2">
-              <User className="h-4.5 w-4.5 text-[#2563EB]" />
-              <h2 className="text-sm font-bold text-[#0F172A]">
+          <Card className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
+            <div className="flex items-center gap-2 border-b border-[#E2E8F0] dark:border-slate-800 pb-2">
+              <User className="h-4.5 w-4.5 text-[#2563EB] dark:text-blue-400" />
+              <h2 className="text-sm font-bold text-[#0F172A] dark:text-slate-100">
                 Personal Information
               </h2>
             </div>
@@ -303,64 +303,64 @@ export function Profile() {
               <form onSubmit={handleSaveProfile} className="space-y-3">
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">Full Name</label>
+                    <label className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-1">Full Name</label>
                     <input
                       type="text"
                       value={profile.fullName}
                       onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#0F172A] focus:bg-white outline-none"
+                      className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-[#0F172A] dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">Email</label>
+                    <label className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-1">Email</label>
                     <input
                       type="email"
                       value={profile.email}
                       disabled
-                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#64748B]"
+                      className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/60 px-3 py-1.5 text-xs font-semibold text-[#64748B] dark:text-slate-400 cursor-not-allowed"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">Mobile</label>
+                    <label className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-1">Mobile</label>
                     <input
                       type="text"
                       value={profile.phone}
                       onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#0F172A] focus:bg-white outline-none"
+                      className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-[#0F172A] dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">Location</label>
+                    <label className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-1">Location</label>
                     <input
                       type="text"
                       value={profile.location}
                       onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#0F172A] focus:bg-white outline-none"
+                      className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-[#0F172A] dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">City</label>
+                    <label className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-1">City</label>
                     <input
                       type="text"
                       value={profile.city}
                       onChange={(e) => setProfile({ ...profile, city: e.target.value })}
-                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#0F172A] focus:bg-white outline-none"
+                      className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-[#0F172A] dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 outline-none"
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-semibold text-[#334155] block mb-1">Pincode</label>
+                    <label className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-1">Pincode</label>
                     <input
                       type="text"
                       value={profile.pincode}
                       onChange={(e) => setProfile({ ...profile, pincode: e.target.value })}
-                      className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-xs font-semibold text-[#0F172A] focus:bg-white outline-none"
+                      className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-1.5 text-xs font-semibold text-[#0F172A] dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 outline-none"
                     />
                   </div>
                 </div>
                 <div className="flex justify-end pt-1">
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#2563EB] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[#1E40AF] transition-all cursor-pointer shadow-xs"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#2563EB] hover:bg-[#1E40AF] px-4 py-1.5 text-xs font-semibold text-white transition-all cursor-pointer shadow-xs"
                   >
                     <Check className="h-3.5 w-3.5" />
                     <span>Save Personal Information</span>
@@ -370,38 +370,38 @@ export function Profile() {
             ) : (
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
-                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Full Name</span>
-                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                  <span className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-0.5">Full Name</span>
+                  <div className="rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-2 font-semibold text-[#0F172A] dark:text-slate-100">
                     {profile.fullName}
                   </div>
                 </div>
                 <div>
-                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Email</span>
-                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A] truncate">
+                  <span className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-0.5">Email</span>
+                  <div className="rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-2 font-semibold text-[#0F172A] dark:text-slate-100 truncate">
                     {profile.email}
                   </div>
                 </div>
                 <div>
-                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Mobile</span>
-                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                  <span className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-0.5">Mobile</span>
+                  <div className="rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-2 font-semibold text-[#0F172A] dark:text-slate-100">
                     {profile.phone}
                   </div>
                 </div>
                 <div>
-                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Location</span>
-                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                  <span className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-0.5">Location</span>
+                  <div className="rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-2 font-semibold text-[#0F172A] dark:text-slate-100">
                     {profile.location}
                   </div>
                 </div>
                 <div>
-                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">City</span>
-                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                  <span className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-0.5">City</span>
+                  <div className="rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-2 font-semibold text-[#0F172A] dark:text-slate-100">
                     {profile.city}
                   </div>
                 </div>
                 <div>
-                  <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Pincode</span>
-                  <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                  <span className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-0.5">Pincode</span>
+                  <div className="rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-2 font-semibold text-[#0F172A] dark:text-slate-100">
                     {profile.pincode}
                   </div>
                 </div>
@@ -410,25 +410,25 @@ export function Profile() {
           </Card>
 
           {/* Academic Credentials */}
-          <Card className="p-3 sm:p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
-            <div className="flex items-center gap-2 border-b border-[#E2E8F0] pb-2">
-              <ShieldCheck className="h-4.5 w-4.5 text-[#2563EB]" />
-              <h2 className="text-sm font-bold text-[#0F172A]">
+          <Card className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
+            <div className="flex items-center gap-2 border-b border-[#E2E8F0] dark:border-slate-800 pb-2">
+              <ShieldCheck className="h-4.5 w-4.5 text-[#2563EB] dark:text-blue-400" />
+              <h2 className="text-sm font-bold text-[#0F172A] dark:text-slate-100">
                 Academic &amp; Institutional Credentials
               </h2>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
-                <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Professional Title</span>
-                <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                <span className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-0.5">Professional Title</span>
+                <div className="rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-2 font-semibold text-[#0F172A] dark:text-slate-100">
                   {profile.title}
                 </div>
               </div>
 
               <div>
-                <span className="text-[11px] font-semibold text-[#334155] block mb-0.5">Institution</span>
-                <div className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-2 font-semibold text-[#0F172A]">
+                <span className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-0.5">Institution</span>
+                <div className="rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-2 font-semibold text-[#0F172A] dark:text-slate-100">
                   {profile.institution}
                 </div>
               </div>
@@ -436,19 +436,19 @@ export function Profile() {
 
             {/* Credentials & Expertise Tags */}
             <div className="space-y-1.5 pt-1">
-              <span className="text-[11px] font-semibold text-[#334155] block">Credentials &amp; Expertise</span>
+              <span className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block">Credentials &amp; Expertise</span>
               <div className="flex flex-wrap gap-1.5">
                 {profile.expertise.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 rounded-lg border border-[#bfdbfe] bg-[#DBEAFE] px-2.5 py-0.8 text-xs font-semibold text-[#1E40AF]"
+                    className="inline-flex items-center gap-1 rounded-lg border border-[#bfdbfe] dark:border-blue-900/50 bg-[#DBEAFE] dark:bg-blue-950/60 px-2.5 py-0.8 text-xs font-semibold text-[#1E40AF] dark:text-blue-300"
                   >
                     <span>{tag}</span>
                     {isEditing && (
                       <button
                         type="button"
                         onClick={() => handleRemoveTag(tag)}
-                        className="hover:text-rose-600 cursor-pointer"
+                        className="hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -464,7 +464,7 @@ export function Profile() {
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
                     placeholder="Add field..."
-                    className="rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1 text-xs text-[#0F172A] focus:bg-white outline-none"
+                    className="rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-1 text-xs text-[#0F172A] dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 outline-none"
                   />
                   <button
                     type="button"
@@ -478,14 +478,14 @@ export function Profile() {
               )}
             </div>
 
-            <div className="pt-2 border-t border-[#E2E8F0] flex flex-wrap items-center justify-between text-xs text-[#64748B] gap-2">
+            <div className="pt-2 border-t border-[#E2E8F0] dark:border-slate-800 flex flex-wrap items-center justify-between text-xs text-[#64748B] dark:text-slate-400 gap-2">
               <div className="flex items-center gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-[#64748B]" />
+                <ShieldCheck className="h-3.5 w-3.5 text-[#64748B] dark:text-slate-500" />
                 <span>Verified by:</span>
-                <span className="font-semibold text-[#0F172A]">{profile.institution}</span>
+                <span className="font-semibold text-[#0F172A] dark:text-slate-200">{profile.institution}</span>
               </div>
-              <div className="flex items-center gap-1 font-semibold text-[#166534]">
-                <Calendar className="h-3.5 w-3.5 text-[#166534]" />
+              <div className="flex items-center gap-1 font-semibold text-[#166534] dark:text-emerald-400">
+                <Calendar className="h-3.5 w-3.5 text-[#166534] dark:text-emerald-400" />
                 <span>Verified on Jan 12, 2024</span>
               </div>
             </div>
@@ -495,21 +495,21 @@ export function Profile() {
         {/* RIGHT STACK (Preferences & Toggles) */}
         <div className="lg:col-span-5 space-y-3">
           {/* Preferences Settings */}
-          <Card className="p-3 sm:p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
-            <div className="flex items-center gap-2 border-b border-[#E2E8F0] pb-2">
-              <SlidersHorizontal className="h-4.5 w-4.5 text-[#2563EB]" />
-              <h2 className="text-sm font-bold text-[#0F172A]">
+          <Card className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
+            <div className="flex items-center gap-2 border-b border-[#E2E8F0] dark:border-slate-800 pb-2">
+              <SlidersHorizontal className="h-4.5 w-4.5 text-[#2563EB] dark:text-blue-400" />
+              <h2 className="text-sm font-bold text-[#0F172A] dark:text-slate-100">
                 Preferences &amp; System Settings
               </h2>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="text-[11px] font-semibold text-[#334155] block mb-1">Language</label>
+                <label className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-1">Language</label>
                 <select
                   value={preferences.language}
                   onChange={(e) => setPreferences({ ...preferences, language: e.target.value })}
-                  className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 font-semibold text-[#0F172A] focus:bg-white outline-none cursor-pointer"
+                  className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-1.5 font-semibold text-[#0F172A] dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 outline-none cursor-pointer"
                 >
                   <option value="English (US)">English (US)</option>
                   <option value="English (UK)">English (UK)</option>
@@ -518,11 +518,11 @@ export function Profile() {
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-[#334155] block mb-1">Notification Settings</label>
+                <label className="text-[11px] font-semibold text-[#334155] dark:text-slate-400 block mb-1">Notification Settings</label>
                 <select
                   value={preferences.notifications}
                   onChange={(e) => setPreferences({ ...preferences, notifications: e.target.value })}
-                  className="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 font-semibold text-[#0F172A] focus:bg-white outline-none cursor-pointer"
+                  className="w-full rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F1F5F9] dark:bg-slate-800/80 px-3 py-1.5 font-semibold text-[#0F172A] dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 outline-none cursor-pointer"
                 >
                   <option value="Email Alerts & Synthesis Digest">Email Alerts &amp; Synthesis Digest</option>
                   <option value="Instant Claim Alerts Only">Instant Claim Alerts Only</option>
@@ -533,7 +533,7 @@ export function Profile() {
           </Card>
 
           {/* Email Notifications & Toggles Card */}
-          <Card className="p-3 sm:p-4 rounded-2xl bg-white border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
+          <Card className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 shadow-[0px_4px_12px_rgba(15,23,42,0.06)] space-y-2.5">
             <form onSubmit={handleSavePreferences} className="space-y-3">
               <h3 className="text-xs font-bold text-[#0F172A] border-b border-[#E2E8F0] pb-1.5">
                 Email Notifications

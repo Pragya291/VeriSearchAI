@@ -23,20 +23,20 @@ export function SupportingEvidence({
   return (
     <div className={`space-y-5 ${className}`}>
       {/* Tab Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/70 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 dark:border-slate-800 pb-3">
         <div className="flex items-center gap-2.5">
-          <FileText className="h-5 w-5 text-[#2563EB]" />
-          <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
+          <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
             Supporting Evidence ({supportingSources.length} sources)
           </h3>
         </div>
-        <span className="text-xs font-medium text-slate-500">
+        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
           Independent citations and empirical publications directly validating the verdict
         </span>
       </div>
 
       {supportingSources.length === 0 ? (
-        <div className="rounded-[20px] border border-slate-200/80 bg-white p-8 text-center text-sm text-slate-500">
+        <div className="rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
           No direct supporting sources recorded for this query.
         </div>
       ) : (
@@ -49,18 +49,18 @@ export function SupportingEvidence({
             return (
               <div
                 key={idx}
-                className="rounded-[20px] border border-slate-200/80 bg-white p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-all hover:border-slate-300"
+                className="rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.25)] hover:border-slate-300 dark:hover:border-slate-700 transition-all"
               >
                 {/* Header: domain, date, credibility */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB] font-bold text-xs">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold text-xs">
                       <Globe className="h-3.5 w-3.5" />
                     </div>
                     <div>
-                      <span className="text-xs font-bold text-slate-800">{domain}</span>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{domain}</span>
                       {source.source_type && (
-                        <span className="ml-2 text-[11px] font-medium text-slate-400">
+                        <span className="ml-2 text-[11px] font-medium text-slate-400 dark:text-slate-500">
                           • {source.source_type}
                         </span>
                       )}
@@ -69,12 +69,12 @@ export function SupportingEvidence({
 
                   <div className="flex items-center gap-2">
                     {source.published_date && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">
                         <Calendar className="h-3 w-3" />
                         {formatDate(source.published_date)}
                       </span>
                     )}
-                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-700 border border-blue-100">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-900/40">
                       {relevance}% Match
                     </span>
                     <Badge variant="blue" size="sm" icon={Award}>
@@ -84,25 +84,25 @@ export function SupportingEvidence({
                 </div>
 
                 {/* Title */}
-                <h4 className="mt-3.5 text-base sm:text-[17px] font-bold text-slate-900 leading-snug">
+                <h4 className="mt-3.5 text-base sm:text-[17px] font-bold text-slate-900 dark:text-slate-100 leading-snug">
                   {source.title}
                 </h4>
 
                 {/* Evidence summary / quote */}
-                <div className="mt-3 rounded-xl bg-slate-50/80 p-3.5 border-l-3 border-[#2563EB] text-xs sm:text-sm text-slate-700 leading-relaxed italic">
+                <div className="mt-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 p-3.5 border-l-4 border-blue-600 dark:border-blue-500 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">
                   "{source.snippet || 'Empirical evidence extracted from peer-reviewed findings.'}"
                 </div>
 
                 {/* Footer: Verdict alignment badge & actions */}
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-2">
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200/60">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                       Supports claim
                     </span>
                     {source.evidence_strength && (
-                      <span className="text-xs font-medium text-slate-500">
-                        Evidence strength: <strong className="text-slate-800 font-semibold">{source.evidence_strength}</strong>
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                        Evidence strength: <strong className="text-slate-800 dark:text-slate-200 font-semibold">{source.evidence_strength}</strong>
                       </span>
                     )}
                   </div>
@@ -111,21 +111,21 @@ export function SupportingEvidence({
                     <button
                       type="button"
                       onClick={() => setSelectedSource(source)}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer shadow-2xs"
                     >
-                      <BookOpen className="h-3.5 w-3.5 text-slate-500" />
-                      <span>Read Evidence</span>
+                      <BookOpen className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
+                      <span>Detailed Excerpt</span>
                     </button>
 
                     {source.url && (
                       <a
                         href={source.url}
                         target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs transition-colors"
+                        rel="noreferrer noopener"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/80 px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-900/60 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors shadow-2xs"
                       >
-                        <span>View Source</span>
-                        <ExternalLink className="h-3 w-3" />
+                        <span>Open URL</span>
+                        <ExternalLink className="h-3.5 w-3.5" />
                       </a>
                     )}
                   </div>
@@ -136,40 +136,33 @@ export function SupportingEvidence({
         </div>
       )}
 
-      {/* Modal for viewing detailed evidence excerpt */}
+      {/* Modal for detailed source excerpt inspection */}
       {selectedSource && (
         <Modal
           isOpen={Boolean(selectedSource)}
           onClose={() => setSelectedSource(null)}
-          title="Evidence Details & Excerpt"
-          maxWidth="max-w-xl"
+          title={selectedSource.title || 'Source Excerpt Analysis'}
+          size="lg"
         >
-          <div className="space-y-4 text-sm">
-            <div>
-              <h5 className="font-bold text-slate-900 text-base">{selectedSource.title}</h5>
-              <p className="mt-1 text-xs text-slate-500">
-                Published by <strong className="text-slate-700">{selectedSource.source_name || extractDomain(selectedSource.url)}</strong>
-                {selectedSource.published_date ? ` on ${formatDate(selectedSource.published_date)}` : ''}
-              </p>
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <span className="font-bold text-slate-800 dark:text-slate-200">
+                {selectedSource.source_name || extractDomain(selectedSource.url)}
+              </span>
+              <span>•</span>
+              <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 font-bold text-emerald-700 dark:text-emerald-300">
+                Supports Claim
+              </span>
+              <span>•</span>
+              <span>Credibility: {selectedSource.credibility_score || 'High'}</span>
             </div>
 
-            <div className="rounded-xl bg-slate-50 p-4 border border-slate-200/70 text-slate-700 leading-relaxed">
-              <p className="font-semibold text-xs text-slate-500 uppercase tracking-wider mb-1.5">
-                Full Extracted Excerpt:
-              </p>
-              <p className="italic text-slate-800 text-sm">"{selectedSource.snippet}"</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <div className="rounded-xl bg-emerald-50/70 p-3 border border-emerald-100">
-                <span className="text-xs text-emerald-800 font-semibold block">Alignment</span>
-                <span className="text-sm font-bold text-emerald-700">Supports primary claim</span>
-              </div>
-              <div className="rounded-xl bg-blue-50/70 p-3 border border-blue-100">
-                <span className="text-xs text-blue-800 font-semibold block">Relevance</span>
-                <span className="text-sm font-bold text-[#2563EB]">
-                  {Math.round((selectedSource.relevance_score || 0.88) * 100)}% Match
-                </span>
+            <div className="space-y-2">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Full Retrieved Excerpt
+              </h5>
+              <div className="rounded-2xl bg-slate-50 dark:bg-slate-800/80 p-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-normal whitespace-pre-wrap max-h-96 overflow-y-auto">
+                {selectedSource.snippet || 'No raw snippet recorded for this source.'}
               </div>
             </div>
 
@@ -178,10 +171,10 @@ export function SupportingEvidence({
                 <a
                   href={selectedSource.url}
                   target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-2 text-xs font-semibold text-white transition-colors"
+                  rel="noreferrer noopener"
+                  className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 transition-colors"
                 >
-                  Open Original Source Webpage
+                  <span>Open Full Publication</span>
                   <ExternalLink className="h-3.5 w-3.5" />
                 </a>
               </div>

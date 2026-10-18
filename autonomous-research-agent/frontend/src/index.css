@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.5;
@@ -21,6 +23,7 @@ body {
   min-width: 320px;
   background-color: #f8fafc;
   color: #0f172a;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 #root {
@@ -72,24 +75,24 @@ textarea {
   scrollbar-width: none !important;
 }
 
-html[data-theme='dark'] {
+:is(.dark, html[data-theme='dark']) {
   color-scheme: dark;
 }
 
-html[data-theme='dark'] body {
+:is(.dark, html[data-theme='dark']) body {
   background-color: #090d16;
   color: #f1f5f9;
 }
 
-html[data-theme='dark'] ::-webkit-scrollbar-track {
+:is(.dark, html[data-theme='dark']) ::-webkit-scrollbar-track {
   background: #0f172a;
 }
 
-html[data-theme='dark'] ::-webkit-scrollbar-thumb {
+:is(.dark, html[data-theme='dark']) ::-webkit-scrollbar-thumb {
   background: #334155;
 }
 
-html[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+:is(.dark, html[data-theme='dark']) ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
 

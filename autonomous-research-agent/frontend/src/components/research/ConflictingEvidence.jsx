@@ -16,34 +16,34 @@ export function ConflictingEvidence({
   return (
     <div className={`space-y-5 ${className}`}>
       {/* Tab Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/70 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 dark:border-slate-800 pb-3">
         <div className="flex items-center gap-2.5">
           <AlertTriangle className="h-5 w-5 text-amber-500" />
-          <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
-            Conflicting Evidence ({conflictingSources.length || contradictions.length} sources)
+          <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+            Conflicting Evidence ({conflictingSources.length || contradictions.length} items)
           </h3>
         </div>
-        <span className="text-xs font-medium text-slate-500">
-          Nuances, counter-arguments, and outlier perspectives surfaced for objectivity
+        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          Caveats, counter-arguments, and outlier perspectives surfaced for empirical transparency
         </span>
       </div>
 
-      {/* Subtle warning banner */}
-      <div className="flex items-start gap-3 rounded-[18px] border border-amber-200/80 bg-amber-50/50 p-4 text-amber-950 shadow-2xs">
-        <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+      {/* Warning banner */}
+      <div className="flex items-start gap-3 rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/40 p-4 text-amber-950 dark:text-amber-200 shadow-2xs">
+        <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
         <div className="text-xs sm:text-sm">
-          <p className="font-bold text-amber-900">
-            Some sources provide evidence that does not fully align with the overall conclusion.
+          <p className="font-bold text-amber-900 dark:text-amber-200">
+            Dissenting evidence or methodological caveats identified.
           </p>
-          <p className="mt-0.5 text-amber-800/90 leading-relaxed text-xs">
-            VeriSearchAI surfaces methodological caveats, contradictory clinical findings, and outlier perspectives to ensure complete empirical transparency.
+          <p className="mt-0.5 text-amber-800/90 dark:text-amber-300/80 leading-relaxed text-xs">
+            VeriSearchAI surfaces methodological variations, contradictory trial data, and outlier findings to ensure objectivity rather than assuming consensus.
           </p>
         </div>
       </div>
 
       {!hasItems ? (
-        <div className="rounded-[20px] border border-slate-200/80 bg-white p-8 text-center text-sm text-slate-500">
-          No significant conflicting evidence or contradictory peer-reviewed sources were found for this inquiry.
+        <div className="rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+          No conflicting evidence or contradictory peer-reviewed sources were found for this inquiry.
         </div>
       ) : (
         <div className="space-y-4">
@@ -57,25 +57,25 @@ export function ConflictingEvidence({
                 return (
                   <div
                     key={idx}
-                    className="rounded-[20px] border border-amber-200/70 bg-white p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-all hover:border-amber-300"
+                    className="rounded-3xl border border-amber-200/80 dark:border-amber-900/60 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.25)] hover:border-amber-300 dark:hover:border-amber-700 transition-all"
                   >
                     {/* Header: domain, date, credibility */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-100/60 pb-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-100/60 dark:border-slate-800 pb-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-700 font-bold text-xs">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 font-bold text-xs">
                           <Globe className="h-3.5 w-3.5" />
                         </div>
-                        <span className="text-xs font-bold text-slate-800">{domain}</span>
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{domain}</span>
                       </div>
 
                       <div className="flex items-center gap-2">
                         {source.published_date && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 dark:text-slate-500">
                             <Calendar className="h-3 w-3" />
                             {formatDate(source.published_date)}
                           </span>
                         )}
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-800 border border-amber-200/70">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 text-xs font-bold text-amber-800 dark:text-amber-300 border border-amber-200/70 dark:border-amber-900/60">
                           <AlertTriangle className="h-3 w-3" />
                           Contradiction
                         </span>
@@ -86,13 +86,13 @@ export function ConflictingEvidence({
                     </div>
 
                     {/* Title */}
-                    <h4 className="mt-3.5 text-base sm:text-[17px] font-bold text-slate-900 leading-snug">
+                    <h4 className="mt-3.5 text-base sm:text-[17px] font-bold text-slate-900 dark:text-slate-100 leading-snug">
                       {source.title}
                     </h4>
 
                     {/* What contradicts the claim */}
-                    <div className="mt-3 rounded-xl bg-amber-50/40 p-4 border-l-3 border-amber-500 text-xs sm:text-sm text-slate-800 leading-relaxed">
-                      <span className="font-bold text-amber-900 block mb-1">
+                    <div className="mt-3 rounded-2xl bg-amber-50/50 dark:bg-amber-950/40 p-4 border-l-4 border-amber-500 text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed">
+                      <span className="font-bold text-amber-900 dark:text-amber-300 block mb-1">
                         What Contradicts the Claim:
                       </span>
                       {whatContradicts}
@@ -100,9 +100,9 @@ export function ConflictingEvidence({
 
                     {/* Footer: Strength of contradiction & View Source */}
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 pt-2">
-                      <span className="text-xs font-medium text-slate-600">
+                      <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
                         Strength of contradiction:{' '}
-                        <strong className="text-amber-800 font-bold">{contradictionStrength}</strong>
+                        <strong className="text-amber-800 dark:text-amber-300 font-bold">{contradictionStrength}</strong>
                       </span>
 
                       {source.url && (
@@ -110,7 +110,7 @@ export function ConflictingEvidence({
                           href={source.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50/60 hover:bg-amber-100/70 px-3.5 py-1.5 text-xs font-semibold text-amber-900 transition-colors"
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/60 dark:bg-amber-950/60 hover:bg-amber-100/70 dark:hover:bg-amber-900/60 px-3.5 py-1.5 text-xs font-semibold text-amber-900 dark:text-amber-200 transition-colors shadow-2xs"
                         >
                           <span>View Source</span>
                           <ExternalLink className="h-3.5 w-3.5" />
@@ -123,15 +123,15 @@ export function ConflictingEvidence({
             : contradictions.map((contra, idx) => (
                 <div
                   key={idx}
-                  className="rounded-[20px] border border-amber-200/70 bg-white p-5 sm:p-6 shadow-2xs"
+                  className="rounded-3xl border border-amber-200/80 dark:border-amber-900/60 bg-white dark:bg-slate-900 p-5 sm:p-6 shadow-2xs"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-600" />
-                    <span className="text-xs font-bold text-amber-900 uppercase tracking-wide">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    <span className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wide">
                       Identified Contradiction #{idx + 1}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-700 leading-relaxed">{contra}</p>
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{contra}</p>
                 </div>
               ))}
         </div>

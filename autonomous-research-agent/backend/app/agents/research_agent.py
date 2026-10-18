@@ -1,7 +1,9 @@
 import time
+import json
+import asyncio
 import logging
 from datetime import datetime, timezone
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, AsyncGenerator
 from app.models.research import ResearchMetadata, Claim, Source
 from app.models.report import ResearchResponse
 from app.services.tavily_service import TavilyServiceError, tavily_service
@@ -201,6 +203,297 @@ class ResearchAgent:
             if isinstance(e, TavilyServiceError):
                 raise
             raise RuntimeError(f"Research processing failed: {e}") from e
+
+    async def stream_research(
+        self,
+        question: str,
+        research_id: Optional[str] = None,
+        owner_id: Optional[str] = None,
+    ) -> AsyncGenerator[str, None]:
+        """
+        Executes autonomous research pipeline while yielding real-time SSE progress events.
+        """
+        start_time = time.time()
+
+        def _format_sse(payload: dict, event: Optional[str] = None) -> str:
+            serialized = json.dumps(payload, default=str)
+            if event:
+                return f"event: {event}\ndata: {serialized}\n\n"
+            return f"data: {serialized}\n\n"
+
+        # Event: Request accepted
+        yield _format_sse({
+            "stage": "request_accepted",
+            "stage_index": 0,
+            "label": "Research request accepted",
+            "message": "Inquiry registered and verification pipeline initialized.",
+            "timestamp": time.time(),
+        })
+
+        try:
+            # Step 1: Create or fetch research record
+            if not research_id:
+                research_id = await asyncio.to_thread(
+                    firebase_service.create_research, question, owner_id=owner_id
+                )
+
+            await asyncio.to_thread(
+                firebase_service.update_research_status, research_id, "processing"
+            )
+
+            yield _format_sse({
+                "stage": "session_created",
+                "stage_index": 0,
+                "research_id": research_id,
+                "label": "Session initialized",
+                "message": f"Session assigned ID {research_id}.",
+                "timestamp": time.time(),
+            })
+
+            # Step 2: Tavily Search for Evidence
+            yield _format_sse({
+                "stage": "searching_sources",
+                "stage_index": 1,
+                "label": "Searching web sources",
+                "message": "Initiating search across verified academic and official domains...",
+                "timestamp": time.time(),
+            })
+
+            raw_sources = await asyncio.to_thread(
+                tavily_service.search, query=question, max_results=7
+            )
+            search_count = 1 if raw_sources else 0
+
+            yield _format_sse({
+                "stage": "sources_retrieved",
+                "stage_index": 1,
+                "label": "Sources retrieved",
+                "message": f"Successfully retrieved {len(raw_sources)} primary source documents.",
+                "source_count": len(raw_sources),
+                "timestamp": time.time(),
+            })
+
+            # Step 3: Analyze and Rank Sources
+            yield _format_sse({
+                "stage": "analyzing_sources",
+                "stage_index": 2,
+                "label": "Analyzing sources",
+                "message": "Scoring domain credibility, relevance, and publication freshness...",
+                "source_count": len(raw_sources),
+                "timestamp": time.time(),
+            })
+
+            analyzed_sources = await asyncio.to_thread(
+                source_analyzer.analyze_sources, raw_sources, question
+            )
+
+            # Handle case where no sources are found
+            if not analyzed_sources:
+                logger.warning(f"No web sources found for question: '{question}'")
+                no_sources_summary = f"No reliable sources were found for the research question: '{question}'."
+                no_sources_report = (
+                    f"# Research Report: {question}\n\n"
+                    "## Executive Summary\n"
+                    "No reliable sources were returned for this query, so claims could not be verified.\n\n"
+                    "## Fact-Checking Matrix\n"
+                    "No claims could be extracted or fact-checked.\n\n"
+                    "## Conclusion\n"
+                    "Please refine or broaden your research question."
+                )
+
+                processing_time = round(time.time() - start_time, 2)
+                metadata = ResearchMetadata(
+                    search_count=search_count,
+                    source_count=0,
+                    processing_time=processing_time,
+                )
+
+                response = ResearchResponse(
+                    research_id=research_id,
+                    question=question,
+                    status="insufficient_evidence",
+                    summary=no_sources_summary,
+                    claims=[],
+                    sources=[],
+                    report=no_sources_report,
+                    metadata=metadata,
+                    confidence=0,
+                    contradictions=[],
+                )
+
+                await asyncio.to_thread(
+                    firebase_service.save_research_result, research_id, response.model_dump()
+                )
+
+                yield _format_sse({
+                    "stage": "completed",
+                    "stage_index": 4,
+                    "label": "Research complete (insufficient evidence)",
+                    "message": "No corroborated sources found for this inquiry.",
+                    "status": "insufficient_evidence",
+                    "result": response.model_dump(),
+                    "timestamp": time.time(),
+                }, event="complete")
+                return
+
+            # Step 4: Extract factual claims
+            yield _format_sse({
+                "stage": "extracting_claims",
+                "stage_index": 2,
+                "label": "Extracting claims",
+                "message": "Extracting testable factual statements from source findings...",
+                "source_count": len(analyzed_sources),
+                "timestamp": time.time(),
+            })
+
+            gemini_failed = False
+            evaluated_claims = []
+            contradictions = []
+            report_data = {}
+
+            try:
+                extracted_claim_texts = await asyncio.to_thread(
+                    gemini_service.extract_claims, question, analyzed_sources
+                )
+
+                yield _format_sse({
+                    "stage": "claims_extracted",
+                    "stage_index": 2,
+                    "label": "Claims extracted",
+                    "message": f"Identified {len(extracted_claim_texts)} distinct claims for verification.",
+                    "claim_count": len(extracted_claim_texts),
+                    "source_count": len(analyzed_sources),
+                    "timestamp": time.time(),
+                })
+
+                # Step 5: Fact-check extracted claims
+                yield _format_sse({
+                    "stage": "fact_checking",
+                    "stage_index": 3,
+                    "label": "Fact-checking claims",
+                    "message": "Evaluating evidence alignment and generating individual claim verdicts...",
+                    "claim_count": len(extracted_claim_texts),
+                    "source_count": len(analyzed_sources),
+                    "timestamp": time.time(),
+                })
+
+                evaluated_claims = await asyncio.to_thread(
+                    fact_checker.fact_check_claims, extracted_claim_texts, question, analyzed_sources
+                )
+
+                # Step 6: Contradiction Detection
+                yield _format_sse({
+                    "stage": "checking_conflicts",
+                    "stage_index": 3,
+                    "label": "Checking conflicts",
+                    "message": "Cross-auditing sources for dissenting data or caveats...",
+                    "claim_count": len(evaluated_claims),
+                    "source_count": len(analyzed_sources),
+                    "timestamp": time.time(),
+                })
+
+                contradictions = await asyncio.to_thread(
+                    gemini_service.detect_contradictions, evaluated_claims, analyzed_sources
+                )
+
+                # Step 7: Generating research report
+                yield _format_sse({
+                    "stage": "generating_report",
+                    "stage_index": 4,
+                    "label": "Generating verdict & report",
+                    "message": "Synthesizing full investigation dossier and calculating confidence...",
+                    "claim_count": len(evaluated_claims),
+                    "source_count": len(analyzed_sources),
+                    "timestamp": time.time(),
+                })
+
+                report_data = await asyncio.to_thread(
+                    gemini_service.generate_summary_and_report,
+                    question=question,
+                    claims=evaluated_claims,
+                    sources=analyzed_sources,
+                    contradictions=contradictions,
+                )
+            except Exception as gemini_err:
+                logger.warning(f"Gemini analysis unavailable ({gemini_err}). Synthesizing real-time findings from live evidence.")
+                gemini_failed = True
+
+            if gemini_failed or not evaluated_claims or not report_data:
+                tavily_answer = getattr(tavily_service, "last_answer", "")
+                synthesis = self._autonomous_evidence_synthesis(question, analyzed_sources, tavily_answer)
+                evaluated_claims = synthesis["claims"]
+                contradictions = synthesis["contradictions"]
+                report_data = {
+                    "summary": synthesis["summary"],
+                    "report": synthesis["report"],
+                }
+
+            confidence = self._calculate_confidence(analyzed_sources, evaluated_claims, contradictions)
+            processing_time = round(time.time() - start_time, 2)
+
+            metadata = ResearchMetadata(
+                search_count=search_count,
+                source_count=len(analyzed_sources),
+                processing_time=processing_time,
+            )
+
+            # Build final response object
+            response = ResearchResponse(
+                research_id=research_id,
+                question=question,
+                status="completed",
+                summary=report_data["summary"],
+                claims=evaluated_claims,
+                sources=analyzed_sources,
+                report=report_data["report"],
+                metadata=metadata,
+                confidence=confidence,
+                contradictions=contradictions,
+            )
+
+            # Save to Database
+            await asyncio.to_thread(
+                firebase_service.save_research_result, research_id, response.model_dump()
+            )
+
+            logger.info(f"Streaming research completed in {processing_time}s for ID '{research_id}' with {confidence}% confidence.")
+
+            # Final completed event with complete verified payload
+            yield _format_sse({
+                "stage": "completed",
+                "stage_index": 4,
+                "label": "Research complete",
+                "message": f"Verification completed with {confidence}% empirical confidence.",
+                "status": "completed",
+                "confidence": confidence,
+                "processing_time": processing_time,
+                "result": response.model_dump(),
+                "timestamp": time.time(),
+            }, event="complete")
+
+        except Exception as e:
+            logger.error(f"Error in streaming research agent for ID '{research_id}': {e}", exc_info=True)
+            if research_id:
+                try:
+                    await asyncio.to_thread(
+                        firebase_service.update_research_status, research_id, "failed", error_message=str(e)
+                    )
+                except Exception:
+                    pass
+            detail = str(e)
+            if isinstance(e, TavilyServiceError):
+                detail = "Web search is not configured or failed to retrieve sources."
+            elif isinstance(e, GeminiServiceError):
+                detail = "AI fact verification failed or rate limit reached."
+
+            yield _format_sse({
+                "stage": "error",
+                "stage_index": -1,
+                "label": "Research failed",
+                "detail": detail,
+                "error": True,
+                "timestamp": time.time(),
+            }, event="error")
 
     def _autonomous_evidence_synthesis(
         self,

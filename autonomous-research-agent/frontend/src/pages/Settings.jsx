@@ -5,6 +5,7 @@ import {
   Bell,
   Sun,
   Moon,
+  Laptop,
   User,
   Mail,
   ShieldCheck,
@@ -16,9 +17,11 @@ import {
   CheckCircle2,
   AlertTriangle,
   Check,
-  X,
+  Sparkles,
 } from 'lucide-react'
 import { useAuth } from '../auth/useAuth'
+import { useTheme } from '../context/ThemeContext'
+import { ThemeToggle } from '../components/ui/ThemeToggle'
 
 function ToggleSwitch({ checked, onChange, id, label }) {
   return (
@@ -29,8 +32,8 @@ function ToggleSwitch({ checked, onChange, id, label }) {
       id={id}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-        checked ? 'bg-[#2563EB]' : 'bg-slate-200'
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 ${
+        checked ? 'bg-[#2563EB]' : 'bg-slate-200 dark:bg-slate-700'
       }`}
     >
       <span
@@ -44,6 +47,7 @@ function ToggleSwitch({ checked, onChange, id, label }) {
 
 export function Settings() {
   const { user, setUser } = useAuth()
+  const { theme, resolvedTheme, setTheme } = useTheme()
 
   // Storage keys
   const emailKey = user?.email || 'guest'
@@ -61,7 +65,7 @@ export function Settings() {
     } catch {
       // fallback
     }
-    return user?.full_name || 'alex bennett'
+    return user?.full_name || 'Alex Bennett'
   })
   const email = user?.email || 'alex.bennett@verisearch.ai'
 
@@ -71,16 +75,12 @@ export function Settings() {
   const [completionAlert, setCompletionAlert] = useState(true)
   const [contradictionWarning, setContradictionWarning] = useState(true)
 
-  // Theme state (light / dark)
-  const [theme, setTheme] = useState(() => localStorage.getItem('verisearchai:theme') || 'light')
-  const [themeToast, setThemeToast] = useState('')
-
   // Notifications state
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [notificationsList, setNotificationsList] = useState([
-    { id: 1, title: 'Verification Completed', text: 'Exercise & Cognitive Performance analysis finished with 87% confidence.', time: '10m ago', unread: true },
-    { id: 2, title: 'Contradiction Alert', text: 'High conflict level detected in intermittent fasting trial meta-analysis.', time: '2h ago', unread: true },
-    { id: 3, title: 'Weekly Digest Ready', text: 'Summary of 12 newly evaluated academic sources added to repository.', time: '1d ago', unread: false },
+    { id: 1, title: 'Verification Completed', text: 'Exercise & Cognitive Performance analysis finished with high confidence.', time: '10m ago', unread: true },
+    { id: 2, title: 'Contradiction Alert', text: 'Methodological discrepancy detected in clinical trial cohort.', time: '2h ago', unread: true },
+    { id: 3, title: 'Weekly Digest Ready', text: 'Systematic summary of newly evaluated academic sources added.', time: '1d ago', unread: false },
   ])
 
   // Load saved preferences on mount
@@ -98,14 +98,6 @@ export function Settings() {
       // fallback
     }
   }, [prefsStorageKey])
-
-  const toggleTheme = () => {
-    const nextTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(nextTheme)
-    localStorage.setItem('verisearchai:theme', nextTheme)
-    setThemeToast(`Switched to ${nextTheme === 'dark' ? 'Dark' : 'Light'} appearance`)
-    setTimeout(() => setThemeToast(''), 2200)
-  }
 
   // Save feedback
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -147,57 +139,70 @@ export function Settings() {
     }
   }
 
-  return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-12">
-      {/* Toast for theme toggle or save */}
-      {themeToast && (
-        <div className="fixed top-16 right-6 z-50 flex items-center gap-2.5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs font-semibold text-blue-700 shadow-lg animate-in slide-in-from-top-4 duration-200">
-          <Sun className="h-4 w-4 text-blue-600" />
-          <span>{themeToast}</span>
-        </div>
-      )}
+  const themeOptions = [
+    {
+      id: 'light',
+      label: 'Light',
+      description: 'Clean high-contrast theme optimized for bright environments.',
+      icon: Sun,
+    },
+    {
+      id: 'dark',
+      label: 'Dark',
+      description: 'Deep slate theme engineered for reduced eye strain.',
+      icon: Moon,
+    },
+    {
+      id: 'system',
+      label: 'System',
+      description: 'Synchronizes automatically with your OS light/dark schedule.',
+      icon: Laptop,
+    },
+  ]
 
-      {/* 1. Header matching Reference Image */}
-      <div className="flex items-center justify-between gap-4">
-        {/* Left: Gear Icon inside soft blue container + Title & Subtitle */}
+  return (
+    <div className="max-w-5xl mx-auto space-y-6 pb-16">
+      {/* 1. Header */}
+      <div className="flex items-center justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-4">
+        {/* Left: Gear Icon + Title & Subtitle */}
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#EFF6FF] border border-[#DBEAFE] text-[#2563EB] shadow-2xs">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/50 text-[#2563EB] dark:text-blue-400 shadow-2xs">
             <SettingsIcon className="h-6 w-6 stroke-[2]" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-slate-900 leading-tight">
+            <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
               Platform Settings
             </h1>
-            <p className="mt-0.5 text-xs sm:text-sm text-slate-500 font-normal">
-              Manage your researcher profile and retrieval preferences.
+            <p className="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-normal">
+              Manage your researcher profile, interface appearance, and retrieval preferences.
             </p>
           </div>
         </div>
 
-        {/* Right: Notification Bell with Badge & Theme Toggle */}
+        {/* Right: Notification Bell & Quick Theme Toggle */}
         <div className="flex items-center gap-2.5 shrink-0 relative">
           <button
             type="button"
             onClick={() => setNotificationsOpen(!notificationsOpen)}
-            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/90 bg-white/90 text-slate-600 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer"
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer"
             title="Notifications"
             aria-label="View notifications"
           >
             <Bell className="h-4.5 w-4.5" />
             {notificationsList.some((n) => n.unread) && (
-              <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+              <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
             )}
           </button>
 
           {/* Notifications Popover Dropdown */}
           {notificationsOpen && (
-            <div className="absolute right-12 top-full mt-2 w-80 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                <h4 className="text-xs font-bold text-slate-900">Notifications</h4>
+            <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+                <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">Notifications</h4>
                 <button
                   type="button"
                   onClick={() => setNotificationsList(notificationsList.map((n) => ({ ...n, unread: false })))}
-                  className="text-[10px] font-semibold text-blue-600 hover:underline cursor-pointer"
+                  className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
                 >
                   Mark all read
                 </button>
@@ -207,56 +212,115 @@ export function Settings() {
                   <div
                     key={item.id}
                     className={`p-2.5 rounded-xl text-xs space-y-1 transition-colors ${
-                      item.unread ? 'bg-blue-50/60 border border-blue-100' : 'bg-slate-50/50 hover:bg-slate-100/60'
+                      item.unread
+                        ? 'bg-blue-50/60 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50'
+                        : 'bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100/60 dark:hover:bg-slate-800'
                     }`}
                   >
-                    <div className="flex items-center justify-between font-bold text-slate-800">
+                    <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
                       <span>{item.title}</span>
-                      <span className="text-[10px] font-normal text-slate-400">{item.time}</span>
+                      <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500">{item.time}</span>
                     </div>
-                    <p className="text-slate-600 text-[11px] leading-relaxed">{item.text}</p>
+                    <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">{item.text}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/90 bg-white/90 text-slate-600 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer"
-            title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} mode`}
-            aria-label="Toggle light/dark mode"
-          >
-            {theme === 'light' ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5 text-blue-600" />}
-          </button>
+          <ThemeToggle />
         </div>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* =================================================== */}
-        {/* CARD 1: RESEARCHER PROFILE                          */}
+        {/* CARD 1: APPEARANCE & THEME (Light, Dark, System)   */}
         {/* =================================================== */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-[0_2px_14px_-4px_rgba(0,0,0,0.03)]">
+        <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-7 shadow-[0_2px_14px_-4px_rgba(0,0,0,0.03)] space-y-5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#2563EB] dark:text-blue-400">
+                <Sparkles className="h-5 w-5 stroke-[2]" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 leading-snug">
+                  Interface Appearance
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5">
+                  Select your theme preference. Current display mode:{' '}
+                  <strong className="font-semibold text-slate-700 dark:text-slate-300 capitalize">{resolvedTheme}</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
+            {themeOptions.map((opt) => {
+              const Icon = opt.icon
+              const isSelected = theme === opt.id
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setTheme(opt.id)}
+                  className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                    isSelected
+                      ? 'border-blue-600 dark:border-blue-500 bg-blue-50/60 dark:bg-blue-950/30 ring-2 ring-blue-500/20'
+                      : 'border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100/60 dark:hover:bg-slate-800/80'
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full mb-3">
+                    <div
+                      className={`flex h-8 w-8 items-center justify-center rounded-xl ${
+                        isSelected
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    {isSelected && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400">
+                        <Check className="h-3.5 w-3.5" />
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">{opt.label}</h3>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                      {opt.description}
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* =================================================== */}
+        {/* CARD 2: RESEARCHER PROFILE                          */}
+        {/* =================================================== */}
+        <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-7 shadow-[0_2px_14px_-4px_rgba(0,0,0,0.03)]">
           {/* Card Header */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#2563EB] dark:text-blue-400">
                 <User className="h-5 w-5 stroke-[2]" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-slate-900 leading-snug">
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 leading-snug">
                   Researcher Profile
                 </h2>
-                <p className="text-xs text-slate-500 font-normal mt-0.5">
-                  Update your personal information and account details.
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5">
+                  Update your identity details displayed on verification reports.
                 </p>
               </div>
             </div>
 
             <Link
               to="/app/profile"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition-colors group cursor-pointer shrink-0"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[#2563EB] dark:text-blue-400 hover:text-[#1D4ED8] dark:hover:text-blue-300 transition-colors group cursor-pointer shrink-0"
             >
               <span>Full Profile Page</span>
               <ArrowRight className="h-3.5 w-3.5 transition-transform duration-150 group-hover:translate-x-0.5" />
@@ -269,19 +333,19 @@ export function Settings() {
             <div>
               <label
                 htmlFor="fullName"
-                className="text-[11px] font-bold text-slate-600 tracking-wider uppercase mb-1.5 block"
+                className="text-[11px] font-bold text-slate-600 dark:text-slate-400 tracking-wider uppercase mb-1.5 block"
               >
                 FULL NAME
               </label>
               <div className="relative">
-                <User className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <User className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                 <input
                   id="fullName"
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Your full name"
-                  className="w-full rounded-xl border border-slate-200/90 bg-[#F8FAFC]/40 py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium"
+                  className="w-full rounded-xl border border-slate-200/90 dark:border-slate-800 bg-[#F8FAFC]/40 dark:bg-slate-800/40 py-2.5 pl-10 pr-3 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 transition-all font-medium"
                 />
               </div>
             </div>
@@ -290,44 +354,44 @@ export function Settings() {
             <div>
               <label
                 htmlFor="email"
-                className="text-[11px] font-bold text-slate-600 tracking-wider uppercase mb-1.5 block"
+                className="text-[11px] font-bold text-slate-600 dark:text-slate-400 tracking-wider uppercase mb-1.5 block"
               >
                 EMAIL ADDRESS
               </label>
               <div className="relative">
-                <Mail className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Mail className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                 <input
                   id="email"
                   type="email"
                   value={email}
                   readOnly
                   disabled
-                  className="w-full rounded-xl border border-slate-200/90 bg-[#F8FAFC] py-2.5 pl-10 pr-3 text-sm text-slate-700 font-medium cursor-not-allowed"
+                  className="w-full rounded-xl border border-slate-200/90 dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-800/80 py-2.5 pl-10 pr-3 text-sm text-slate-700 dark:text-slate-300 font-medium cursor-not-allowed"
                 />
               </div>
-              <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-500">
-                <ShieldCheck className="h-4 w-4 text-slate-400 stroke-[2]" />
-                <span>Managed by account owner</span>
+              <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-500 dark:text-slate-400">
+                <ShieldCheck className="h-4 w-4 text-slate-400 dark:text-slate-500 stroke-[2]" />
+                <span>Managed by authentication session</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* =================================================== */}
-        {/* CARD 2: RESEARCH & OUTPUT PREFERENCES               */}
+        {/* CARD 3: RESEARCH & OUTPUT PREFERENCES               */}
         {/* =================================================== */}
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-[0_2px_14px_-4px_rgba(0,0,0,0.03)] space-y-6">
+        <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-7 shadow-[0_2px_14px_-4px_rgba(0,0,0,0.03)] space-y-6">
           {/* Card Header */}
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#2563EB] dark:text-blue-400">
               <Sliders className="h-5 w-5 stroke-[2]" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 leading-snug">
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 leading-snug">
                 Research &amp; Output Preferences
               </h2>
-              <p className="text-xs text-slate-500 font-normal mt-0.5">
-                Customize how your research is performed and results are delivered.
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5">
+                Customize search parameters and verification notification thresholds.
               </p>
             </div>
           </div>
@@ -338,26 +402,26 @@ export function Settings() {
             <div>
               <label
                 htmlFor="searchDepth"
-                className="text-[11px] font-bold text-slate-600 tracking-wider uppercase mb-1.5 block"
+                className="text-[11px] font-bold text-slate-600 dark:text-slate-400 tracking-wider uppercase mb-1.5 block"
               >
                 DEFAULT SEARCH DEPTH
               </label>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                 <select
                   id="searchDepth"
                   value={searchDepth}
                   onChange={(e) => setSearchDepth(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-slate-200/90 bg-white py-2.5 pl-10 pr-9 text-xs sm:text-sm font-medium text-slate-800 hover:border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-2xs"
+                  className="w-full appearance-none rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800 py-2.5 pl-10 pr-9 text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 transition-all cursor-pointer shadow-2xs"
                 >
                   <option value="Quick (Rapid Synthesis)">Quick (Rapid Synthesis)</option>
                   <option value="Standard (Balanced Inquiry)">Standard (Balanced Inquiry)</option>
                   <option value="Deep (Exhaustive Academic)">Deep (Exhaustive Academic)</option>
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
               </div>
-              <p className="text-xs text-slate-500 mt-1.5 font-normal">
-                Choose how deep the AI should search for information.
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-normal">
+                Configures target citation volume and synthesis intensity.
               </p>
             </div>
 
@@ -365,44 +429,44 @@ export function Settings() {
             <div>
               <label
                 htmlFor="citationFormat"
-                className="text-[11px] font-bold text-slate-600 tracking-wider uppercase mb-1.5 block"
+                className="text-[11px] font-bold text-slate-600 dark:text-slate-400 tracking-wider uppercase mb-1.5 block"
               >
                 CITATION &amp; EXPORT FORMAT
               </label>
               <div className="relative">
-                <FileText className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <FileText className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                 <select
                   id="citationFormat"
                   value={citationFormat}
                   onChange={(e) => setCitationFormat(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-slate-200/90 bg-white py-2.5 pl-10 pr-9 text-xs sm:text-sm font-medium text-slate-800 hover:border-slate-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer shadow-2xs"
+                  className="w-full appearance-none rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800 py-2.5 pl-10 pr-9 text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 transition-all cursor-pointer shadow-2xs"
                 >
                   <option value="APA 7th Edition">APA 7th Edition</option>
                   <option value="MLA 9th Edition">MLA 9th Edition</option>
                   <option value="Chicago Manual of Style">Chicago Manual of Style</option>
                   <option value="IEEE Format">IEEE Format</option>
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
               </div>
-              <p className="text-xs text-slate-500 mt-1.5 font-normal">
-                Select your preferred citation style and export format.
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-normal">
+                Standard format for reference export generation.
               </p>
             </div>
           </div>
 
           {/* Section Divider */}
-          <div className="border-t border-slate-100 pt-5 space-y-4">
+          <div className="border-t border-slate-100 dark:border-slate-800 pt-5 space-y-4">
             {/* NOTIFICATIONS & ALERTS Header */}
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#2563EB] dark:text-blue-400">
                 <Bell className="h-4.5 w-4.5 stroke-[2]" />
               </div>
               <div>
-                <h3 className="text-xs font-bold text-slate-900 tracking-wider uppercase">
+                <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 tracking-wider uppercase">
                   NOTIFICATIONS &amp; ALERTS
                 </h3>
-                <p className="text-xs text-slate-500 font-normal mt-0.5">
-                  Stay informed about your research activity and system updates.
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5">
+                  Real-time alerts for completed research runs and high-severity caveats.
                 </p>
               </div>
             </div>
@@ -410,15 +474,15 @@ export function Settings() {
             {/* Row 1: Verification Completion Alert */}
             <div className="flex items-center justify-between gap-4 py-2">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#E8F8F0] text-[#059669]">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#E8F8F0] dark:bg-emerald-950/60 text-[#059669] dark:text-emerald-400">
                   <CheckCircle2 className="h-4 w-4 stroke-[2.5]" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm font-semibold text-slate-900 leading-snug">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 leading-snug">
                     Verification Completion Alert
                   </p>
-                  <p className="text-xs text-slate-500 leading-tight mt-0.5">
-                    Notify when an autonomous search concludes.
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+                    Trigger notification when autonomous research pipeline finishes.
                   </p>
                 </div>
               </div>
@@ -434,15 +498,15 @@ export function Settings() {
             {/* Row 2: High Contradiction Warnings */}
             <div className="flex items-center justify-between gap-4 py-2">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#FEF7EC] text-[#D97706]">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#FEF7EC] dark:bg-amber-950/60 text-[#D97706] dark:text-amber-400">
                   <AlertTriangle className="h-4 w-4 stroke-[2.5]" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs sm:text-sm font-semibold text-slate-900 leading-snug">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 leading-snug">
                     High Contradiction Warnings
                   </p>
-                  <p className="text-xs text-slate-500 leading-tight mt-0.5">
-                    Flag severe conflicting data from high-credibility sources.
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+                    Flag dissenting evidence and trial discrepancies prominently.
                   </p>
                 </div>
               </div>
@@ -460,7 +524,7 @@ export function Settings() {
         {/* Save Actions Bar */}
         <div className="flex items-center justify-between gap-4 pt-2">
           {saveSuccess ? (
-            <div className="inline-flex items-center gap-1.5 rounded-xl bg-[#E8F8F0] border border-[#A7F3D0] px-3.5 py-2 text-xs font-bold text-[#059669] animate-in fade-in">
+            <div className="inline-flex items-center gap-1.5 rounded-xl bg-[#E8F8F0] dark:bg-emerald-950/60 border border-[#A7F3D0] dark:border-emerald-800/60 px-3.5 py-2 text-xs font-bold text-[#059669] dark:text-emerald-300 animate-in fade-in">
               <Check className="h-3.5 w-3.5 stroke-[3]" />
               <span>Settings updated successfully</span>
             </div>
@@ -470,7 +534,7 @@ export function Settings() {
 
           <button
             type="submit"
-            className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] px-6 py-2.5 text-sm font-semibold text-white shadow-xs hover:shadow-sm transition-all duration-150 cursor-pointer"
+            className="rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] dark:bg-blue-600 dark:hover:bg-blue-500 px-6 py-2.5 text-sm font-semibold text-white shadow-xs hover:shadow-sm transition-all duration-150 cursor-pointer"
           >
             Save Preferences
           </button>

@@ -12,10 +12,10 @@ export function AppLayout() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC]">
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] dark:bg-slate-950">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4 shadow-sm">
           <img src="/verisearch-icon.png" alt="VeriSearch AI" className="h-6 w-6 animate-pulse" />
-          <span className="text-sm font-medium text-slate-700">Connecting to VeriSearch AI...</span>
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Connecting to VeriSearch AI...</span>
         </div>
       </div>
     )
@@ -26,17 +26,17 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#F7F9FC] flex flex-col md:flex-row text-slate-900">
+    <div className="min-h-screen md:h-screen md:overflow-hidden bg-[#F7F9FC] dark:bg-slate-950 flex flex-col md:flex-row text-slate-900 dark:text-slate-100 transition-colors">
       {/* Desktop Sticky Floating Sidebar matching reference image */}
-      <Sidebar className="hidden md:flex my-3.5 ml-3.5 rounded-[24px] border border-slate-200/80 h-[calc(100vh-1.75rem)] sticky top-3.5" />
+      <Sidebar className="hidden md:flex my-3.5 ml-3.5 rounded-[24px] border border-slate-200/80 dark:border-slate-800 h-[calc(100vh-1.75rem)] sticky top-3.5" />
 
       {/* Mobile Top Header */}
-      <div className="md:hidden sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200/90 bg-white px-4">
+      <div className="md:hidden sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 px-4">
         <BrandLogo />
         <button
           type="button"
           onClick={() => setMobileSidebarOpen(true)}
-          className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 transition-colors"
+          className="rounded-xl p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           aria-label="Open navigation menu"
         >
           <Menu className="h-6 w-6" />
@@ -50,13 +50,13 @@ export function AppLayout() {
             className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileSidebarOpen(false)}
           />
-          <div className="fixed inset-y-0 left-0 w-72 bg-white shadow-2xl flex flex-col z-10">
-            <div className="flex items-center justify-between p-4 border-b border-slate-100">
+          <div className="fixed inset-y-0 left-0 w-72 bg-white dark:bg-slate-900 shadow-2xl flex flex-col z-10 border-r border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
               <BrandLogo />
               <button
                 type="button"
                 onClick={() => setMobileSidebarOpen(false)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <X className="h-5 w-5" />
               </button>

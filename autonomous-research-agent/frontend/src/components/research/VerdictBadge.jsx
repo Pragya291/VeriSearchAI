@@ -5,7 +5,7 @@ export function VerdictBadge({ verdict, size = 'md', className = '' }) {
   const Icon = config.icon
 
   const sizeClasses = {
-    sm: 'px-2.5 py-0.5 text-[11px] gap-1.5 font-bold tracking-wider',
+    sm: 'px-2.5 py-0.5 text-[10.5px] gap-1.5 font-bold tracking-wider',
     md: 'px-3 py-1 text-xs gap-1.5 font-bold tracking-wide',
     lg: 'px-4 py-1.5 text-sm gap-2 font-bold tracking-wide',
   }
@@ -18,9 +18,9 @@ export function VerdictBadge({ verdict, size = 'md', className = '' }) {
 
   return (
     <span
-      className={`inline-flex items-center uppercase rounded-full border ${
+      className={`inline-flex items-center uppercase rounded-full border shadow-2xs transition-colors ${
         config.badgeClass
-      } ${sizeClasses[size] || sizeClasses.md} ${className}`}
+      } dark:${config.darkBadgeClass} ${sizeClasses[size] || sizeClasses.md} ${className}`}
       title={config.description}
     >
       <Icon className={`${iconSizes[size] || iconSizes.md} shrink-0`} strokeWidth={2.5} />
