@@ -60,6 +60,18 @@ textarea {
   background: #94a3b8;
 }
 
+/* Utilities to completely hide scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
 html[data-theme='dark'] {
   color-scheme: dark;
 }

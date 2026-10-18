@@ -210,7 +210,7 @@ export function Login({ initialMode = 'login' }) {
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-[#F8FAFF] flex items-center justify-center p-4 sm:p-6 lg:p-12 overflow-x-hidden selection:bg-blue-100 selection:text-blue-900 font-['Plus_Jakarta_Sans',sans-serif]">
+    <div className="relative min-h-screen lg:h-screen w-full bg-[#F8FAFF] flex items-center justify-center p-4 sm:p-6 lg:py-3 lg:px-8 overflow-x-hidden overflow-y-auto lg:overflow-hidden selection:bg-blue-100 selection:text-blue-900 font-['Plus_Jakarta_Sans',sans-serif] no-scrollbar">
       {/* ============================================================== */}
       {/* SOFT AMBIENT BACKGROUND GRADIENTS (Exact visual match)         */}
       {/* ============================================================== */}
@@ -226,11 +226,11 @@ export function Login({ initialMode = 'login' }) {
       />
 
       {/* Main 2-Column Responsive Container */}
-      <div className="relative z-10 w-full max-w-[1140px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
+      <div className="relative z-10 w-full max-w-[1100px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center">
         {/* ============================================================ */}
         {/* LEFT SECTION: BRAND, HEADLINE & ILLUSTRATION                */}
         {/* ============================================================ */}
-        <div className="lg:col-span-6 flex flex-col justify-center space-y-6 sm:space-y-8 py-2">
+        <div className="lg:col-span-6 flex flex-col justify-center space-y-3.5 sm:space-y-5 lg:space-y-4 py-1">
           {/* Logo & Brand Name */}
           <Link
             to="/home"
@@ -238,10 +238,10 @@ export function Login({ initialMode = 'login' }) {
             aria-label="VeriSearch AI Home"
           >
             {/* Blue rounded-square logo with search/AI symbol */}
-            <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-[14px] bg-[#2563EB] flex items-center justify-center shadow-sm transition-colors group-hover:bg-[#1d4ed8]">
+            <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-[13px] bg-[#2563EB] flex items-center justify-center shadow-sm transition-colors group-hover:bg-[#1d4ed8]">
               <svg
                 viewBox="0 0 100 100"
-                className="h-6 w-6 text-white"
+                className="h-5.5 w-5.5 text-white"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
@@ -270,25 +270,25 @@ export function Login({ initialMode = 'login' }) {
                 <circle cx="44" cy="44" r="5" fill="currentColor" />
               </svg>
             </div>
-            <span className="text-2xl sm:text-[26px] font-bold tracking-tight text-[#172554]">
+            <span className="text-xl sm:text-2xl font-bold tracking-tight text-[#172554]">
               VeriSearch AI
             </span>
           </Link>
 
           {/* Headline & Supporting text */}
-          <div className="space-y-3">
-            <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight text-[#172554] leading-[1.08]">
+          <div className="space-y-2">
+            <h1 className="text-3xl sm:text-4xl lg:text-[46px] font-extrabold tracking-tight text-[#172554] leading-[1.08]">
               Smarter<br />
               Research.<br />
               <span className="text-[#2563EB]">Faster.</span>
             </h1>
-            <p className="text-[#64748B] text-base sm:text-[17px] leading-relaxed max-w-sm pt-1">
+            <p className="text-[#64748B] text-sm sm:text-base leading-relaxed max-w-sm pt-0.5">
               Get accurate insights, explore deeper, and save time with AI.
             </p>
           </div>
 
           {/* Research Dashboard & Laptop Illustration */}
-          <div className="w-full max-w-[460px] pt-1">
+          <div className="w-full max-w-[410px] lg:max-w-[420px] pt-0.5">
             <ResearchIllustration className="w-full" />
           </div>
         </div>
@@ -297,9 +297,9 @@ export function Login({ initialMode = 'login' }) {
         {/* RIGHT SECTION: WHITE LOGIN / SIGNUP CARD                   */}
         {/* ============================================================ */}
         <div className="lg:col-span-6 flex justify-center lg:justify-end">
-          <div className="w-full max-w-[460px] rounded-[26px] border border-[#DBEAFE] bg-white p-7 sm:p-9 shadow-[0_20px_50px_-15px_rgba(37,99,235,0.07),0_4px_16px_-4px_rgba(23,37,84,0.03)] transition-all">
+          <div className="w-full max-w-[440px] rounded-[24px] border border-[#DBEAFE] bg-white p-6 sm:p-7 lg:p-7 shadow-[0_20px_50px_-15px_rgba(37,99,235,0.07),0_4px_16px_-4px_rgba(23,37,84,0.03)] transition-all">
             {/* 1. TABS: Log In & Sign Up */}
-            <div className="flex rounded-xl bg-slate-100/80 p-1 border border-slate-100 mb-6">
+            <div className="flex rounded-xl bg-slate-100/80 p-1 border border-slate-100 mb-4 sm:mb-5">
               <button
                 type="button"
                 onClick={() => handleTabChange('login')}
@@ -341,7 +341,7 @@ export function Login({ initialMode = 'login' }) {
             {/* LOG IN VIEW (Default strictly matching reference image)  */}
             {/* ======================================================== */}
             {activeTab === 'login' && (
-              <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <form onSubmit={handleLoginSubmit} className="space-y-3 sm:space-y-3.5">
                 {/* 2. EMAIL FIELD */}
                 <div>
                   <label
@@ -691,7 +691,7 @@ export function Login({ initialMode = 'login' }) {
             )}
 
             {/* 8. FOOTER TEXT: Don't have an account? Sign Up / Log In */}
-            <div className="mt-6 pt-3 text-center text-xs sm:text-sm text-[#64748B]">
+            <div className="mt-4 pt-2 text-center text-xs sm:text-sm text-[#64748B]">
               {activeTab === 'login' ? (
                 <>
                   Don't have an account?{' '}
